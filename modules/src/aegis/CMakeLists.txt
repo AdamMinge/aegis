@@ -80,8 +80,8 @@ aegis_add_module(
   Qt6::Core
   Qt6::Widgets
   Qt6::Network
-  DEPENDS_PRIVATE
   qtils::serializer
+  DEPENDS_PRIVATE
   qtils::dpi)
 
 target_include_directories(

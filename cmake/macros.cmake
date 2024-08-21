@@ -113,7 +113,7 @@ function(aegis_export_modules)
     DESTINATION ${config_package_location})
 
   install(
-    DIRECTORY ${AEGIS_SOURCE_DIR}/include
+    DIRECTORY ${AEGIS_SOURCE_DIR}/modules/include
     DESTINATION .
     COMPONENT devel
     FILES_MATCHING

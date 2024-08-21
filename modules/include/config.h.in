@@ -1,0 +1,42 @@
+/* -------------------------------------------------------------------------- */
+#ifndef AEGIS_CONFIG_H
+#define AEGIS_CONFIG_H
+/* -------------------------------------------------------------------------- */
+/* ---------------------------- Define AEGIS version ----------------------- */
+/* -------------------------------------------------------------------------- */
+// clang-format off
+
+#define AEGIS_VERSION_MAJOR @AEGIS_VERSION_MAJOR@
+#define AEGIS_VERSION_MINOR @AEGIS_VERSION_MINOR@
+#define AEGIS_VERSION_PATCH @AEGIS_VERSION_PATCH@
+#define AEGIS_VERSION @AEGIS_VERSION_MAJOR@.@AEGIS_VERSION_MINOR@.@AEGIS_VERSION_PATCH@
+#define AEGIS_VERSION_STR "@AEGIS_VERSION_MAJOR@.@AEGIS_VERSION_MINOR@.@AEGIS_VERSION_PATCH@"
+
+// clang-format on
+/* -------------------------------------------------------------------------- */
+/* ----------------------- Identify the operating system -------------------- */
+/* -------------------------------------------------------------------------- */
+#if defined(_WIN32)
+#define AEGIS_OS_WINDOWS
+#elif defined(__linux__)
+#define AEGIS_OS_LINUX
+#else
+#error This operating system is not supported by AEGIS library
+#endif
+/* -------------------------------------------------------------------------- */
+/* ------------------------ Define a portable debug macro ------------------- */
+/* -------------------------------------------------------------------------- */
+#if !defined(NDEBUG)
+#define AEGIS_DEBUG
+#endif
+/* -------------------------------------------------------------------------- */
+/* -------------------- Define helpers to set items as deprecated ----------- */
+/* -------------------------------------------------------------------------- */
+#if !defined(AEGIS_DEPRECATED_WARNINGS)
+#define AEGIS_DEPRECATED [[deprecated]]
+#else
+#define AEGIS_DEPRECATED
+#endif
+/* -------------------------------------------------------------------------- */
+#endif  // AEGIS_CONFIG_H
+/* -------------------------------------------------------------------------- */

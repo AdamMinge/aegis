@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------- #
 # -------------- Set config_name dependent on libraries type ------------ #
 # ----------------------------------------------------------------------- #
-if(AEGIS_STATIC_LIBRARIES)
+if(aegis_STATIC_LIBRARIES)
     set(config_name "static")
 else()
     set(config_name "shared")

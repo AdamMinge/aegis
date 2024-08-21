@@ -65,7 +65,7 @@ set(CMAKE_AUTORCC ON)
 # ----------------------------------------------------------------------- #
 # -------------------------- Find external libraries -------------------- #
 # ----------------------------------------------------------------------- #
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network Qml)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network)
 find_package(qtils REQUIRED COMPONENTS serializer dpi)
 # ----------------------------------------------------------------------- #
 # -------------------------- Create plugin shared lib ------------------- #
@@ -81,7 +81,6 @@ aegis_add_module(
   Qt6::Widgets
   Qt6::Network
   qtils::serializer
-  DEPENDS_PRIVATE
   qtils::dpi)
 
 target_include_directories(

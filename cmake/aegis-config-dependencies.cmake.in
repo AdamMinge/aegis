@@ -1,0 +1,11 @@
+set(FIND_aegis_DEPENDENCIES_NOTFOUND)
+
+find_package(Qt6 COMPONENTS Core Widgets Network)
+find_package(qtils COMPONENTS serializer dpi)
+
+if(FIND_aegis_DEPENDENCIES_NOTFOUND)
+  set(FIND_aegis_ERROR
+      "aegis found but some of its dependencies are missing (${FIND_aegis_DEPENDENCIES_NOTFOUND})"
+  )
+  set(aegis_FOUND FALSE)
+endif()

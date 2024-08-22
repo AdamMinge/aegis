@@ -1,6 +1,8 @@
 #ifndef AEGIS_RECORD_RECORDER_H
 #define AEGIS_RECORD_RECORDER_H
 
+/* --------------------------------- Standard ------------------------------- */
+#include <unordered_map>
 /* ------------------------------------ Qt ---------------------------------- */
 #include <QThread>
 #include <QWidget>
@@ -50,6 +52,10 @@ class LIB_AEGIS_API Recorder : public QObject {
 
   [[nodiscard]] const QStringList &getReport() const;
 
+  bool addStrategy(std::unique_ptr<RecordStrategy> &&strategy);
+  std::unique_ptr<RecordStrategy> takeStrategy(int type);
+  bool removeStrategy(int type);
+
  protected Q_SLOTS:
   void onCurrentWidgetChanged(QWidget *widget);
   void onRecorder(const QString &command);
@@ -58,7 +64,7 @@ class LIB_AEGIS_API Recorder : public QObject {
   [[nodiscard]] RecordStrategy *findStrategy(QWidget *widget) const;
 
  private:
-  QMap<int, RecordStrategy *> m_strategies;
+  std::unordered_map<int, std::unique_ptr<RecordStrategy>> m_strategies;
   RecordStrategy *m_current_strategy;
   WidgetListener *m_widget_listener;
   QStringList m_report;

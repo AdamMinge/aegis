@@ -16,11 +16,16 @@ class LIB_AEGIS_API RecordStrategy : public QObject {
   Q_OBJECT
 
  public:
-  explicit RecordStrategy(QObject *parent = nullptr);
+  explicit RecordStrategy(int type, QObject *parent = nullptr);
   ~RecordStrategy() override;
 
   void setWidget(QWidget *widget);
   [[nodiscard]] QWidget *getWidget() const;
+
+  template <typename TYPE>
+  [[nodiscard]] TYPE *getWidgetAs() const;
+
+  [[nodiscard]] int getType() const;
 
  Q_SIGNALS:
   void recorded(const QString &command);
@@ -30,16 +35,41 @@ class LIB_AEGIS_API RecordStrategy : public QObject {
   virtual void removeConnections(QWidget *widget);
 
  private:
+  int m_type;
   QPointer<QWidget> m_widget;
+};
+
+template <typename TYPE>
+TYPE *RecordStrategy::getWidgetAs() const {
+  const auto widget = getWidget();
+  const auto specific_widget = qobject_cast<TYPE *>(widget);
+  Q_ASSERT(widget == specific_widget);
+
+  return specific_widget;
+}
+
+/* ---------------------------- RecordWidgetStrategy ------------------------ */
+
+class LIB_AEGIS_API RecordWidgetStrategy : public RecordStrategy {
+  Q_OBJECT
+
+ public:
+  explicit RecordWidgetStrategy(QObject *parent = nullptr);
+  ~RecordWidgetStrategy() override;
+
+ protected:
+  explicit RecordWidgetStrategy(int type, QObject *parent = nullptr);
+
+  bool eventFilter(QObject *obj, QEvent *event) override;
+
+ private Q_SLOTS:
+  void onOpenContextMenu();
 };
 
 /* ---------------------------- RecordButtonStrategy ------------------------ */
 
-class LIB_AEGIS_API RecordButtonStrategy : public RecordStrategy {
+class LIB_AEGIS_API RecordButtonStrategy : public RecordWidgetStrategy {
   Q_OBJECT
-
- public:
-  static const int type;
 
  public:
   explicit RecordButtonStrategy(QObject *parent = nullptr);
@@ -56,11 +86,8 @@ class LIB_AEGIS_API RecordButtonStrategy : public RecordStrategy {
 
 /* --------------------------- RecordComboBoxStrategy ----------------------- */
 
-class LIB_AEGIS_API RecordComboBoxStrategy : public RecordStrategy {
+class LIB_AEGIS_API RecordComboBoxStrategy : public RecordWidgetStrategy {
   Q_OBJECT
-
- public:
-  static const int type;
 
  public:
   explicit RecordComboBoxStrategy(QObject *parent = nullptr);
@@ -75,11 +102,8 @@ class LIB_AEGIS_API RecordComboBoxStrategy : public RecordStrategy {
 
 /* --------------------------- RecordSpinBoxStrategy ------------------------ */
 
-class LIB_AEGIS_API RecordSpinBoxStrategy : public RecordStrategy {
+class LIB_AEGIS_API RecordSpinBoxStrategy : public RecordWidgetStrategy {
   Q_OBJECT
-
- public:
-  static const int type;
 
  public:
   explicit RecordSpinBoxStrategy(QObject *parent = nullptr);
@@ -95,11 +119,8 @@ class LIB_AEGIS_API RecordSpinBoxStrategy : public RecordStrategy {
 
 /* ---------------------------- RecordSliderStrategy ------------------------ */
 
-class LIB_AEGIS_API RecordSliderStrategy : public RecordStrategy {
+class LIB_AEGIS_API RecordSliderStrategy : public RecordWidgetStrategy {
   Q_OBJECT
-
- public:
-  static const int type;
 
  public:
   explicit RecordSliderStrategy(QObject *parent = nullptr);
@@ -114,11 +135,8 @@ class LIB_AEGIS_API RecordSliderStrategy : public RecordStrategy {
 
 /* ---------------------------- RecordTabBarStrategy ------------------------ */
 
-class LIB_AEGIS_API RecordTabBarStrategy : public RecordStrategy {
+class LIB_AEGIS_API RecordTabBarStrategy : public RecordWidgetStrategy {
   Q_OBJECT
-
- public:
-  static const int type;
 
  public:
   explicit RecordTabBarStrategy(QObject *parent = nullptr);
@@ -139,11 +157,8 @@ class LIB_AEGIS_API RecordTabBarStrategy : public RecordStrategy {
 
 /* ---------------------------- RecordToolBoxStrategy ----------------------- */
 
-class LIB_AEGIS_API RecordToolBoxStrategy : public RecordStrategy {
+class LIB_AEGIS_API RecordToolBoxStrategy : public RecordWidgetStrategy {
   Q_OBJECT
-
- public:
-  static const int type;
 
  public:
   explicit RecordToolBoxStrategy(QObject *parent = nullptr);
@@ -158,11 +173,8 @@ class LIB_AEGIS_API RecordToolBoxStrategy : public RecordStrategy {
 
 /* ----------------------------- RecordMenuStrategy ------------------------- */
 
-class LIB_AEGIS_API RecordMenuStrategy : public RecordStrategy {
+class LIB_AEGIS_API RecordMenuStrategy : public RecordWidgetStrategy {
   Q_OBJECT
-
- public:
-  static const int type;
 
  public:
   explicit RecordMenuStrategy(QObject *parent = nullptr);
@@ -177,11 +189,8 @@ class LIB_AEGIS_API RecordMenuStrategy : public RecordStrategy {
 
 /* --------------------------- RecordTextEditStrategy ----------------------- */
 
-class LIB_AEGIS_API RecordTextEditStrategy : public RecordStrategy {
+class LIB_AEGIS_API RecordTextEditStrategy : public RecordWidgetStrategy {
   Q_OBJECT
-
- public:
-  static const int type;
 
  public:
   explicit RecordTextEditStrategy(QObject *parent = nullptr);
@@ -196,11 +205,8 @@ class LIB_AEGIS_API RecordTextEditStrategy : public RecordStrategy {
 
 /* --------------------------- RecordLineEditStrategy ----------------------- */
 
-class LIB_AEGIS_API RecordLineEditStrategy : public RecordStrategy {
+class LIB_AEGIS_API RecordLineEditStrategy : public RecordWidgetStrategy {
   Q_OBJECT
-
- public:
-  static const int type;
 
  public:
   explicit RecordLineEditStrategy(QObject *parent = nullptr);
@@ -217,11 +223,8 @@ class LIB_AEGIS_API RecordLineEditStrategy : public RecordStrategy {
 
 /* --------------------------- RecordItemViewStrategy ----------------------- */
 
-class LIB_AEGIS_API RecordItemViewStrategy : public RecordStrategy {
+class LIB_AEGIS_API RecordItemViewStrategy : public RecordWidgetStrategy {
   Q_OBJECT
-
- public:
-  static const int type;
 
  public:
   explicit RecordItemViewStrategy(QObject *parent = nullptr);

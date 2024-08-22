@@ -3,6 +3,7 @@
 
 #include "aegis/manager.h"
 #include "aegis/record/recorder.h"
+#include "aegis/record/strategy.h"
 /* -------------------------------------------------------------------------- */
 
 namespace aegis {
@@ -19,6 +20,19 @@ RecordCommand::RecordCommand()
       {{"t", "stop"}, "Stop the Recorder"},
       {{"r", "report"}, "Report the Recorder"},
   });
+
+  m_recorder->addStrategy(std::make_unique<RecordWidgetStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordButtonStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordComboBoxStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordSpinBoxStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordSliderStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordTabBarStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordToolBoxStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordMenuStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordTextEditStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordLineEditStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordItemViewStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordButtonStrategy>());
 }
 
 RecordCommand::~RecordCommand() = default;

@@ -102,19 +102,6 @@ Recorder::Recorder(QObject *parent)
       m_current_strategy(nullptr),
       m_widget_listener(new WidgetListener(this)),
       m_running(false) {
-  m_strategies.insert({
-      {RecordButtonStrategy::type, new RecordButtonStrategy(this)},
-      {RecordComboBoxStrategy::type, new RecordComboBoxStrategy(this)},
-      {RecordSpinBoxStrategy::type, new RecordSpinBoxStrategy(this)},
-      {RecordSliderStrategy::type, new RecordSliderStrategy(this)},
-      {RecordTabBarStrategy::type, new RecordTabBarStrategy(this)},
-      {RecordToolBoxStrategy::type, new RecordToolBoxStrategy(this)},
-      {RecordMenuStrategy::type, new RecordMenuStrategy(this)},
-      {RecordTextEditStrategy::type, new RecordTextEditStrategy(this)},
-      {RecordLineEditStrategy::type, new RecordLineEditStrategy(this)},
-      {RecordItemViewStrategy::type, new RecordItemViewStrategy(this)},
-  });
-
   connect(m_widget_listener, &WidgetListener::currentWidgetChanged, this,
           &Recorder::onCurrentWidgetChanged);
 }
@@ -141,6 +128,29 @@ void Recorder::stop() {
 void Recorder::clear() { m_report.clear(); }
 
 const QStringList &Recorder::getReport() const { return m_report; }
+
+bool Recorder::addStrategy(std::unique_ptr<RecordStrategy> &&strategy) {
+  if (m_strategies.contains(strategy->getType())) return false;
+
+  m_strategies.insert(std::make_pair(strategy->getType(), std::move(strategy)));
+  return true;
+}
+
+std::unique_ptr<RecordStrategy> Recorder::takeStrategy(int type) {
+  if (!m_strategies.contains(type)) return nullptr;
+
+  auto strategy = std::move(m_strategies[type]);
+  m_strategies.erase(type);
+
+  return strategy;
+}
+
+bool Recorder::removeStrategy(int type) {
+  if (!m_strategies.contains(type)) return false;
+
+  m_strategies.erase(type);
+  return true;
+}
 
 void Recorder::onRecorder(const QString &command) {
   if (!m_running) return;
@@ -173,7 +183,7 @@ RecordStrategy *Recorder::findStrategy(QWidget *widget) const {
     const auto type_id = meta_object->metaType().id();
     auto found_strategy = m_strategies.find(type_id);
     if (found_strategy != m_strategies.end()) {
-      return found_strategy.value();
+      return found_strategy->second.get();
     }
 
     meta_object = meta_object->superClass();

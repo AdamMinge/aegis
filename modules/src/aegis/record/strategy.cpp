@@ -39,8 +39,8 @@ namespace aegis {
 
 /* ------------------------------- RecordStrategy --------------------------- */
 
-RecordStrategy::RecordStrategy(QObject *parent)
-    : QObject(parent), m_widget(nullptr) {}
+RecordStrategy::RecordStrategy(int type, QObject *parent)
+    : QObject(parent), m_type(type), m_widget(nullptr) {}
 
 RecordStrategy::~RecordStrategy() = default;
 
@@ -62,28 +62,51 @@ void RecordStrategy::setWidget(QWidget *widget) {
 
 QWidget *RecordStrategy::getWidget() const { return m_widget; }
 
+int RecordStrategy::getType() const { return m_type; }
+
 void RecordStrategy::installConnections(QWidget *widget) { Q_UNUSED(widget); }
 
 void RecordStrategy::removeConnections(QWidget *widget) {
   m_widget->disconnect(this);
 }
 
+/* ---------------------------- RecordWidgetStrategy ------------------------ */
+
+RecordWidgetStrategy::RecordWidgetStrategy(QObject *parent)
+    : RecordStrategy(qMetaTypeId<QWidget>(), parent) {}
+
+RecordWidgetStrategy::RecordWidgetStrategy(int type, QObject *parent)
+    : RecordStrategy(type, parent) {}
+
+RecordWidgetStrategy::~RecordWidgetStrategy() = default;
+
+bool RecordWidgetStrategy::eventFilter(QObject *obj, QEvent *event) {
+  if (auto widget = getWidget(); widget == obj) {
+    switch (event->type()) {
+      case QEvent::ContextMenu:
+        onOpenContextMenu();
+        break;
+    }
+  }
+
+  return RecordStrategy::eventFilter(obj, event);
+}
+
+void RecordWidgetStrategy::onOpenContextMenu() {
+  qDebug() << "RecordButtonStrategy::onOpenContextMenu";
+}
+
 /* ---------------------------- RecordButtonStrategy ------------------------ */
 
-const int RecordButtonStrategy::type = qMetaTypeId<QAbstractButton>();
-
 RecordButtonStrategy::RecordButtonStrategy(QObject *parent)
-    : RecordStrategy(parent) {}
+    : RecordWidgetStrategy(qMetaTypeId<QAbstractButton>(), parent) {}
 
 RecordButtonStrategy::~RecordButtonStrategy() = default;
 
 bool RecordButtonStrategy::eventFilter(QObject *obj, QEvent *event) {
-  if (auto widget = getWidget(); widget == obj) {
+  if (auto button = getWidgetAs<QAbstractButton>(); button == obj) {
     switch (event->type()) {
       case QEvent::MouseButtonRelease: {
-        const auto button = qobject_cast<QAbstractButton *>(widget);
-        Q_ASSERT(button);
-
         const auto mouse_event = static_cast<QMouseEvent *>(event);
         const auto mouse_position = mouse_event->position().toPoint();
         const auto button_rect = button->rect();
@@ -107,11 +130,11 @@ bool RecordButtonStrategy::eventFilter(QObject *obj, QEvent *event) {
     }
   }
 
-  return QObject::eventFilter(obj, event);
+  return RecordWidgetStrategy::eventFilter(obj, event);
 }
 
 void RecordButtonStrategy::onPressed() {
-  const auto button = qobject_cast<QAbstractButton *>(getWidget());
+  const auto button = getWidgetAs<QAbstractButton>();
 
   if (button->isCheckable()) {
     onToggled(!button->isChecked());
@@ -130,10 +153,8 @@ void RecordButtonStrategy::onToggled(bool checked) {
 
 /* --------------------------- RecordComboBoxStrategy ----------------------- */
 
-const int RecordComboBoxStrategy::type = qMetaTypeId<QComboBox>();
-
 RecordComboBoxStrategy::RecordComboBoxStrategy(QObject *parent)
-    : RecordStrategy(parent) {}
+    : RecordWidgetStrategy(qMetaTypeId<QComboBox>(), parent) {}
 
 RecordComboBoxStrategy::~RecordComboBoxStrategy() = default;
 
@@ -151,10 +172,8 @@ void RecordComboBoxStrategy::onCurrentIndexChanged(int index) {
 
 /* --------------------------- RecordSpinBoxStrategy ------------------------ */
 
-const int RecordSpinBoxStrategy::type = qMetaTypeId<QAbstractSpinBox>();
-
 RecordSpinBoxStrategy::RecordSpinBoxStrategy(QObject *parent)
-    : RecordStrategy(parent) {}
+    : RecordWidgetStrategy(qMetaTypeId<QAbstractSpinBox>(), parent) {}
 
 RecordSpinBoxStrategy::~RecordSpinBoxStrategy() = default;
 
@@ -180,10 +199,8 @@ void RecordSpinBoxStrategy::onValueChanged(int value) {
 
 /* ---------------------------- RecordSliderStrategy ------------------------ */
 
-const int RecordSliderStrategy::type = qMetaTypeId<QAbstractSlider>();
-
 RecordSliderStrategy::RecordSliderStrategy(QObject *parent)
-    : RecordStrategy(parent) {}
+    : RecordWidgetStrategy(qMetaTypeId<QAbstractSlider>(), parent) {}
 
 RecordSliderStrategy::~RecordSliderStrategy() = default;
 
@@ -201,10 +218,8 @@ void RecordSliderStrategy::onValueChanged(int value) {
 
 /* ---------------------------- RecordTabBarStrategy ------------------------ */
 
-const int RecordTabBarStrategy::type = qMetaTypeId<QTabBar>();
-
 RecordTabBarStrategy::RecordTabBarStrategy(QObject *parent)
-    : RecordStrategy(parent), m_closing(false) {}
+    : RecordWidgetStrategy(qMetaTypeId<QTabBar>(), parent), m_closing(false) {}
 
 RecordTabBarStrategy::~RecordTabBarStrategy() = default;
 
@@ -237,7 +252,7 @@ void RecordTabBarStrategy::installConnections(QWidget *widget) {
 }
 
 void RecordTabBarStrategy::removeConnections(QWidget *widget) {
-  RecordStrategy::removeConnections(widget);
+  RecordWidgetStrategy::removeConnections(widget);
 
   auto tabbar = qobject_cast<QTabBar *>(widget);
   Q_ASSERT(tabbar);
@@ -267,10 +282,8 @@ void RecordTabBarStrategy::onTabMoved(int from, int to) {
 
 /* ---------------------------- RecordToolBoxStrategy ----------------------- */
 
-const int RecordToolBoxStrategy::type = qMetaTypeId<QToolBox>();
-
 RecordToolBoxStrategy::RecordToolBoxStrategy(QObject *parent)
-    : RecordStrategy(parent) {}
+    : RecordWidgetStrategy(qMetaTypeId<QToolBox>(), parent) {}
 
 RecordToolBoxStrategy::~RecordToolBoxStrategy() = default;
 
@@ -288,10 +301,8 @@ void RecordToolBoxStrategy::onCurrentChanged(int index) {
 
 /* ----------------------------- RecordMenuStrategy ------------------------- */
 
-const int RecordMenuStrategy::type = qMetaTypeId<QMenu>();
-
 RecordMenuStrategy::RecordMenuStrategy(QObject *parent)
-    : RecordStrategy(parent) {}
+    : RecordWidgetStrategy(qMetaTypeId<QMenu>(), parent) {}
 
 RecordMenuStrategy::~RecordMenuStrategy() = default;
 
@@ -307,12 +318,9 @@ bool RecordMenuStrategy::eventFilter(QObject *obj, QEvent *event) {
     onTriggered(action);
   };
 
-  if (auto widget = getWidget(); widget == obj) {
+  if (auto menu = getWidgetAs<QMenu>(); menu == obj) {
     switch (event->type()) {
       case QEvent::KeyPress: {
-        const auto menu = qobject_cast<QMenu *>(widget);
-        Q_ASSERT(menu);
-
         const auto key_event = static_cast<QKeyEvent *>(event);
         const auto key = key_event->key();
 
@@ -324,9 +332,6 @@ bool RecordMenuStrategy::eventFilter(QObject *obj, QEvent *event) {
         break;
       }
       case QEvent::MouseButtonRelease: {
-        const auto menu = qobject_cast<QMenu *>(widget);
-        Q_ASSERT(menu);
-
         const auto mouse_event = static_cast<QMouseEvent *>(event);
         const auto mouse_position = mouse_event->position().toPoint();
         const auto action = menu->actionAt(mouse_position);
@@ -338,7 +343,7 @@ bool RecordMenuStrategy::eventFilter(QObject *obj, QEvent *event) {
     }
   }
 
-  return QObject::eventFilter(obj, event);
+  return RecordWidgetStrategy::eventFilter(obj, event);
 }
 
 void RecordMenuStrategy::onTriggered(QAction *action) {
@@ -347,10 +352,8 @@ void RecordMenuStrategy::onTriggered(QAction *action) {
 
 /* --------------------------- RecordTextEditStrategy ----------------------- */
 
-const int RecordTextEditStrategy::type = qMetaTypeId<QTextEdit>();
-
 RecordTextEditStrategy::RecordTextEditStrategy(QObject *parent)
-    : RecordStrategy(parent) {}
+    : RecordWidgetStrategy(qMetaTypeId<QTextEdit>(), parent) {}
 
 RecordTextEditStrategy::~RecordTextEditStrategy() = default;
 
@@ -368,10 +371,8 @@ void RecordTextEditStrategy::onTextChanged() {
 
 /* --------------------------- RecordLineEditStrategy ----------------------- */
 
-const int RecordLineEditStrategy::type = qMetaTypeId<QLineEdit>();
-
 RecordLineEditStrategy::RecordLineEditStrategy(QObject *parent)
-    : RecordStrategy(parent) {}
+    : RecordWidgetStrategy(qMetaTypeId<QLineEdit>(), parent) {}
 
 RecordLineEditStrategy::~RecordLineEditStrategy() = default;
 
@@ -399,7 +400,7 @@ bool RecordLineEditStrategy::eventFilter(QObject *obj, QEvent *event) {
     }
   }
 
-  return QObject::eventFilter(obj, event);
+  return RecordWidgetStrategy::eventFilter(obj, event);
 }
 
 void RecordLineEditStrategy::onTextChanged(const QString &text) {
@@ -412,10 +413,8 @@ void RecordLineEditStrategy::onReturnPressed() {
 
 /* --------------------------- RecordItemViewStrategy ----------------------- */
 
-const int RecordItemViewStrategy::type = qMetaTypeId<QAbstractItemView>();
-
 RecordItemViewStrategy::RecordItemViewStrategy(QObject *parent)
-    : RecordStrategy(parent) {}
+    : RecordWidgetStrategy(qMetaTypeId<QAbstractItemView>(), parent) {}
 
 RecordItemViewStrategy::~RecordItemViewStrategy() = default;
 

@@ -302,7 +302,7 @@ void RecordToolBoxStrategy::onCurrentChanged(int index) {
 /* ----------------------------- RecordMenuStrategy ------------------------- */
 
 RecordMenuStrategy::RecordMenuStrategy(QObject *parent)
-    : RecordWidgetStrategy(qMetaTypeId<QMenu>(), parent) {}
+    : RecordStrategy(qMetaTypeId<QMenu>(), parent) {}
 
 RecordMenuStrategy::~RecordMenuStrategy() = default;
 
@@ -343,7 +343,7 @@ bool RecordMenuStrategy::eventFilter(QObject *obj, QEvent *event) {
     }
   }
 
-  return RecordWidgetStrategy::eventFilter(obj, event);
+  return RecordStrategy::eventFilter(obj, event);
 }
 
 void RecordMenuStrategy::onTriggered(QAction *action) {

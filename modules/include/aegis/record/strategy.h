@@ -173,7 +173,7 @@ class LIB_AEGIS_API RecordToolBoxStrategy : public RecordWidgetStrategy {
 
 /* ----------------------------- RecordMenuStrategy ------------------------- */
 
-class LIB_AEGIS_API RecordMenuStrategy : public RecordWidgetStrategy {
+class LIB_AEGIS_API RecordMenuStrategy : public RecordStrategy {
   Q_OBJECT
 
  public:

@@ -298,8 +298,11 @@ RecordMenuStrategy::~RecordMenuStrategy() = default;
 bool RecordMenuStrategy::eventFilter(QObject *obj, QEvent *event) {
   const auto tryTrigger = [this](auto menu, auto action) {
     if (!action) return;
-    if (!action->isEnabled()) return;
-    if (action != menu->activeAction()) return;
+
+    const auto is_disabled = !action->isEnabled();
+    const auto is_submenu = action->menu();
+    const auto is_inactive = action != menu->activeAction();
+    if (is_disabled || is_submenu || is_inactive) return;
 
     onTriggered(action);
   };

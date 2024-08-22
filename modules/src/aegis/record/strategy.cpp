@@ -296,24 +296,39 @@ RecordMenuStrategy::RecordMenuStrategy(QObject *parent)
 RecordMenuStrategy::~RecordMenuStrategy() = default;
 
 bool RecordMenuStrategy::eventFilter(QObject *obj, QEvent *event) {
+  const auto tryTrigger = [this](auto menu, auto action) {
+    if (!action) return;
+    if (!action->isEnabled()) return;
+    if (action != menu->activeAction()) return;
+
+    onTriggered(action);
+  };
+
   if (auto widget = getWidget(); widget == obj) {
     switch (event->type()) {
+      case QEvent::KeyPress: {
+        const auto menu = qobject_cast<QMenu *>(widget);
+        Q_ASSERT(menu);
+
+        const auto key_event = static_cast<QKeyEvent *>(event);
+        const auto key = key_event->key();
+
+        if (key == Qt::Key_Enter || key == Qt::Key_Return) {
+          const auto action = menu->activeAction();
+          tryTrigger(menu, action);
+        }
+
+        break;
+      }
       case QEvent::MouseButtonRelease: {
         const auto menu = qobject_cast<QMenu *>(widget);
         Q_ASSERT(menu);
 
         const auto mouse_event = static_cast<QMouseEvent *>(event);
         const auto mouse_position = mouse_event->position().toPoint();
-
         const auto action = menu->actionAt(mouse_position);
-        if (!action) break;
-        if (!action->isEnabled()) break;
-        if (action != menu->activeAction()) break;
 
-        const auto rect = menu->actionGeometry(action);
-        if (!rect.contains(mouse_position)) break;
-
-        onTriggered(action);
+        tryTrigger(menu, action);
 
         break;
       }

@@ -2,6 +2,7 @@
 #include "aegis/record/recorder.h"
 
 #include "aegis/manager.h"
+#include "aegis/record/action.h"
 #include "aegis/record/strategy.h"
 /* ------------------------------------ Qt ---------------------------------- */
 #include <QAbstractButton>
@@ -125,9 +126,16 @@ void Recorder::stop() {
   m_running = false;
 }
 
-void Recorder::clear() { m_report.clear(); }
+void Recorder::clearRecordedActions() { m_recorded_actions.clear(); }
 
-const QStringList &Recorder::getReport() const { return m_report; }
+QQueue<RecordedAction> Recorder::getRecordedActions() const {
+  auto recorded_actions = m_recorded_actions;
+  if (m_current_strategy) {
+    recorded_actions.append(m_current_strategy->getRecordedActions());
+  }
+
+  return recorded_actions;
+}
 
 bool Recorder::addStrategy(std::unique_ptr<RecordStrategy> &&strategy) {
   if (m_strategies.contains(strategy->getType())) return false;
@@ -152,28 +160,18 @@ bool Recorder::removeStrategy(int type) {
   return true;
 }
 
-void Recorder::onRecorder(const QString &command) {
-  if (!m_running) return;
-  m_report.append(command);
-}
-
 void Recorder::onCurrentWidgetChanged(QWidget *widget) {
   auto strategy = findStrategy(widget);
 
   if (m_current_strategy) {
+    m_recorded_actions.append(m_current_strategy->getRecordedActions());
     m_current_strategy->setWidget(nullptr);
-
-    disconnect(m_current_strategy, &RecordStrategy::recorded, this,
-               &Recorder::onRecorder);
   }
 
   m_current_strategy = strategy;
 
   if (m_current_strategy) {
     m_current_strategy->setWidget(widget);
-
-    connect(m_current_strategy, &RecordStrategy::recorded, this,
-            &Recorder::onRecorder);
   }
 }
 

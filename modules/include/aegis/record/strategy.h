@@ -3,12 +3,15 @@
 
 /* ------------------------------------ Qt ---------------------------------- */
 #include <QPointer>
+#include <QQueue>
 #include <QWidget>
 /* ----------------------------------- Local -------------------------------- */
 #include "aegis/export.h"
 /* -------------------------------------------------------------------------- */
 
 namespace aegis {
+
+class RecordedAction;
 
 /* ------------------------------- RecordStrategy --------------------------- */
 
@@ -27,16 +30,19 @@ class LIB_AEGIS_API RecordStrategy : public QObject {
 
   [[nodiscard]] int getType() const;
 
- Q_SIGNALS:
-  void recorded(const QString &command);
+  [[nodiscard]] const QQueue<RecordedAction> &getRecordedActions();
+  void clearRecordedActions();
 
  protected:
   virtual void installConnections(QWidget *widget);
   virtual void removeConnections(QWidget *widget);
 
+  void recordAction(RecordedAction &&action);
+
  private:
   int m_type;
   QPointer<QWidget> m_widget;
+  QQueue<RecordedAction> m_recorded_actions;
 };
 
 template <typename TYPE>

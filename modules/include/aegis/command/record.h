@@ -13,6 +13,17 @@ namespace aegis {
 
 class Recorder;
 
+/* -------------------------------- ReportMessage --------------------------- */
+
+struct LIB_AEGIS_API ReportMessage {
+  Q_GADGET
+
+ public:
+  Q_PROPERTY(QStringList commands MEMBER commands)
+
+  QStringList commands;
+};
+
 /* ------------------------------- RecordCommand ---------------------------- */
 
 class LIB_AEGIS_API RecordCommand : public Command {
@@ -30,7 +41,7 @@ class LIB_AEGIS_API RecordCommand : public Command {
   Response<> start();
   Response<> pause();
   Response<> stop();
-  Response<> report();
+  Response<ReportMessage> report();
 
  private:
   State m_state;

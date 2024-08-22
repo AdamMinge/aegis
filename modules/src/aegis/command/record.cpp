@@ -2,11 +2,76 @@
 #include "aegis/command/record.h"
 
 #include "aegis/manager.h"
+#include "aegis/record/action.h"
 #include "aegis/record/recorder.h"
 #include "aegis/record/strategy.h"
 /* -------------------------------------------------------------------------- */
 
 namespace aegis {
+
+/* ------------------------------- RecordCommand ---------------------------- */
+
+class RecordedActionsMapper {
+ public:
+  QString operator()(const RecordedAction::ContextMenuOpened& action) const {
+    return QString{};
+  }
+
+  QString operator()(const RecordedAction::ButtonClicked& action) const {
+    return QString{};
+  }
+
+  QString operator()(const RecordedAction::ButtonToggled& action) const {
+    return QString{};
+  }
+
+  QString operator()(
+      const RecordedAction::ComboBoxCurrentChanged& action) const {
+    return QString{};
+  }
+
+  QString operator()(const RecordedAction::SpinBoxValueChanged& action) const {
+    return QString{};
+  }
+
+  QString operator()(const RecordedAction::SliderValueChanged& action) const {
+    return QString{};
+  }
+
+  QString operator()(const RecordedAction::TabCurrentChanged& action) const {
+    return QString{};
+  }
+
+  QString operator()(const RecordedAction::TabClosed& action) const {
+    return QString{};
+  }
+
+  QString operator()(const RecordedAction::TabMoved& action) const {
+    return QString{};
+  }
+
+  QString operator()(
+      const RecordedAction::ToolBoxCurrentChanged& action) const {
+    return QString{};
+  }
+
+  QString operator()(const RecordedAction::ActionTriggered& action) const {
+    return QString{};
+  }
+
+  QString operator()(const RecordedAction::TextEditTextChanged& action) const {
+    return QString{};
+  }
+
+  QString operator()(const RecordedAction::LineEditTextChanged& action) const {
+    return QString{};
+  }
+
+  QString operator()(
+      const RecordedAction::LineEditReturnPressed& action) const {
+    return QString{};
+  }
+};
 
 /* ------------------------------- RecordCommand ---------------------------- */
 
@@ -36,8 +101,6 @@ RecordCommand::RecordCommand()
 }
 
 RecordCommand::~RecordCommand() = default;
-
-Response<> RecordCommand::report() { return EmptyMessage(); }
 
 QByteArray RecordCommand::exec() {
   if (m_parser.isSet("start")) return serializer()->serialize(start());
@@ -88,9 +151,22 @@ Response<> RecordCommand::stop() {
 
   m_state = State::Stopped;
   m_recorder->stop();
-  m_recorder->clear();
+  m_recorder->clearRecordedActions();
 
   return EmptyMessage();
+}
+
+Response<ReportMessage> RecordCommand::report() {
+  const auto actions_mapper = RecordedActionsMapper{};
+  const auto recorded_actions = m_recorder->getRecordedActions();
+
+  auto message = ReportMessage{};
+  for (const auto& action : recorded_actions) {
+    const auto command = action.visit(actions_mapper);
+    message.commands.append(command);
+  }
+
+  return message;
 }
 
 }  // namespace aegis

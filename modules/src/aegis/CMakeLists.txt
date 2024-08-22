@@ -53,7 +53,8 @@ set(includes
     ${include_root}/search/searcher.h
     ${include_root}/search/strategy.h
     ${include_root}/record/recorder.h
-    ${include_root}/record/strategy.h)
+    ${include_root}/record/strategy.h
+    ${include_root}/record/action.h)
 
 set(resources ${resource_root}/aegis.qrc)
 # ----------------------------------------------------------------------- #

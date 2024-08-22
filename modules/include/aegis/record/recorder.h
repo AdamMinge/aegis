@@ -4,6 +4,7 @@
 /* --------------------------------- Standard ------------------------------- */
 #include <unordered_map>
 /* ------------------------------------ Qt ---------------------------------- */
+#include <QQueue>
 #include <QThread>
 #include <QWidget>
 /* ----------------------------------- Local -------------------------------- */
@@ -13,6 +14,7 @@
 namespace aegis {
 
 class RecordStrategy;
+class RecordedAction;
 
 /* ------------------------------- WidgetListener --------------------------- */
 
@@ -48,9 +50,9 @@ class LIB_AEGIS_API Recorder : public QObject {
 
   void start();
   void stop();
-  void clear();
 
-  [[nodiscard]] const QStringList &getReport() const;
+  void clearRecordedActions();
+  [[nodiscard]] QQueue<RecordedAction> getRecordedActions() const;
 
   bool addStrategy(std::unique_ptr<RecordStrategy> &&strategy);
   std::unique_ptr<RecordStrategy> takeStrategy(int type);
@@ -58,16 +60,15 @@ class LIB_AEGIS_API Recorder : public QObject {
 
  protected Q_SLOTS:
   void onCurrentWidgetChanged(QWidget *widget);
-  void onRecorder(const QString &command);
 
  private:
   [[nodiscard]] RecordStrategy *findStrategy(QWidget *widget) const;
 
  private:
   std::unordered_map<int, std::unique_ptr<RecordStrategy>> m_strategies;
+  QQueue<RecordedAction> m_recorded_actions;
   RecordStrategy *m_current_strategy;
   WidgetListener *m_widget_listener;
-  QStringList m_report;
   bool m_running;
 };
 

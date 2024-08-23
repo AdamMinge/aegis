@@ -30,7 +30,8 @@ set(sources
     ${source_root}/search/strategy.cpp
     ${source_root}/search/query.cpp
     ${source_root}/record/recorder.cpp
-    ${source_root}/record/strategy.cpp)
+    ${source_root}/record/strategy.cpp
+    ${source_root}/record/action.cpp)
 
 set(includes
     ${include_root}/export.h

@@ -40,9 +40,12 @@ class LIB_AEGIS_API RecordStrategy : public QObject {
   virtual void removeConnections(QWidget *widget);
 
   void recordAction(RecordedAction &&action);
+  void recordActionWithMerge(RecordedAction &&action);
 
   template <typename Type, typename... Args>
   void recordAction(Args &&...args);
+  template <typename Type, typename... Args>
+  void recordActionWithMerge(Args &&...args);
 
  private:
   int m_type;
@@ -62,6 +65,11 @@ TYPE *RecordStrategy::getWidgetAs() const {
 template <typename Type, typename... Args>
 void RecordStrategy::recordAction(Args &&...args) {
   recordAction(Type{getWidgetAsQuery(), std::forward<Args>(args)...});
+}
+
+template <typename Type, typename... Args>
+void RecordStrategy::recordActionWithMerge(Args &&...args) {
+  recordActionWithMerge(Type{getWidgetAsQuery(), std::forward<Args>(args)...});
 }
 
 /* ---------------------------- RecordWidgetStrategy ------------------------ */

@@ -96,6 +96,8 @@ class LIB_AEGIS_API RecordedAction {
   template <typename ActionSubtype>
   [[nodiscard]] const ActionSubtype *getIf() const;
 
+  [[nodiscard]] std::size_t index() const;
+
   template <typename T>
   decltype(auto) visit(T &&visitor) const;
 

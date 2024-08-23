@@ -91,6 +91,15 @@ void RecordStrategy::recordAction(RecordedAction &&action) {
   m_recorded_actions.enqueue(std::move(action));
 }
 
+void RecordStrategy::recordActionWithMerge(RecordedAction &&action) {
+  const auto &last_action = m_recorded_actions.back();
+  if (last_action.index() == action.index()) {
+    m_recorded_actions.pop_back();
+  }
+
+  recordAction(std::move(action));
+}
+
 /* ---------------------------- RecordWidgetStrategy ------------------------ */
 
 RecordWidgetStrategy::RecordWidgetStrategy(QObject *parent)
@@ -366,7 +375,8 @@ bool RecordMenuStrategy::eventFilter(QObject *obj, QEvent *event) {
   return RecordStrategy::eventFilter(obj, event);
 }
 
-void RecordMenuStrategy::onTriggered(QAction *action) { /* TODO */ }
+void RecordMenuStrategy::onTriggered(QAction *action) { /* TODO */
+}
 
 /* --------------------------- RecordTextEditStrategy ----------------------- */
 
@@ -384,7 +394,7 @@ void RecordTextEditStrategy::installConnections(QWidget *widget) {
 }
 
 void RecordTextEditStrategy::onTextChanged(const QString &text) {
-  recordAction<RecordedAction::TextEditTextChanged>(text);
+  recordActionWithMerge<RecordedAction::TextEditTextChanged>(text);
 }
 
 /* --------------------------- RecordLineEditStrategy ----------------------- */
@@ -422,7 +432,7 @@ bool RecordLineEditStrategy::eventFilter(QObject *obj, QEvent *event) {
 }
 
 void RecordLineEditStrategy::onTextChanged(const QString &text) {
-  recordAction<RecordedAction::LineEditTextChanged>(text);
+  recordActionWithMerge<RecordedAction::LineEditTextChanged>(text);
 }
 
 void RecordLineEditStrategy::onReturnPressed() {

@@ -14,62 +14,68 @@ namespace aegis {
 class RecordedActionsMapper {
  public:
   QString operator()(const RecordedAction::ContextMenuOpened& action) const {
-    return QString{};
+    return QString{"ContextMenuOpened %1"}.arg(action.object.toString());
   }
 
   QString operator()(const RecordedAction::ButtonClicked& action) const {
-    return QString{};
+    return QString{"ButtonClicked %1"}.arg(action.object.toString());
   }
 
   QString operator()(const RecordedAction::ButtonToggled& action) const {
-    return QString{};
+    return QString{"ButtonToggled %1"}.arg(action.object.toString());
   }
 
   QString operator()(
       const RecordedAction::ComboBoxCurrentChanged& action) const {
-    return QString{};
+    return QString{"ComboBoxCurrentChanged %1"}.arg(action.object.toString());
   }
 
   QString operator()(const RecordedAction::SpinBoxValueChanged& action) const {
-    return QString{};
+    return QString{"SpinBoxValueChanged %1"}.arg(action.object.toString());
+  }
+
+  QString operator()(
+      const RecordedAction::DoubleSpinBoxValueChanged& action) const {
+    return QString{"DoubleSpinBoxValueChanged %1"}.arg(
+        action.object.toString());
   }
 
   QString operator()(const RecordedAction::SliderValueChanged& action) const {
-    return QString{};
+    return QString{"SliderValueChanged %1"}.arg(action.object.toString());
   }
 
   QString operator()(const RecordedAction::TabCurrentChanged& action) const {
-    return QString{};
+    return QString{"TabCurrentChanged %1"}.arg(action.object.toString());
   }
 
   QString operator()(const RecordedAction::TabClosed& action) const {
-    return QString{};
+    return QString{"TabClosed %1"}.arg(action.object.toString());
   }
 
   QString operator()(const RecordedAction::TabMoved& action) const {
-    return QString{};
+    return QString{"TabMoved %1"}.arg(action.object.toString());
   }
 
   QString operator()(
       const RecordedAction::ToolBoxCurrentChanged& action) const {
-    return QString{};
+    return QString{"ToolBoxCurrentChanged %1"}.arg(action.object.toString());
   }
 
   QString operator()(const RecordedAction::ActionTriggered& action) const {
-    return QString{};
+    return QString{"ActionTriggered %1"}.arg(action.object.toString());
   }
 
   QString operator()(const RecordedAction::TextEditTextChanged& action) const {
-    return QString{};
+    return QString{"TextEditTextChanged %1"}.arg(action.object.toString());
   }
 
   QString operator()(const RecordedAction::LineEditTextChanged& action) const {
-    return QString{};
+    return QString{"LineEditTextChanged %1"}.arg(action.object.toString());
   }
 
   QString operator()(
       const RecordedAction::LineEditReturnPressed& action) const {
-    return QString{};
+    return QString{"LineEditReturnPressed %1"}.arg(action.object.toString());
   }
 };
 

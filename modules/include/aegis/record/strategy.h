@@ -7,6 +7,7 @@
 #include <QWidget>
 /* ----------------------------------- Local -------------------------------- */
 #include "aegis/export.h"
+#include "aegis/search/query.h"
 /* -------------------------------------------------------------------------- */
 
 namespace aegis {
@@ -27,6 +28,7 @@ class LIB_AEGIS_API RecordStrategy : public QObject {
 
   template <typename TYPE>
   [[nodiscard]] TYPE *getWidgetAs() const;
+  [[nodiscard]] ObjectQuery getWidgetAsQuery() const;
 
   [[nodiscard]] int getType() const;
 
@@ -38,6 +40,9 @@ class LIB_AEGIS_API RecordStrategy : public QObject {
   virtual void removeConnections(QWidget *widget);
 
   void recordAction(RecordedAction &&action);
+
+  template <typename Type, typename... Args>
+  void recordAction(Args &&...args);
 
  private:
   int m_type;
@@ -52,6 +57,11 @@ TYPE *RecordStrategy::getWidgetAs() const {
   Q_ASSERT(widget == specific_widget);
 
   return specific_widget;
+}
+
+template <typename Type, typename... Args>
+void RecordStrategy::recordAction(Args &&...args) {
+  recordAction(Type{getWidgetAsQuery(), std::forward<Args>(args)...});
 }
 
 /* ---------------------------- RecordWidgetStrategy ------------------------ */
@@ -206,7 +216,7 @@ class LIB_AEGIS_API RecordTextEditStrategy : public RecordWidgetStrategy {
   void installConnections(QWidget *widget) override;
 
  private Q_SLOTS:
-  void onTextChanged();
+  void onTextChanged(const QString &text);
 };
 
 /* --------------------------- RecordLineEditStrategy ----------------------- */

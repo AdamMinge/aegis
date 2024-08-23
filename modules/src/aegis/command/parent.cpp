@@ -50,7 +50,7 @@ Response<ObjectsParentMessage> ParentCommand::find(
 
   auto message = ObjectsParentMessage{};
   for (const auto object : objects) {
-    const auto object_id = searcher()->getId(object);
+    const auto object_id = searcher()->getQuery(object);
     const auto parent_id = getParent(object);
 
     message.objects.append(
@@ -62,7 +62,7 @@ Response<ObjectsParentMessage> ParentCommand::find(
 
 ObjectQuery ParentCommand::getParent(const QObject* object) const {
   const auto parent_id =
-      object->parent() ? searcher()->getId(object->parent()) : ObjectQuery{};
+      object->parent() ? searcher()->getQuery(object->parent()) : ObjectQuery{};
 
   return parent_id;
 }

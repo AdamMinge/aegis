@@ -28,6 +28,7 @@ set(sources
     ${source_root}/command/set_property.cpp
     ${source_root}/search/searcher.cpp
     ${source_root}/search/strategy.cpp
+    ${source_root}/search/query.cpp
     ${source_root}/record/recorder.cpp
     ${source_root}/record/strategy.cpp)
 
@@ -52,6 +53,7 @@ set(includes
     ${include_root}/command/set_property.h
     ${include_root}/search/searcher.h
     ${include_root}/search/strategy.h
+    ${include_root}/search/query.h
     ${include_root}/record/recorder.h
     ${include_root}/record/strategy.h
     ${include_root}/record/action.h)

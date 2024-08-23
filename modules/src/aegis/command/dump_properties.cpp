@@ -49,7 +49,7 @@ Response<PropertiesDumpsMessage> DumpPropertiesCommand::dump(
 
   auto message = PropertiesDumpsMessage{};
   for (const auto object : objects) {
-    const auto object_id = searcher()->getId(object);
+    const auto object_id = searcher()->getQuery(object);
     const auto properties = getProperties(object);
 
     message.objects.append(

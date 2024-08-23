@@ -53,7 +53,7 @@ Response<ObjectsChildrenMessage> ChildrenCommand::find(
 
   auto message = ObjectsChildrenMessage{};
   for (const auto object : objects) {
-    const auto object_id = searcher()->getId(object);
+    const auto object_id = searcher()->getQuery(object);
     const auto children_ids = getChildren(object);
 
     auto children = QStringList{};
@@ -71,7 +71,7 @@ Response<ObjectsChildrenMessage> ChildrenCommand::find(
 QList<ObjectQuery> ChildrenCommand::getChildren(const QObject* object) const {
   auto children = QList<ObjectQuery>{};
   for (const auto child : object->children()) {
-    const auto child_id = searcher()->getId(child);
+    const auto child_id = searcher()->getQuery(child);
     children.append(child_id);
   }
 

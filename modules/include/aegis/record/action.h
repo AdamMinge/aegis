@@ -5,6 +5,7 @@
 #include <QQueue>
 /* ----------------------------------- Local -------------------------------- */
 #include "aegis/export.h"
+#include "aegis/search/query.h"
 /* -------------------------------------------------------------------------- */
 
 namespace aegis {
@@ -13,20 +14,77 @@ namespace aegis {
 
 class LIB_AEGIS_API RecordedAction {
  public:
-  struct ContextMenuOpened {};
-  struct ButtonClicked {};
-  struct ButtonToggled {};
-  struct ComboBoxCurrentChanged {};
-  struct SpinBoxValueChanged {};
-  struct SliderValueChanged {};
-  struct TabCurrentChanged {};
-  struct TabClosed {};
-  struct TabMoved {};
-  struct ToolBoxCurrentChanged {};
-  struct ActionTriggered {};
-  struct TextEditTextChanged {};
-  struct LineEditTextChanged {};
-  struct LineEditReturnPressed {};
+  struct ContextMenuOpened {
+    ObjectQuery object;
+  };
+
+  struct ButtonClicked {
+    ObjectQuery object;
+  };
+
+  struct ButtonToggled {
+    ObjectQuery object;
+    bool checked;
+  };
+
+  struct ComboBoxCurrentChanged {
+    ObjectQuery object;
+    int index;
+  };
+
+  struct SpinBoxValueChanged {
+    ObjectQuery object;
+    int value;
+  };
+
+  struct DoubleSpinBoxValueChanged {
+    ObjectQuery object;
+    double value;
+  };
+
+  struct SliderValueChanged {
+    ObjectQuery object;
+    int value;
+  };
+
+  struct TabCurrentChanged {
+    ObjectQuery object;
+    int index;
+  };
+
+  struct TabClosed {
+    ObjectQuery object;
+    int index;
+  };
+
+  struct TabMoved {
+    ObjectQuery object;
+    int from;
+    int to;
+  };
+
+  struct ToolBoxCurrentChanged {
+    ObjectQuery object;
+    int index;
+  };
+
+  struct ActionTriggered {
+    ObjectQuery object;
+  };
+
+  struct TextEditTextChanged {
+    ObjectQuery object;
+    QString value;
+  };
+
+  struct LineEditTextChanged {
+    ObjectQuery object;
+    QString value;
+  };
+
+  struct LineEditReturnPressed {
+    ObjectQuery object;
+  };
 
  public:
   template <typename ActionSubtype>
@@ -43,10 +101,10 @@ class LIB_AEGIS_API RecordedAction {
 
  private:
   std::variant<ContextMenuOpened, ButtonClicked, ButtonToggled,
-               ComboBoxCurrentChanged, SpinBoxValueChanged, SliderValueChanged,
-               TabCurrentChanged, TabClosed, TabMoved, ToolBoxCurrentChanged,
-               ActionTriggered, TextEditTextChanged, LineEditTextChanged,
-               LineEditReturnPressed>
+               ComboBoxCurrentChanged, SpinBoxValueChanged,
+               DoubleSpinBoxValueChanged, SliderValueChanged, TabCurrentChanged,
+               TabClosed, TabMoved, ToolBoxCurrentChanged, ActionTriggered,
+               TextEditTextChanged, LineEditTextChanged, LineEditReturnPressed>
       m_data;
 };
 

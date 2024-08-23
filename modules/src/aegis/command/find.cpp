@@ -40,7 +40,7 @@ Response<FoundObjectsMessage> FindCommand::find(
 
   auto message = FoundObjectsMessage{};
   for (const auto object : objects) {
-    message.objects.append(searcher()->getId(object).toString());
+    message.objects.append(searcher()->getQuery(object).toString());
   }
 
   return message;

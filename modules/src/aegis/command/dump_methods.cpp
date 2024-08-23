@@ -47,7 +47,7 @@ Response<MethodsDumpsMessage> DumpMethodsCommand::dump(
 
   auto message = MethodsDumpsMessage{};
   for (const auto object : objects) {
-    const auto object_id = searcher()->getId(object);
+    const auto object_id = searcher()->getQuery(object);
     const auto methods = getMethods(object);
 
     message.objects.append(MethodsDumpMessage{object_id.toString(), methods});

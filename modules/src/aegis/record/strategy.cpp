@@ -1,6 +1,7 @@
 /* ----------------------------------- Local -------------------------------- */
 #include "aegis/record/strategy.h"
 
+#include "aegis/manager.h"
 #include "aegis/record/action.h"
 /* ------------------------------------ Qt ---------------------------------- */
 #include <QAbstractButton>
@@ -65,6 +66,13 @@ void RecordStrategy::setWidget(QWidget *widget) {
 
 QWidget *RecordStrategy::getWidget() const { return m_widget; }
 
+ObjectQuery RecordStrategy::getWidgetAsQuery() const {
+  const auto object = searcher()->getQuery(getWidget());
+  Q_ASSERT(object.isValid());
+
+  return object;
+}
+
 int RecordStrategy::getType() const { return m_type; }
 
 void RecordStrategy::installConnections(QWidget *widget) { Q_UNUSED(widget); }
@@ -106,7 +114,7 @@ bool RecordWidgetStrategy::eventFilter(QObject *obj, QEvent *event) {
 }
 
 void RecordWidgetStrategy::onOpenContextMenu() {
-  qDebug() << "RecordButtonStrategy::onOpenContextMenu";
+  recordAction<RecordedAction::ContextMenuOpened>();
 }
 
 /* ---------------------------- RecordButtonStrategy ------------------------ */
@@ -157,11 +165,11 @@ void RecordButtonStrategy::onPressed() {
 }
 
 void RecordButtonStrategy::onClicked() {
-  qDebug() << "RecordButtonStrategy::onClicked";
+  recordAction<RecordedAction::ButtonClicked>();
 }
 
 void RecordButtonStrategy::onToggled(bool checked) {
-  qDebug() << "RecordButtonStrategy::onToggled = " << checked;
+  recordAction<RecordedAction::ButtonToggled>(checked);
 }
 
 /* --------------------------- RecordComboBoxStrategy ----------------------- */
@@ -180,7 +188,7 @@ void RecordComboBoxStrategy::installConnections(QWidget *widget) {
 }
 
 void RecordComboBoxStrategy::onCurrentIndexChanged(int index) {
-  qDebug() << "RecordComboBoxStrategy::onCurrentIndexChanged = " << index;
+  recordAction<RecordedAction::ComboBoxCurrentChanged>(index);
 }
 
 /* --------------------------- RecordSpinBoxStrategy ------------------------ */
@@ -203,11 +211,11 @@ void RecordSpinBoxStrategy::installConnections(QWidget *widget) {
 }
 
 void RecordSpinBoxStrategy::onValueChanged(double value) {
-  qDebug() << "RecordSpinBoxStrategy::onValueChanged = " << value;
+  recordAction<RecordedAction::DoubleSpinBoxValueChanged>(value);
 }
 
 void RecordSpinBoxStrategy::onValueChanged(int value) {
-  qDebug() << "RecordSpinBoxStrategy::onValueChanged = " << value;
+  recordAction<RecordedAction::SpinBoxValueChanged>(value);
 }
 
 /* ---------------------------- RecordSliderStrategy ------------------------ */
@@ -226,7 +234,7 @@ void RecordSliderStrategy::installConnections(QWidget *widget) {
 }
 
 void RecordSliderStrategy::onValueChanged(int value) {
-  qDebug() << "RecordSliderStrategy::onValueChanged = " << value;
+  recordAction<RecordedAction::SliderValueChanged>(value);
 }
 
 /* ---------------------------- RecordTabBarStrategy ------------------------ */
@@ -281,16 +289,15 @@ void RecordTabBarStrategy::removeConnections(QWidget *widget) {
 }
 
 void RecordTabBarStrategy::onCurrentChanged(int index) {
-  qDebug() << "RecordTabBarStrategy::onCurrentChanged = " << index;
+  recordAction<RecordedAction::TabCurrentChanged>(index);
 }
 
 void RecordTabBarStrategy::onTabClosed(int index) {
-  qDebug() << "RecordTabBarStrategy::onTabClosed = " << index;
+  recordAction<RecordedAction::TabClosed>(index);
 }
 
 void RecordTabBarStrategy::onTabMoved(int from, int to) {
-  qDebug() << "RecordTabBarStrategy::onTabMoved = (" << from << "," << to
-           << ")";
+  recordAction<RecordedAction::TabMoved>(from, to);
 }
 
 /* ---------------------------- RecordToolBoxStrategy ----------------------- */
@@ -309,7 +316,7 @@ void RecordToolBoxStrategy::installConnections(QWidget *widget) {
 }
 
 void RecordToolBoxStrategy::onCurrentChanged(int index) {
-  qDebug() << "RecordToolBoxStrategy::onCurrentChanged = " << index;
+  recordAction<RecordedAction::ToolBoxCurrentChanged>(index);
 }
 
 /* ----------------------------- RecordMenuStrategy ------------------------- */
@@ -359,9 +366,7 @@ bool RecordMenuStrategy::eventFilter(QObject *obj, QEvent *event) {
   return RecordStrategy::eventFilter(obj, event);
 }
 
-void RecordMenuStrategy::onTriggered(QAction *action) {
-  qDebug() << "RecordMenuStrategy::onTriggered = " << action->text();
-}
+void RecordMenuStrategy::onTriggered(QAction *action) { /* TODO */ }
 
 /* --------------------------- RecordTextEditStrategy ----------------------- */
 
@@ -375,11 +380,11 @@ void RecordTextEditStrategy::installConnections(QWidget *widget) {
   Q_ASSERT(textedit);
 
   connect(textedit, &QTextEdit::textChanged, this,
-          &RecordTextEditStrategy::onTextChanged);
+          [this, textedit]() { onTextChanged(textedit->toPlainText()); });
 }
 
-void RecordTextEditStrategy::onTextChanged() {
-  qDebug() << "RecordTextEditStrategy::onTextChanged";
+void RecordTextEditStrategy::onTextChanged(const QString &text) {
+  recordAction<RecordedAction::TextEditTextChanged>(text);
 }
 
 /* --------------------------- RecordLineEditStrategy ----------------------- */
@@ -417,11 +422,11 @@ bool RecordLineEditStrategy::eventFilter(QObject *obj, QEvent *event) {
 }
 
 void RecordLineEditStrategy::onTextChanged(const QString &text) {
-  qDebug() << "RecordLineEditStrategy::onTextChanged = " << text;
+  recordAction<RecordedAction::LineEditTextChanged>(text);
 }
 
 void RecordLineEditStrategy::onReturnPressed() {
-  qDebug() << "RecordLineEditStrategy::onReturnPressed";
+  recordAction<RecordedAction::LineEditReturnPressed>();
 }
 
 /* --------------------------- RecordItemViewStrategy ----------------------- */
@@ -455,7 +460,7 @@ void RecordItemViewStrategy::removeConnections(QWidget *widget) {
 void RecordItemViewStrategy::onDataChanged(const QModelIndex &topLeft,
                                            const QModelIndex &bottomRight,
                                            const QList<int> &roles) {
-  qDebug() << "RecordItemViewStrategy::onDataChanged";
+  /* TODO */
 }
 
 }  // namespace aegis

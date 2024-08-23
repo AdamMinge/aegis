@@ -92,9 +92,11 @@ void RecordStrategy::recordAction(RecordedAction &&action) {
 }
 
 void RecordStrategy::recordActionWithMerge(RecordedAction &&action) {
-  const auto &last_action = m_recorded_actions.back();
-  if (last_action.index() == action.index()) {
-    m_recorded_actions.pop_back();
+  if (!m_recorded_actions.isEmpty()) {
+    const auto &last_action = m_recorded_actions.back();
+    if (last_action.index() == action.index()) {
+      m_recorded_actions.pop_back();
+    }
   }
 
   recordAction(std::move(action));

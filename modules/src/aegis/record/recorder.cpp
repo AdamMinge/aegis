@@ -62,11 +62,15 @@ WidgetListener::~WidgetListener() = default;
 
 bool WidgetListener::eventFilter(QObject *obj, QEvent *event) {
   switch (event->type()) {
-    case QEvent::MouseButtonPress:
-    case QEvent::MouseButtonRelease:
-    case QEvent::MouseButtonDblClick:
     case QEvent::KeyPress:
     case QEvent::KeyRelease: {
+      auto widget = findWidget(qobject_cast<QWidget *>(obj));
+      if (widget && widget->hasFocus()) setWidget(widget);
+      break;
+    }
+    case QEvent::MouseButtonPress:
+    case QEvent::MouseButtonRelease:
+    case QEvent::MouseButtonDblClick: {
       auto widget = findWidget(qobject_cast<QWidget *>(obj));
       setWidget(widget);
       break;

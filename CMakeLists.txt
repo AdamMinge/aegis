@@ -16,6 +16,7 @@ include(${AEGIS_SOURCE_DIR}/cmake/macros.cmake)
 # ----------------------------------------------------------------------- #
 add_subdirectory(deps)
 add_subdirectory(modules)
+add_subdirectory(examples)
 
 add_subdirectory(docs)
 # ----------------------------------------------------------------------- #

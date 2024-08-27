@@ -1,5 +1,4 @@
-from PySide6.QtWidgets import QMainWindow, QWidget, QStackedWidget, QVBoxLayout
-from PySide6.QtCore import Slot
+from PySide6.QtWidgets import QMainWindow
 
 
 class MainWindow(QMainWindow):

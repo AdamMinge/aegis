@@ -1,7 +1,7 @@
 import sys
 
-from .main_window import MainWindow
-from .application import Application
+from main_window import MainWindow
+from application import Application
 
 
 def main():

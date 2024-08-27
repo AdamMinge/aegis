@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QMainWindow, QWidget, QStackedWidget, QVBoxLayout
 from PySide6.QtCore import Slot
 
-from .pages import (
+from pages import (
     SelectAttachStrategyPage,
     AttachToProcessPage,
     ClientPage,

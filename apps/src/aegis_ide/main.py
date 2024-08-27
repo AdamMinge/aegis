@@ -1,5 +1,7 @@
 import sys
 
+from __generated__ import rcc
+
 from main_window import MainWindow
 from application import Application
 

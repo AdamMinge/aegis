@@ -49,7 +49,8 @@ add_custom_target(
 # ----------------------------------------------------------------------- #
 set(app_aegis_client_qrc_input
     ${CMAKE_SOURCE_DIR}/apps/resource/aegis_client/aegis_client.qrc)
-set(app_aegis_client_qrc_output ${CMAKE_CURRENT_SOURCE_DIR}/resource.py)
+set(app_aegis_client_qrc_output
+    ${CMAKE_CURRENT_SOURCE_DIR}/__generated__/rcc.py)
 
 add_custom_target(
   app_aegis_client_build_rcc

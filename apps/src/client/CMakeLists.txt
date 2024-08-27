@@ -10,14 +10,16 @@ find_package(
   COMPONENTS Interpreter
   REQUIRED)
 # ----------------------------------------------------------------------- #
-# --------------------------- Install Dependencies ---------------------- #
+# ---------------------------- Create Virtual Env ----------------------- #
 # ----------------------------------------------------------------------- #
 set(client_venv_path ${CMAKE_CURRENT_BINARY_DIR}/venv)
 
 if(WIN32)
   set(client_python_exe ${client_venv_path}/Scripts/python.exe)
+  set(pyside6_rcc_exe ${client_venv_path}/Scripts/pyside6-rcc.exe)
 else()
   set(client_python_exe ${client_venv_path}/bin/python)
+  set(pyside6_rcc_exe ${client_venv_path}/bin/pyside6-rcc)
 endif()
 
 add_custom_target(
@@ -39,12 +41,32 @@ add_custom_target(
   COMMENT "Installing Client dependencies from requirements.txt"
   DEPENDS client_create_virtualenv)
 # ----------------------------------------------------------------------- #
+# -------------------------------- Build RCC ---------------------------- #
+# ----------------------------------------------------------------------- #
+set(simple_qrc_input ${CMAKE_SOURCE_DIR}/apps/resource/client/client_simple.qrc)
+set(simple_qrc_output ${CMAKE_CURRENT_SOURCE_DIR}/simple/rcc.py)
+
+add_custom_target(
+  client_simple_build_rcc
+  COMMAND ${pyside6_rcc_exe} ${simple_qrc_input} -o ${simple_qrc_output}
+  COMMENT "Build Simple Client resources")
+
+set(extended_qrc_input
+    ${CMAKE_SOURCE_DIR}/apps/resource/client/client_extended.qrc)
+set(extended_qrc_output ${CMAKE_CURRENT_SOURCE_DIR}/extended/rcc.py)
+
+add_custom_target(
+  client_extended_build_rcc
+  COMMAND ${pyside6_rcc_exe} ${extended_qrc_input} -o ${extended_qrc_output}
+  COMMENT "Build Extended Client resources")
+# ----------------------------------------------------------------------- #
 # ------------------------------- Setup Client -------------------------- #
 # ----------------------------------------------------------------------- #
 add_custom_target(
   setup_client ALL
   COMMENT "Setting up Client (creating venv and installing dependencies)"
-  DEPENDS client_install_requirements)
+  DEPENDS client_install_requirements client_simple_build_rcc
+          client_extended_build_rcc)
 # ----------------------------------------------------------------------- #
 # ------------------------------ Execute Client ------------------------- #
 # ----------------------------------------------------------------------- #

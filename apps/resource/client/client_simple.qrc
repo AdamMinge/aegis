@@ -1,0 +1,6 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>icons/attach_to_process.png</file>
+    <file>icons/run_and_attach.png</file>
+</qresource>
+</RCC>

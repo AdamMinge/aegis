@@ -9,7 +9,6 @@
 #include "aegis/search/searcher.h"
 #include "aegis/serializer.h"
 #include "aegis/server.h"
-#include "aegis/sniffer.h"
 /* -------------------------------------------------------------------------- */
 
 namespace aegis {
@@ -27,7 +26,6 @@ class LIB_AEGIS_API AegisManager : public QObject {
   ~AegisManager() override;
 
   [[nodiscard]] Server* getServer() const;
-  [[nodiscard]] Sniffer* getSniffer() const;
   [[nodiscard]] Searcher* getSearcher() const;
   [[nodiscard]] Serializer* getSerializer() const;
   [[nodiscard]] CommandExecutor* getCommandExecutor() const;
@@ -39,15 +37,12 @@ class LIB_AEGIS_API AegisManager : public QObject {
   static std::unique_ptr<AegisManager> m_instance;
 
   Server* m_server;
-  Sniffer* m_sniffer;
   Searcher* m_searcher;
   Serializer* m_serializer;
   CommandExecutor* m_command_executor;
 };
 
 inline Server* server() { return AegisManager::getInstance().getServer(); }
-
-inline Sniffer* sniffer() { return AegisManager::getInstance().getSniffer(); }
 
 inline Searcher* searcher() {
   return AegisManager::getInstance().getSearcher();

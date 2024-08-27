@@ -27,7 +27,6 @@ void AegisManager::deleteInstance() { m_instance.reset(nullptr); }
 
 AegisManager::AegisManager()
     : m_server(new Server(this)),
-      m_sniffer(new Sniffer(this)),
       m_searcher(new Searcher(this)),
       m_serializer(new Serializer(Serializer::Format::Json, this)),
       m_command_executor(new CommandExecutor(this)) {
@@ -45,8 +44,6 @@ AegisManager::AegisManager()
 AegisManager::~AegisManager() = default;
 
 Server* AegisManager::getServer() const { return m_server; }
-
-Sniffer* AegisManager::getSniffer() const { return m_sniffer; }
 
 Searcher* AegisManager::getSearcher() const { return m_searcher; }
 

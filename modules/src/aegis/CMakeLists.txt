@@ -12,9 +12,9 @@ set(resource_root ${AEGIS_SOURCE_DIR}/modules/resource/aegis)
 set(sources
     ${source_root}/client.cpp
     ${source_root}/server.cpp
-    ${source_root}/sniffer.cpp
     ${source_root}/serializer.cpp
     ${source_root}/manager.cpp
+    ${source_root}/inject.cpp
     ${source_root}/command/children.cpp
     ${source_root}/command/command.cpp
     ${source_root}/command/dump_methods.cpp
@@ -26,18 +26,21 @@ set(sources
     ${source_root}/command/parent.cpp
     ${source_root}/command/record.cpp
     ${source_root}/command/set_property.cpp
+    ${source_root}/command/sniffer.cpp
     ${source_root}/search/searcher.cpp
     ${source_root}/search/strategy.cpp
     ${source_root}/search/query.cpp
     ${source_root}/record/recorder.cpp
     ${source_root}/record/strategy.cpp
-    ${source_root}/record/action.cpp)
+    ${source_root}/record/action.cpp
+    ${source_root}/sniff/sniffer.cpp
+    ${source_root}/sniff/widget_tooltip.cpp
+    ${source_root}/sniff/widget_marker.cpp)
 
 set(includes
     ${include_root}/export.h
     ${include_root}/client.h
     ${include_root}/server.h
-    ${include_root}/sniffer.h
     ${include_root}/serializer.h
     ${include_root}/response.h
     ${include_root}/manager.h
@@ -52,12 +55,16 @@ set(includes
     ${include_root}/command/parent.h
     ${include_root}/command/record.h
     ${include_root}/command/set_property.h
+    ${include_root}/command/sniffer.h
     ${include_root}/search/searcher.h
     ${include_root}/search/strategy.h
     ${include_root}/search/query.h
     ${include_root}/record/recorder.h
     ${include_root}/record/strategy.h
-    ${include_root}/record/action.h)
+    ${include_root}/record/action.h
+    ${include_root}/sniff/sniffer.h
+    ${include_root}/sniff/widget_tooltip.h
+    ${include_root}/sniff/widget_marker.h)
 
 set(resources ${resource_root}/aegis.qrc)
 # ----------------------------------------------------------------------- #

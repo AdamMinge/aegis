@@ -1,6 +1,8 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
     <file>icons/attach_to_process.png</file>
-    <file>icons/run_and_attach.png</file>
+    <file>icons/start_new_process.png</file>
+    <file>icons/arrow_left.png</file>
+    <file>icons/refresh.png</file>
 </qresource>
 </RCC>

@@ -1,11 +1,11 @@
-from .attach_to_process import AttachToProcessPage
-from .client import ClientPage
-from .run_and_attach import RunAndAttachPage
-from .select_attach_strategy import SelectAttachStrategyPage
+from .attach_to_process import AttachToProcess
+from .client_editor import ClientEditor
+from .injection_mode_selector import InjectionModeSelector
+from .start_new_process import StartNewProcess
 
 __all__ = [
-    "AttachToProcessPage",
-    "ClientPage",
-    "RunAndAttachPage",
-    "SelectAttachStrategyPage",
+    "AttachToProcess",
+    "ClientEditor",
+    "InjectionModeSelector",
+    "StartNewProcess",
 ]

@@ -1,0 +1,35 @@
+[app]
+title = Aegis Client
+project_dir = .
+input_file = @CMAKE_CURRENT_SOURCE_DIR@/main.py
+exec_directory = @CMAKE_CURRENT_BINARY_DIR@/
+project_file = 
+icon =
+
+[python]
+python_path = 
+packages = nuitka==1.8.0,ordered_set,zstandard
+android_packages = buildozer==1.5.0,cython==0.29.33
+
+[qt]
+qml_files = 
+excluded_qml_plugins = 
+
+[android]
+wheel_pyside = 
+wheel_shiboken = 
+plugins = platforms_qtforandroid
+
+[nuitka]
+extra_args = --quiet --noinclude-qt-translations
+
+[buildozer]
+mode = debug
+recipe_dir = 
+jars_dir = 
+ndk_path = 
+sdk_path = 
+modules = 
+local_libs = plugins_platforms_qtforandroid
+arch = 
+

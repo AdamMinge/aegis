@@ -10,6 +10,6 @@ set(resource_root ${AEGIS_SOURCE_DIR}/apps/resource/aegis_client)
 # ----------------------------------------------------------------------- #
 # -------------------------------- Setup VENV --------------------------- #
 # ----------------------------------------------------------------------- #
-aegis_add_python_app(aegis_client SOURCES ${source_root} QRC
+aegis_add_python_app(aegis_client SOURCE ${source_root} QRC
                      ${resource_root}/aegis_client.qrc)
 # ----------------------------------------------------------------------- #

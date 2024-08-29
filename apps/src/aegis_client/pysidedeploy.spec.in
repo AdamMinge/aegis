@@ -1,7 +1,7 @@
 [app]
 title = Aegis Client
 project_dir = .
-input_file = @CMAKE_CURRENT_SOURCE_DIR@/main.py
+input_file = @CMAKE_CURRENT_SOURCE_DIR@/aegis_client/main.py
 exec_directory = @CMAKE_CURRENT_BINARY_DIR@/
 project_file = 
 icon =

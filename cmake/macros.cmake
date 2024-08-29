@@ -487,8 +487,7 @@ endfunction()
 # -------------- Define a macro that helps add python venv -------------- #
 # ----------------------------------------------------------------------- #
 macro(_aegis_create_python_venv)
-  cmake_parse_arguments(THIS "" "VENV;REQUIREMENTS;WORKING_DIRECTORY" ""
-                        ${ARGN})
+  cmake_parse_arguments(THIS "" "VENV;WORKING_DIRECTORY" "" ${ARGN})
   if(NOT "${THIS_UNPARSED_ARGUMENTS}" STREQUAL "")
     message(
       FATAL_ERROR
@@ -508,15 +507,25 @@ macro(_aegis_create_python_venv)
 
   execute_process(COMMAND ${Python3_EXECUTABLE} "-m" "pip" "install" "--upgrade"
                           "pip" WORKING_DIRECTORY ${THIS_WORKING_DIRECTORY})
+
+  execute_process(COMMAND ${Python3_EXECUTABLE} "-m" "pip" "install" "poetry"
+                  WORKING_DIRECTORY ${THIS_WORKING_DIRECTORY})
+
+  if(AEGIS_OS_WINDOWS)
+    set(poetry ${venv_path}/Scripts/poetry.exe)
+  else()
+    set(poetry ${venv_path}/bin/poetry)
+  endif()
+
   execute_process(
-    COMMAND ${Python3_EXECUTABLE} "-m" "pip" "install" "-r" ${THIS_REQUIREMENTS}
+    COMMAND ${CMAKE_COMMAND} -E env VIRTUAL_ENV=${venv_path} ${poetry} "install"
     WORKING_DIRECTORY ${THIS_WORKING_DIRECTORY})
 endmacro()
 # ----------------------------------------------------------------------- #
 # -------------- Define a macro that helps add python module ------------ #
 # ----------------------------------------------------------------------- #
 macro(aegis_add_python_module target)
-  cmake_parse_arguments(THIS "" "SOURCES" "" ${ARGN})
+  cmake_parse_arguments(THIS "" "" "" ${ARGN})
   if(NOT "${THIS_UNPARSED_ARGUMENTS}" STREQUAL "")
     message(
       FATAL_ERROR
@@ -526,15 +535,15 @@ macro(aegis_add_python_module target)
 
   set(venv_path ${CMAKE_CURRENT_BINARY_DIR}/venv)
 
-  _aegis_create_python_venv(
-    VENV ${venv_path} REQUIREMENTS ${THIS_SOURCES}/requirements.txt
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+  _aegis_create_python_venv(VENV ${venv_path} WORKING_DIRECTORY
+                            ${CMAKE_CURRENT_SOURCE_DIR})
+
 endmacro()
 # ----------------------------------------------------------------------- #
 # --------------- Define a macro that helps add python app -------------- #
 # ----------------------------------------------------------------------- #
 macro(aegis_add_python_app target)
-  cmake_parse_arguments(THIS "" "SOURCES;QRC" "" ${ARGN})
+  cmake_parse_arguments(THIS "" "SOURCE;QRC" "" ${ARGN})
   if(NOT "${THIS_UNPARSED_ARGUMENTS}" STREQUAL "")
     message(
       FATAL_ERROR
@@ -544,9 +553,8 @@ macro(aegis_add_python_app target)
 
   set(venv_path ${CMAKE_CURRENT_BINARY_DIR}/venv)
 
-  _aegis_create_python_venv(
-    VENV ${venv_path} REQUIREMENTS ${THIS_SOURCES}/requirements.txt
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+  _aegis_create_python_venv(VENV ${venv_path} WORKING_DIRECTORY
+                            ${CMAKE_CURRENT_SOURCE_DIR})
 
   if(AEGIS_OS_WINDOWS)
     set(pyside6_rcc ${venv_path}/Scripts/pyside6-rcc.exe)
@@ -559,12 +567,12 @@ macro(aegis_add_python_app target)
   add_custom_target(
     ${target}_build_rcc
     COMMAND ${CMAKE_COMMAND} -E env VIRTUAL_ENV=${venv_path} ${pyside6_rcc}
-            ${THIS_QRC} -o ${source_root}/__generated__/rcc.py
+            ${THIS_QRC} -o ${THIS_SOURCE}/${target}/__generated__/rcc.py
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Build ${target} resources")
 
-  configure_file(${source_root}/pysidedeploy.spec.in
-                 ${source_root}/__generated__/pysidedeploy.spec)
+  configure_file(${THIS_SOURCE}/pysidedeploy.spec.in
+                 ${THIS_SOURCE}/${target}/__generated__/pysidedeploy.spec)
 
   add_custom_target(
     ${target}_setup ALL
@@ -575,7 +583,7 @@ macro(aegis_add_python_app target)
   add_custom_target(
     ${target}_deploy
     COMMAND ${CMAKE_COMMAND} -E env VIRTUAL_ENV=${venv_path} ${pyside6_deploy}
-            -c ${source_root}/__generated__/pysidedeploy.spec
+            -c ${THIS_SOURCE}/${target}/__generated__/pysidedeploy.spec
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Deploing ${target}")
 

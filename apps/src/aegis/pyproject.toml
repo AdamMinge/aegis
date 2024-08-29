@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "Aegis"
+version = "0.1.0"
+description = ""
+authors = ["Adam Minge <minge.adam@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.10, <3.13"
+pyside6 = "^6.6"
+pyinjector = "^1.3"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

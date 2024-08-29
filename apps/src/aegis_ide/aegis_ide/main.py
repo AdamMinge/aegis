@@ -4,6 +4,8 @@ from __generated__ import rcc
 
 from application import Application, MainWindow
 
+from aegis import Client
+
 
 def main():
     app = Application(sys.argv)

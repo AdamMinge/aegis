@@ -6,8 +6,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QFileDialog,
 )
-from PySide6.QtCore import Signal, Slot, QSize
-from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtCore import Signal, Slot
 
 from .page_with_back import PageWithBack
 
@@ -46,10 +45,6 @@ class StartNewProcess(PageWithBack):
         self.__application_path.textChanged.connect(self.__handle_application_changed)
         self.__browse_application.pressed.connect(self.__handle_browse_pressed)
         self.__attach_button.pressed.connect(self.__handle_attach_pressed)
-
-    @Slot(str)
-    def __handle_back_pressed(self):
-        self.back_clicked.emit()
 
     @Slot()
     def __handle_application_changed(self):

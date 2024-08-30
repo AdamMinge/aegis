@@ -582,9 +582,11 @@ macro(aegis_add_python_app target)
 
   add_custom_target(
     ${target}_deploy
-    COMMAND ${CMAKE_COMMAND} -E env VIRTUAL_ENV=${venv_path} ${pyside6_deploy}
-            -c ${THIS_SOURCE}/${target}/__generated__/pysidedeploy.spec
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND
+      ${CMAKE_COMMAND} -E env VIRTUAL_ENV=${venv_path} ${pyside6_deploy}
+      ${THIS_SOURCE}/${target}/main.py -c
+      ${THIS_SOURCE}/${target}/__generated__/pysidedeploy.spec
+    WORKING_DIRECTORY ${THIS_SOURCE}/${target}
     COMMENT "Deploing ${target}")
 
   install(

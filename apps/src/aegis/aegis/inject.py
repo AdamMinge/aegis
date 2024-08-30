@@ -1,7 +1,7 @@
 import subprocess
 import pyinjector
 
-from client import Client
+from aegis.client import Client
 
 
 def attach_to_process(pid: int, library: str) -> Client | None:

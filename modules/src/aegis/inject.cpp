@@ -8,31 +8,17 @@ void startServer() {
   auto valid_port = false;
   auto valid_host = false;
 
-  const auto str_host = qEnvironmentVariable("AEGIS_HOST", "0.0.0.0");
-  const auto str_port = qEnvironmentVariable("AEGIS_PORT", "4322");
+  const auto str_host = qEnvironmentVariable("AEGIS_SERVER_HOST", "0.0.0.0");
+  const auto str_port = qEnvironmentVariable("AEGIS_SERVER_PORT", "5010");
 
   const auto host = QHostAddress(str_host);
   valid_host = !host.isNull();
 
   const auto port = str_port.toUInt(&valid_port);
 
-  if (!valid_host) {
-    qDebug() << QLatin1String(
-                    "AEGIS_HOST environment variable is incorrect: %1")
-                    .arg(str_host);
-    return;
-  }
+  if (!valid_host) return;
+  if (!valid_port) return;
 
-  if (!valid_port) {
-    qDebug() << QLatin1String(
-                    "AEGIS_PORT environment variable is incorrect: %1")
-                    .arg(str_port);
-    return;
-  }
-
-  qDebug() << QLatin1String("Aegis server start listen(%1, %2)")
-                  .arg(host.toString())
-                  .arg(port);
   aegis::server()->listen(host, port);
 }
 

@@ -1,5 +1,6 @@
 import enum
 import psutil
+import typing
 import dataclasses
 
 from PySide6.QtWidgets import (
@@ -13,7 +14,10 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Signal, Slot, QSize, QSortFilterProxyModel, Qt, QModelIndex
 from PySide6.QtGui import QIcon, QPixmap, QStandardItemModel, QStandardItem
+from PySide6.QtNetwork import QHostAddress
 
+from aegis import Client, ClientException
+from aegis_client.pages import AEGIS_CLIENT_PORT, AEGIS_CLIENT_DLL
 from aegis_client.pages.page_with_back import PageWithBack
 
 
@@ -84,6 +88,18 @@ class ProcessTable(QTableView):
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 continue
 
+    def current(self) -> typing.Optional[Process]:
+        indexes = self.selectionModel().selectedIndexes()
+        if len(indexes) == 0:
+            return None
+
+        index = indexes[0]
+        name = str(self.__model.item(index.row(), ProcessTable.Columns.Name).text())
+        id = int(self.__model.item(index.row(), ProcessTable.Columns.ID).text())
+        username = str(self.__model.item(index.row(), ProcessTable.Columns.User).text())
+
+        return Process(name, id, username)
+
     def __append_process(self, process: Process):
         name = QStandardItem(process.name)
         id = QStandardItem(str(process.id))
@@ -97,21 +113,11 @@ class ProcessTable(QTableView):
 
     @Slot()
     def __handle_current_changed(self):
-        indexes = self.selectionModel().selectedIndexes()
-        if len(indexes) == 0:
-            self.current_changed.emit(None)
-            return
-
-        index = indexes[0]
-        name = str(self.__model.item(index.row(), ProcessTable.Columns.Name).text())
-        id = int(self.__model.item(index.row(), ProcessTable.Columns.ID).text())
-        username = str(self.__model.item(index.row(), ProcessTable.Columns.User).text())
-
-        self.current_changed.emit(Process(name, id, username))
+        self.current_changed.emit(self.current())
 
 
 class AttachToProcess(PageWithBack):
-    attached = Signal(int)
+    attached = Signal(Client)
     back_clicked = Signal()
 
     def __init__(self):
@@ -158,8 +164,8 @@ class AttachToProcess(PageWithBack):
     def __handle_refresh_pressed(self):
         self.__process_table.refresh()
 
-    @Slot(Process)
-    def __handle_process_changed(self, process: Process):
+    @Slot(Process, type(None))
+    def __handle_process_changed(self, process: typing.Optional[Process]):
         self.__attach_button.setDisabled(process == None)
 
     @Slot()
@@ -169,4 +175,18 @@ class AttachToProcess(PageWithBack):
 
     @Slot()
     def __handle_attach_pressed(self):
-        pass
+        process = self.__process_table.current()
+        assert process != None
+
+        try:
+            client = Client.attach_to_existing_process(
+                QHostAddress(QHostAddress.SpecialAddress.LocalHost),
+                AEGIS_CLIENT_PORT,
+                process.id,
+                AEGIS_CLIENT_DLL,
+            )
+        except ClientException as e:
+            print(str(e))
+            return
+
+        self.attached.emit(client)

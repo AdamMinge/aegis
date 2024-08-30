@@ -1,5 +1,5 @@
-#ifndef AEGIS_COMMAND_INVOKE_METHOD_H
-#define AEGIS_COMMAND_INVOKE_METHOD_H
+#ifndef AEGIS_COMMAND_SNIFFER_H
+#define AEGIS_COMMAND_SNIFFER_H
 
 /* ----------------------------------- Local -------------------------------- */
 #include "aegis/command/command.h"
@@ -36,4 +36,4 @@ class LIB_AEGIS_API SnifferCommand : public Command {
 
 }  // namespace aegis
 
-#endif  // AEGIS_COMMAND_INVOKE_METHOD_H
+#endif  // AEGIS_COMMAND_SNIFFER_H

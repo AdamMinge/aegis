@@ -7,7 +7,10 @@ from PySide6.QtWidgets import (
     QFileDialog,
 )
 from PySide6.QtCore import Signal, Slot
+from PySide6.QtNetwork import QHostAddress
 
+from aegis import Client, ClientException
+from aegis_client.pages import AEGIS_CLIENT_PORT, AEGIS_CLIENT_DLL
 from aegis_client.pages.page_with_back import PageWithBack
 
 
@@ -69,4 +72,15 @@ class StartNewProcess(PageWithBack):
 
     @Slot()
     def __handle_attach_pressed(self):
-        pass
+        try:
+            client = Client.attach_to_new_process(
+                QHostAddress(QHostAddress.SpecialAddress.LocalHost),
+                AEGIS_CLIENT_PORT,
+                self.__application_path.text(),
+                AEGIS_CLIENT_DLL,
+            )
+        except ClientException as e:
+            print(str(e))
+            return
+
+        self.attached.emit(client)

@@ -10,6 +10,7 @@
 #include "aegis/command/parent.h"
 #include "aegis/command/record.h"
 #include "aegis/command/set_property.h"
+#include "aegis/command/sniffer.h"
 /* -------------------------------------------------------------------------- */
 
 namespace aegis {
@@ -39,6 +40,7 @@ AegisManager::AegisManager()
   m_command_executor->addCommand(std::make_unique<ParentCommand>());
   m_command_executor->addCommand(std::make_unique<RecordCommand>());
   m_command_executor->addCommand(std::make_unique<SetPropertyCommand>());
+  m_command_executor->addCommand(std::make_unique<SnifferCommand>());
 }
 
 AegisManager::~AegisManager() = default;

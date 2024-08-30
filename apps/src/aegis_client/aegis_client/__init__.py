@@ -1,3 +1,6 @@
-import os, sys
+from aegis_client.application import Application, MainWindow
 
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
+__all__ = [
+    "Application",
+    "MainWindow",
+]

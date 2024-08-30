@@ -1,8 +1,7 @@
 import sys
 
-from __generated__ import rcc
-
-from application import Application, MainWindow
+from aegis_client.__generated__ import rcc
+from aegis_client.application import Application, MainWindow
 
 
 def main():

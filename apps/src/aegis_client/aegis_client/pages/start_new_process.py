@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Signal, Slot
 
-from .page_with_back import PageWithBack
+from aegis_client.pages.page_with_back import PageWithBack
 
 
 class StartNewProcess(PageWithBack):

@@ -14,7 +14,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Signal, Slot, QSize, QSortFilterProxyModel, Qt, QModelIndex
 from PySide6.QtGui import QIcon, QPixmap, QStandardItemModel, QStandardItem
 
-from .page_with_back import PageWithBack
+from aegis_client.pages.page_with_back import PageWithBack
 
 
 @dataclasses.dataclass

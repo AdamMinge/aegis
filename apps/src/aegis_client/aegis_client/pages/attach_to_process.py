@@ -17,8 +17,8 @@ from PySide6.QtGui import QIcon, QPixmap, QStandardItemModel, QStandardItem
 from PySide6.QtNetwork import QHostAddress
 
 from aegis import Client, ClientException
-from aegis_client.pages import AEGIS_CLIENT_PORT, AEGIS_CLIENT_DLL
-from aegis_client.pages.page_with_back import PageWithBack
+from aegis_client import AEGIS_CLIENT_PORT, AEGIS_CLIENT_DLL
+from aegis_client.pages.page import PageWithBack
 
 
 @dataclasses.dataclass
@@ -123,8 +123,6 @@ class AttachToProcess(PageWithBack):
     def __init__(self):
         super().__init__()
         self.__init_ui()
-        self.__handle_refresh_pressed()
-        self.__handle_process_changed(None)
 
     def __init_ui(self):
         self.__filter_processes = QLineEdit(self)
@@ -160,6 +158,11 @@ class AttachToProcess(PageWithBack):
         self.__refresh_button.pressed.connect(self.__handle_refresh_pressed)
         self.__attach_button.pressed.connect(self.__handle_attach_pressed)
 
+    def setAsCurrent(self, **kwargs):
+        self.__filter_processes.clear()
+        self.__process_table.refresh()
+        self.__handle_process_changed(None)
+
     @Slot()
     def __handle_refresh_pressed(self):
         self.__process_table.refresh()
@@ -186,7 +189,6 @@ class AttachToProcess(PageWithBack):
                 AEGIS_CLIENT_DLL,
             )
         except ClientException as e:
-            print(str(e))
             return
 
         self.attached.emit(client)

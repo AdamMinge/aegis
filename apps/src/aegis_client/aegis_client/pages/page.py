@@ -9,7 +9,15 @@ from PySide6.QtCore import Signal, Slot, QSize
 from PySide6.QtGui import QIcon, QPixmap
 
 
-class PageWithBack(QWidget):
+class Page(QWidget):
+    def __init__(self):
+        super().__init__()
+
+    def setAsCurrent(self, **kwargs):
+        pass
+
+
+class PageWithBack(Page):
     back_clicked = Signal()
 
     def __init__(self):

@@ -2,13 +2,14 @@ from PySide6.QtWidgets import (
     QApplication,
     QMainWindow,
     QWidget,
-    QStackedWidget,
     QVBoxLayout,
     QSizePolicy,
 )
 from PySide6.QtCore import Slot
 
-from pages import (
+from aegis import Client
+from aegis_client.pages import (
+    StackedPage,
     AttachToProcess,
     ClientEditor,
     InjectionModeSelector,
@@ -35,7 +36,7 @@ class MainWindow(QMainWindow):
         self.__central_widget = QWidget()
         self.setCentralWidget(self.__central_widget)
 
-        self.__stack = QStackedWidget()
+        self.__stack = StackedPage()
         self.__layout = QVBoxLayout(self.__central_widget)
         self.__layout.addWidget(self.__stack)
 
@@ -75,8 +76,8 @@ class MainWindow(QMainWindow):
             self.__stack.setCurrentWidget(self.__start_new_process_page)
 
     @Slot(int)
-    def __handle_attached_process(self, pid: int):
-        self.__stack.setCurrentWidget(self.__client_editor_page)
+    def __handle_attached_process(self, client: Client):
+        self.__stack.setCurrentWidget(self.__client_editor_page, client=client)
 
     @Slot()
     def __handle_detached_process(self):

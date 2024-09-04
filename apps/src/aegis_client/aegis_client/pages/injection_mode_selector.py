@@ -1,11 +1,13 @@
 import enum
 
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QToolButton
+from PySide6.QtWidgets import QHBoxLayout, QToolButton
 from PySide6.QtCore import Signal, Slot, QSize
 from PySide6.QtGui import QIcon, QPixmap
 
+from aegis_client.pages.page import Page
 
-class InjectionModeSelector(QWidget):
+
+class InjectionModeSelector(Page):
     class Mode(enum.Enum):
         AttachToProcess = 1
         StartNewProcess = 2

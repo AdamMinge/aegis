@@ -10,8 +10,8 @@ from PySide6.QtCore import Signal, Slot
 from PySide6.QtNetwork import QHostAddress
 
 from aegis import Client, ClientException
-from aegis_client.pages import AEGIS_CLIENT_PORT, AEGIS_CLIENT_DLL
-from aegis_client.pages.page_with_back import PageWithBack
+from aegis_client import AEGIS_CLIENT_PORT, AEGIS_CLIENT_DLL
+from aegis_client.pages.page import PageWithBack
 
 
 class StartNewProcess(PageWithBack):
@@ -21,7 +21,6 @@ class StartNewProcess(PageWithBack):
     def __init__(self):
         super().__init__()
         self.__init_ui()
-        self.__handle_application_changed()
 
     def __init_ui(self):
         self.__application_path = QLineEdit(self)
@@ -48,6 +47,10 @@ class StartNewProcess(PageWithBack):
         self.__application_path.textChanged.connect(self.__handle_application_changed)
         self.__browse_application.pressed.connect(self.__handle_browse_pressed)
         self.__attach_button.pressed.connect(self.__handle_attach_pressed)
+
+    def setAsCurrent(self, **kwargs):
+        self.__application_path.clear()
+        self.__handle_application_changed()
 
     @Slot()
     def __handle_application_changed(self):
@@ -80,7 +83,6 @@ class StartNewProcess(PageWithBack):
                 AEGIS_CLIENT_DLL,
             )
         except ClientException as e:
-            print(str(e))
             return
 
         self.attached.emit(client)

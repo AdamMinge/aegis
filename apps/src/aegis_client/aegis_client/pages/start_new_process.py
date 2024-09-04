@@ -15,7 +15,7 @@ from aegis_client.pages.page import PageWithBack
 
 
 class StartNewProcess(PageWithBack):
-    attached = Signal(int)
+    attached = Signal(Client)
     back_clicked = Signal()
 
     def __init__(self):

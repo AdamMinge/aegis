@@ -1,6 +1,7 @@
 import subprocess
 import pyinjector
 import time
+import os
 
 from PySide6.QtNetwork import QTcpSocket, QHostAddress
 
@@ -35,7 +36,7 @@ class Client(QTcpSocket):
         host: QHostAddress, port: int, app: str, library: str
     ) -> "Client":
         try:
-            process = subprocess.Popen([app])
+            process = subprocess.Popen([app], env=os.environ)
             time.sleep(1)
         except OSError as e:
             raise ClientException(str(e))

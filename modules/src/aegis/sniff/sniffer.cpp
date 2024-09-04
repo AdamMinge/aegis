@@ -26,10 +26,15 @@ void Sniffer::start() {
   if (!m_sniffing) {
     m_sniffing = true;
 
-    qApp->installEventFilter(this);
+    QMetaObject::invokeMethod(
+        qApp,
+        [this]() {
+          qApp->installEventFilter(this);
 
-    m_tooltip->show();
-    m_marker->show();
+          m_tooltip->show();
+          m_marker->show();
+        },
+        Qt::QueuedConnection);
   }
 }
 
@@ -37,10 +42,15 @@ void Sniffer::stop() {
   if (m_sniffing) {
     m_sniffing = false;
 
-    qApp->removeEventFilter(this);
+    QMetaObject::invokeMethod(
+        qApp,
+        [this]() {
+          qApp->removeEventFilter(this);
 
-    m_tooltip->hide();
-    m_marker->hide();
+          m_tooltip->hide();
+          m_marker->hide();
+        },
+        Qt::QueuedConnection);
   }
 }
 

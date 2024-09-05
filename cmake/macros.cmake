@@ -526,7 +526,12 @@ macro(_aegis_create_python_venv)
     unset(${Python_EXECUTABLE})
   endif()
 
-  set(Python_EXECUTABLE "${THIS_VENV}/bin/python")
+  if(AEGIS_OS_WINDOWS)
+    set(Python_EXECUTABLE ${THIS_VENV}/Scripts/python)
+  else()
+    set(Python_EXECUTABLE ${THIS_VENV}/bin/python)
+  endif()
+
   find_package(Python 3.10 REQUIRED)
 
   execute_process(COMMAND ${Python_EXECUTABLE} "-m" "pip" "install" "--upgrade"

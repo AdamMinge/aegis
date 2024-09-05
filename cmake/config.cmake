@@ -31,13 +31,11 @@ aegis_set_option(
 aegis_set_option(
   AEGIS_DEPRECATED_WARNINGS TRUE BOOL
   "FALSE to disable deprecated warning, TRUE to enable depracated warning")
-aegis_set_option(AEGIS_BUILD_TEST TRUE BOOL
-                 "TRUE to build the aegis-tests, FALSE to ignore them")
 aegis_set_option(AEGIS_BUILD_DOCUMENTATION FALSE BOOL
                  "TRUE to build the documentation, FALSE to ignore them")
-aegis_set_option(AEGIS_ENABLE_CLANG_TIDY TRUE BOOL
+aegis_set_option(AEGIS_ENABLE_CLANG_TIDY FALSE BOOL
                  "TRUE to enable clang tidy, FALSE to ignore them")
-aegis_set_option(AEGIS_ENABLE_CPPCHECK TRUE BOOL
+aegis_set_option(AEGIS_ENABLE_CPPCHECK FALSE BOOL
                  "TRUE to enable cppcheck, FALSE to ignore them")
 # ----------------------------------------------------------------------- #
 # -------------------------- Set other options -------------------------- #

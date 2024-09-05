@@ -37,7 +37,7 @@ class Client(QTcpSocket):
     ) -> "Client":
         try:
             process = subprocess.Popen([app], env=os.environ)
-            time.sleep(1)
+            time.sleep(0.5)
         except OSError as e:
             raise ClientException(str(e))
 

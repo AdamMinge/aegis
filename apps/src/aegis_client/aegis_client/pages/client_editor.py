@@ -99,7 +99,7 @@ class ClientEditor(Page):
     @Slot()
     def __handle_server_response(self):
         response = self.__client.readAll().data().decode("utf-8")  # type: ignore
-        self.__console_widget.write(response, ConsoleWidget.Level.Warning)
+        self.__console_widget.write(response, ConsoleWidget.Level.Info)
 
     @Slot()
     def __handle_special_command(self, command: str) -> bool:
@@ -113,7 +113,7 @@ class ClientEditor(Page):
         if self.__handle_special_command(command):
             return
 
-        self.__console_widget.write(command, ConsoleWidget.Level.Warning)
+        self.__console_widget.write(command, ConsoleWidget.Level.Info)
         self.__client.write(command.encode("utf-8"))
 
     @Slot()

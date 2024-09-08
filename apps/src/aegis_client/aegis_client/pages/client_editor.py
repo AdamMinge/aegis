@@ -10,9 +10,10 @@ from aegis_client.pages.page import Page
 
 class ConsoleWidget(QWidget):
     class Level(enum.Enum):
-        Info = 0
-        Warning = 1
-        Error = 2
+        Request = 0
+        Response = 1
+        Warning = 2
+        Error = 3
 
     command_entered = Signal(str)
 
@@ -44,6 +45,8 @@ class ConsoleWidget(QWidget):
             color = QColor("red")
         elif level == ConsoleWidget.Level.Warning:
             color = QColor("yellow")
+        elif level == ConsoleWidget.Level.Response:
+            color = QColor("green")
         else:
             color = QColor("white")
 
@@ -56,6 +59,7 @@ class ConsoleWidget(QWidget):
 
     def clear(self):
         self.__console_output.clear()
+        self.__command_line.clear()
 
     @Slot()
     def __handle_command_entered(self):
@@ -89,17 +93,26 @@ class ClientEditor(Page):
         self.__predefined_commands = {}
         self.__predefined_commands["clear"] = self.__clear_console_command
 
-    def setAsCurrent(self, **kwargs):
-        self.__client: Client = kwargs["client"]
-        self.__client.readyRead.connect(self.__handle_server_response)
+    def activate_page(self, **kwargs):
+        self.__set_client(kwargs["client"])
 
+    def deactivate_page(self):
+        self.__clear_console_command()
+
+    @Slot()
+    def __set_client(self, client: Client):
+        self.__client = client
+        self.__client.readyRead.connect(self.__handle_server_response)
+        self.__client.disconnected.connect(self.__handle_close)
+
+    @Slot()
     def __clear_console_command(self):
         self.__console_widget.clear()
 
     @Slot()
     def __handle_server_response(self):
         response = self.__client.readAll().data().decode("utf-8")  # type: ignore
-        self.__console_widget.write(response, ConsoleWidget.Level.Info)
+        self.__console_widget.write(response, ConsoleWidget.Level.Response)
 
     @Slot()
     def __handle_special_command(self, command: str) -> bool:
@@ -113,9 +126,10 @@ class ClientEditor(Page):
         if self.__handle_special_command(command):
             return
 
-        self.__console_widget.write(command, ConsoleWidget.Level.Info)
+        self.__console_widget.write(command, ConsoleWidget.Level.Request)
         self.__client.write(command.encode("utf-8"))
 
     @Slot()
     def __handle_close(self):
-        pass
+        self.__client.close()
+        self.detached.emit()

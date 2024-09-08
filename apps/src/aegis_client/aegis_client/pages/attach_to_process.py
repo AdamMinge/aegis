@@ -158,7 +158,11 @@ class AttachToProcess(PageWithBack):
         self.__refresh_button.pressed.connect(self.__handle_refresh_pressed)
         self.__attach_button.pressed.connect(self.__handle_attach_pressed)
 
-    def setAsCurrent(self, **kwargs):
+    def deactivate_page(self):
+        self.__clear()
+
+    @Slot()
+    def __clear(self):
         self.__filter_processes.clear()
         self.__process_table.refresh()
         self.__handle_process_changed(None)

@@ -13,7 +13,10 @@ class Page(QWidget):
     def __init__(self):
         super().__init__()
 
-    def setAsCurrent(self, **kwargs):
+    def activate_page(self, **kwargs):
+        pass
+
+    def deactivate_page(self):
         pass
 
 

@@ -48,7 +48,11 @@ class StartNewProcess(PageWithBack):
         self.__browse_application.pressed.connect(self.__handle_browse_pressed)
         self.__attach_button.pressed.connect(self.__handle_attach_pressed)
 
-    def setAsCurrent(self, **kwargs):
+    def deactivate_page(self):
+        self.__clear()
+
+    @Slot()
+    def __clear(self):
         self.__application_path.clear()
         self.__handle_application_changed()
 

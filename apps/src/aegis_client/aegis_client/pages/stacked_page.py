@@ -10,5 +10,11 @@ class StackedPage(QStackedWidget):
         super().__init__()
 
     def setCurrentWidget(self, page: Page, **kwargs):
+        current_page: Page = super().currentWidget()  # type: ignore
+        if current_page:
+            current_page.deactivate_page()
+
         super().setCurrentWidget(page)
-        page.setAsCurrent(**kwargs)
+
+        if page:
+            page.activate_page(**kwargs)

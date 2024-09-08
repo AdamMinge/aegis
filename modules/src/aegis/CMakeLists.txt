@@ -38,6 +38,7 @@ set(sources
     ${source_root}/sniff/widget_marker.cpp)
 
 set(includes
+    ${include_root}/config.h
     ${include_root}/export.h
     ${include_root}/client.h
     ${include_root}/server.h
@@ -76,6 +77,8 @@ set(CMAKE_AUTORCC ON)
 # ----------------------------------------------------------------------- #
 # -------------------------- Find external libraries -------------------- #
 # ----------------------------------------------------------------------- #
+set(QTILS_STATIC_LIBRARIES TRUE)
+
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network)
 find_package(qtils REQUIRED COMPONENTS serializer dpi)
 # ----------------------------------------------------------------------- #

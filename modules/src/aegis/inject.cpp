@@ -1,8 +1,8 @@
 
 #include <QCoreApplication>
 
+#include "aegis/config.h"
 #include "aegis/manager.h"
-#include "config.h"
 
 void startServer() {
   auto valid_port = false;

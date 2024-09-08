@@ -17,8 +17,16 @@ namespace aegis {
 Sniffer::Sniffer(QObject *parent)
     : QObject(parent),
       m_sniffing(false),
-      m_tooltip(new SnifferWidgetTooltip),
-      m_marker(new SnifferWidgetMarker) {}
+      m_tooltip(nullptr),
+      m_marker(nullptr) {
+  QMetaObject::invokeMethod(
+      qApp,
+      [this]() {
+        m_tooltip.reset(new SnifferWidgetTooltip);
+        m_marker.reset(new SnifferWidgetMarker);
+      },
+      Qt::QueuedConnection);
+}
 
 Sniffer::~Sniffer() = default;
 

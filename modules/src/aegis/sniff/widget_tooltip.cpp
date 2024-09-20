@@ -1,7 +1,7 @@
 /* ----------------------------------- Local -------------------------------- */
 #include "aegis/sniff/widget_tooltip.h"
 
-#include "aegis/manager.h"
+#include "aegis/module.h"
 /* ------------------------------------ Qt ---------------------------------- */
 #include <QVBoxLayout>
 /* -------------------------------------------------------------------------- */
@@ -24,7 +24,7 @@ void SnifferWidgetTooltip::setWidget(QWidget *widget) {
     m_widget = widget;
 
     if (m_widget) {
-      const auto id = m_widget ? searcher()->getQuery(m_widget).toString() : "";
+      const auto id = m_widget ? searcher().getQuery(m_widget).toString() : "";
       m_label->setText(id);
       show();
     } else {

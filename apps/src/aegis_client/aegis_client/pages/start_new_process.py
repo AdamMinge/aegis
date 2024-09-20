@@ -87,6 +87,7 @@ class StartNewProcess(PageWithBack):
                 AEGIS_CLIENT_DLL,
             )
         except ClientException as e:
+            print(e)
             return
 
         self.attached.emit(client)

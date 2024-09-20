@@ -11,13 +11,9 @@
 
 namespace aegis {
 
-/* ----------------------------------- Searcher ----------------------------- */
+/* --------------------------------- Searcher -------------------------- */
 
-Searcher::Searcher(QObject* parent) : QObject(parent) {
-  m_search_strategies.emplace_back(std::make_unique<TypeSearch>());
-  m_search_strategies.emplace_back(std::make_unique<PropertiesSearch>());
-  m_search_strategies.emplace_back(std::make_unique<PathSearch>());
-}
+Searcher::Searcher() = default;
 
 Searcher::~Searcher() = default;
 
@@ -31,14 +27,18 @@ QList<QObject*> Searcher::getObjects(const ObjectQuery& query) const {
   return objects;
 }
 
-ObjectQuery Searcher::getQuery(QObject* object) const {
+ObjectQuery Searcher::getQuery(const QObject* object) const {
   auto query = QVariantMap{};
-  for (const auto& search_strategy : m_search_strategies) {
+  for (const auto& search_strategy : m_strategies) {
     const auto sub_query = search_strategy->createObjectQuery(object);
     query.insert(sub_query);
   }
 
   return ObjectQuery(query);
+}
+
+void Searcher::addStrategy(std::unique_ptr<SearchStrategy>&& strategy) {
+  m_strategies.emplace_back(std::move(strategy));
 }
 
 QList<QObject*> Searcher::findObjects(const ObjectQuery& query,
@@ -55,7 +55,7 @@ QList<QObject*> Searcher::findObjects(const ObjectQuery& query,
     objects.pop();
 
     const auto matches_query = std::all_of(
-        m_search_strategies.begin(), m_search_strategies.end(),
+        m_strategies.begin(), m_strategies.end(),
         [parent, &query](const auto& search_strategy) {
           return search_strategy->matchesObjectQuery(parent, query.m_data);
         });

@@ -1,7 +1,7 @@
 /* ----------------------------------- Local -------------------------------- */
 #include "aegis/record/strategy.h"
 
-#include "aegis/manager.h"
+#include "aegis/module.h"
 #include "aegis/record/action.h"
 /* ------------------------------------ Qt ---------------------------------- */
 #include <QAbstractButton>
@@ -67,7 +67,7 @@ void RecordStrategy::setWidget(QWidget *widget) {
 QWidget *RecordStrategy::getWidget() const { return m_widget; }
 
 ObjectQuery RecordStrategy::getWidgetAsQuery() const {
-  const auto object = searcher()->getQuery(getWidget());
+  const auto object = searcher().getQuery(getWidget());
   Q_ASSERT(object.isValid());
 
   return object;

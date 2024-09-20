@@ -17,9 +17,9 @@ class LIB_AEGIS_API SearchStrategy {
   virtual ~SearchStrategy();
 
   [[nodiscard]] virtual bool matchesObjectQuery(
-      QObject* object, const QVariantMap& query) const = 0;
+      const QObject* object, const QVariantMap& query) const = 0;
   [[nodiscard]] virtual QVariantMap createObjectQuery(
-      QObject* object) const = 0;
+      const QObject* object) const = 0;
 };
 
 /* -------------------------------- TypeSearch ------------------------------ */
@@ -33,8 +33,9 @@ class LIB_AEGIS_API TypeSearch : public SearchStrategy {
   ~TypeSearch() override;
 
   [[nodiscard]] bool matchesObjectQuery(
-      QObject* object, const QVariantMap& query) const override;
-  [[nodiscard]] QVariantMap createObjectQuery(QObject* object) const override;
+      const QObject* object, const QVariantMap& query) const override;
+  [[nodiscard]] QVariantMap createObjectQuery(
+      const QObject* object) const override;
 };
 
 /* ----------------------------- PropertiesSearch --------------------------- */
@@ -48,11 +49,12 @@ class LIB_AEGIS_API PropertiesSearch : public SearchStrategy {
   ~PropertiesSearch() override;
 
   [[nodiscard]] bool matchesObjectQuery(
-      QObject* object, const QVariantMap& query) const override;
-  [[nodiscard]] QVariantMap createObjectQuery(QObject* object) const override;
+      const QObject* object, const QVariantMap& query) const override;
+  [[nodiscard]] QVariantMap createObjectQuery(
+      const QObject* object) const override;
 
  private:
-  [[nodiscard]] static QSet<QString> getUsedProperties(QObject* object);
+  [[nodiscard]] static QSet<QString> getUsedProperties(const QObject* object);
   [[nodiscard]] static QMap<int, QSet<QString>> getTypeToProperties();
 };
 
@@ -67,11 +69,12 @@ class LIB_AEGIS_API PathSearch : public SearchStrategy {
   ~PathSearch() override;
 
   [[nodiscard]] bool matchesObjectQuery(
-      QObject* object, const QVariantMap& query) const override;
-  [[nodiscard]] QVariantMap createObjectQuery(QObject* object) const override;
+      const QObject* object, const QVariantMap& query) const override;
+  [[nodiscard]] QVariantMap createObjectQuery(
+      const QObject* object) const override;
 
  private:
-  [[nodiscard]] QString getPath(QObject* object) const;
+  [[nodiscard]] QString getPath(const QObject* object) const;
 };
 
 }  // namespace aegis

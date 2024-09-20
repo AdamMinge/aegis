@@ -35,7 +35,7 @@ TypeSearch::TypeSearch() = default;
 
 TypeSearch::~TypeSearch() = default;
 
-bool TypeSearch::matchesObjectQuery(QObject* object,
+bool TypeSearch::matchesObjectQuery(const QObject* object,
                                     const QVariantMap& query) const {
   if (query.contains(type_query)) {
     return object->metaObject()->className() == query[type_query];
@@ -44,7 +44,7 @@ bool TypeSearch::matchesObjectQuery(QObject* object,
   return true;
 }
 
-QVariantMap TypeSearch::createObjectQuery(QObject* object) const {
+QVariantMap TypeSearch::createObjectQuery(const QObject* object) const {
   auto query = QVariantMap{};
   query[type_query] = object->metaObject()->className();
 
@@ -57,7 +57,7 @@ PropertiesSearch::PropertiesSearch() = default;
 
 PropertiesSearch::~PropertiesSearch() = default;
 
-bool PropertiesSearch::matchesObjectQuery(QObject* object,
+bool PropertiesSearch::matchesObjectQuery(const QObject* object,
                                           const QVariantMap& query) const {
   if (query.contains(properties_query)) {
     const auto properties = query[properties_query].toMap();
@@ -72,7 +72,7 @@ bool PropertiesSearch::matchesObjectQuery(QObject* object,
   return true;
 }
 
-QVariantMap PropertiesSearch::createObjectQuery(QObject* object) const {
+QVariantMap PropertiesSearch::createObjectQuery(const QObject* object) const {
   auto query = QVariantMap{};
   auto properties = QVariantMap{};
 
@@ -89,7 +89,7 @@ QVariantMap PropertiesSearch::createObjectQuery(QObject* object) const {
   return query;
 }
 
-QSet<QString> PropertiesSearch::getUsedProperties(QObject* object) {
+QSet<QString> PropertiesSearch::getUsedProperties(const QObject* object) {
   static const auto type_to_properties = getTypeToProperties();
 
   auto used_properties = QSet<QString>{};
@@ -144,7 +144,7 @@ PathSearch::PathSearch() = default;
 
 PathSearch::~PathSearch() = default;
 
-bool PathSearch::matchesObjectQuery(QObject* object,
+bool PathSearch::matchesObjectQuery(const QObject* object,
                                     const QVariantMap& query) const {
   if (query.contains(path_query)) {
     return getPath(object).contains(query[path_query].toString());
@@ -153,14 +153,14 @@ bool PathSearch::matchesObjectQuery(QObject* object,
   return true;
 }
 
-QVariantMap PathSearch::createObjectQuery(QObject* object) const {
+QVariantMap PathSearch::createObjectQuery(const QObject* object) const {
   auto query = QVariantMap{};
   query[path_query] = getPath(object);
 
   return query;
 }
 
-QString PathSearch::getPath(QObject* object) const {
+QString PathSearch::getPath(const QObject* object) const {
   auto objects_path = QStringList{};
 
   while (object) {

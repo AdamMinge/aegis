@@ -1,5 +1,5 @@
-#ifndef AEGIS_SEARCH_SEARCHER_H
-#define AEGIS_SEARCH_SEARCHER_H
+#ifndef AEGIS_SEARCH_QUERY_H
+#define AEGIS_SEARCH_QUERY_H
 
 /* ------------------------------------ Qt ---------------------------------- */
 #include <QObject>
@@ -45,4 +45,4 @@ class LIB_AEGIS_API CommonQueries {
 
 }  // namespace aegis
 
-#endif  // AEGIS_SEARCH_SEARCHER_H
+#endif  // AEGIS_SEARCH_QUERY_H

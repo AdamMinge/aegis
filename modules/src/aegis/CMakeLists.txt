@@ -8,66 +8,48 @@ cmake_minimum_required(VERSION 3.11)
 set(source_root ${AEGIS_SOURCE_DIR}/modules/src/aegis)
 set(include_root ${AEGIS_SOURCE_DIR}/modules/include/aegis)
 set(resource_root ${AEGIS_SOURCE_DIR}/modules/resource/aegis)
+set(proto_root ${AEGIS_SOURCE_DIR}/proto)
 
 set(sources
-    ${source_root}/client.cpp
-    ${source_root}/server.cpp
-    ${source_root}/serializer.cpp
-    ${source_root}/manager.cpp
     ${source_root}/inject.cpp
-    ${source_root}/command/children.cpp
-    ${source_root}/command/command.cpp
-    ${source_root}/command/dump_methods.cpp
-    ${source_root}/command/dump_properties.cpp
-    ${source_root}/command/executor.cpp
-    ${source_root}/command/find.cpp
-    ${source_root}/command/help.cpp
-    ${source_root}/command/invoke_method.cpp
-    ${source_root}/command/parent.cpp
-    ${source_root}/command/record.cpp
-    ${source_root}/command/set_property.cpp
-    ${source_root}/command/sniffer.cpp
-    ${source_root}/search/searcher.cpp
-    ${source_root}/search/strategy.cpp
-    ${source_root}/search/query.cpp
+    ${source_root}/module.cpp
+    ${source_root}/server/server.cpp
+    ${source_root}/server/call.cpp
+    ${source_root}/service/sniffer.cpp
+    ${source_root}/service/recorder.cpp
+    ${source_root}/service/object.cpp
+    ${source_root}/record/action.cpp
     ${source_root}/record/recorder.cpp
     ${source_root}/record/strategy.cpp
-    ${source_root}/record/action.cpp
+    ${source_root}/search/query.cpp
+    ${source_root}/search/searcher.cpp
+    ${source_root}/search/strategy.cpp
     ${source_root}/sniff/sniffer.cpp
-    ${source_root}/sniff/widget_tooltip.cpp
-    ${source_root}/sniff/widget_marker.cpp)
+    ${source_root}/sniff/widget_marker.cpp
+    ${source_root}/sniff/widget_tooltip.cpp)
 
 set(includes
     ${include_root}/config.h
     ${include_root}/export.h
-    ${include_root}/client.h
-    ${include_root}/server.h
-    ${include_root}/serializer.h
-    ${include_root}/response.h
-    ${include_root}/manager.h
-    ${include_root}/command/children.h
-    ${include_root}/command/command.h
-    ${include_root}/command/dump_methods.h
-    ${include_root}/command/dump_properties.h
-    ${include_root}/command/executor.h
-    ${include_root}/command/find.h
-    ${include_root}/command/help.h
-    ${include_root}/command/invoke_method.h
-    ${include_root}/command/parent.h
-    ${include_root}/command/record.h
-    ${include_root}/command/set_property.h
-    ${include_root}/command/sniffer.h
-    ${include_root}/search/searcher.h
-    ${include_root}/search/strategy.h
-    ${include_root}/search/query.h
+    ${include_root}/module.h
+    ${include_root}/server/server.h
+    ${include_root}/server/call.h
+    ${include_root}/service/sniffer.h
+    ${include_root}/service/recorder.h
+    ${include_root}/service/object.h
+    ${include_root}/record/action.h
     ${include_root}/record/recorder.h
     ${include_root}/record/strategy.h
-    ${include_root}/record/action.h
+    ${include_root}/search/query.h
+    ${include_root}/search/searcher.h
+    ${include_root}/search/strategy.h
     ${include_root}/sniff/sniffer.h
-    ${include_root}/sniff/widget_tooltip.h
-    ${include_root}/sniff/widget_marker.h)
+    ${include_root}/sniff/widget_marker.h
+    ${include_root}/sniff/widget_tooltip.h)
 
 set(resources ${resource_root}/aegis.qrc)
+
+set(protos ${proto_root}/aegis.proto)
 # ----------------------------------------------------------------------- #
 # ------------------------- Qt libraries configuration ------------------ #
 # ----------------------------------------------------------------------- #
@@ -77,10 +59,7 @@ set(CMAKE_AUTORCC ON)
 # ----------------------------------------------------------------------- #
 # -------------------------- Find external libraries -------------------- #
 # ----------------------------------------------------------------------- #
-set(QTILS_STATIC_LIBRARIES TRUE)
-
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network)
-find_package(qtils REQUIRED COMPONENTS serializer dpi)
 # ----------------------------------------------------------------------- #
 # -------------------------- Create plugin shared lib ------------------- #
 # ----------------------------------------------------------------------- #
@@ -90,12 +69,12 @@ aegis_add_module(
   ${sources}
   ${includes}
   ${resources}
+  PROTOS
+  ${protos}
   DEPENDS
   Qt6::Core
   Qt6::Widgets
-  Qt6::Network
-  qtils::serializer
-  qtils::dpi)
+  Qt6::Network)
 
 target_include_directories(
   aegis

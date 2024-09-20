@@ -1,3 +1,3 @@
-from aegis.client import Client, ClientException
+from aegis.client import Client, ClientException, ClientResponse
 
-__all__ = ["Client", "ClientException"]
+__all__ = ["Client", "ClientException", "ClientResponse"]

@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/struct.proto";
+
+package aegis_proto;
+
+// --------------------------------- Sniffer --------------------------------- //
+
+service Sniffer {
+    rpc Start (google.protobuf.Empty) returns (google.protobuf.Empty) {}
+    rpc Stop (google.protobuf.Empty) returns (google.protobuf.Empty) {}
+}
+
+// --------------------------------- Recorder -------------------------------- //
+
+service Recorder {
+    rpc Start (google.protobuf.Empty) returns (google.protobuf.Empty) {}
+    rpc Stop (google.protobuf.Empty) returns (google.protobuf.Empty) {}
+    rpc Clear (google.protobuf.Empty) returns (google.protobuf.Empty) {}
+    rpc Report (google.protobuf.Empty) returns (ReportResponse) {}
+}
+
+message ReportResponse {
+    repeated string commands = 1;
+}
+
+// --------------------------------- Object ---------------------------------- //
+
+service Object {
+    rpc Find (ObjectRequest) returns (FindResponse) {}
+    rpc Parent (ObjectRequest) returns (ParentResponse) {}
+    rpc Children (ObjectRequest) returns (ChildrenResponse) {}
+
+    rpc InvokeMethod (InvokeMethodRequest) returns (google.protobuf.Empty) {}
+    rpc SetProperty (SetPropertyRequest) returns (google.protobuf.Empty) {}
+
+    rpc DumpMethods (ObjectRequest) returns (DumpMethodsResponse) {}
+    rpc DumpProperties (ObjectRequest) returns (DumpPropertiesResponse) {}
+}
+
+message ObjectRequest {
+    string object = 1;
+}
+
+message InvokeMethodRequest {
+    string object = 1;
+    string method = 2;
+    repeated google.protobuf.Value arguments = 3;
+}
+
+message SetPropertyRequest {
+    string object = 1;
+    string property = 2;
+    google.protobuf.Value value = 3;
+}
+
+message FindResponse {
+    repeated string objects = 1;
+}
+
+message ParentResponse {
+    repeated ObjectParent objects = 1;
+}
+
+message ObjectParent {
+    string object = 1;
+    string parent = 2;
+}
+
+message ChildrenResponse {
+    repeated ObjectChildren objects = 1;
+}
+
+message ObjectChildren {
+    string object = 1;
+    repeated string children = 2;
+}
+
+message DumpMethodsResponse {
+    repeated ObjectMethods objects = 1;
+}
+
+message ObjectMethods {
+    string object = 1;
+    repeated string methods = 2;
+}
+
+message DumpPropertiesResponse {
+    repeated ObjectProperties objects = 1;
+}
+
+message ObjectProperties {
+    string object = 1;
+    repeated PropertyValue properties = 2;
+}
+
+message PropertyValue {
+    string property = 1;
+    google.protobuf.Value value = 2;
+}

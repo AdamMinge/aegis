@@ -1,12 +1,13 @@
 /* ----------------------------------- Local -------------------------------- */
-#include "aegis/serializer.h"
+#include "aegis/server/call.h"
 /* -------------------------------------------------------------------------- */
 
 namespace aegis {
 
-Serializer::Serializer(Format format, QObject* parent)
-    : QObject(parent), m_format(format) {}
+/* ---------------------------------- Callable ------------------------------ */
 
-Serializer::~Serializer() = default;
+Callable::Callable() = default;
+
+Callable::~Callable() = default;
 
 }  // namespace aegis

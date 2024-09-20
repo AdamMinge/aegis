@@ -1,8 +1,11 @@
-
-#include <QCoreApplication>
-
+/* ----------------------------------- Local -------------------------------- */
 #include "aegis/config.h"
-#include "aegis/manager.h"
+#include "aegis/module.h"
+/* ------------------------------------ Qt ---------------------------------- */
+#include <QtGlobal>
+/* ---------------------------------- Standard ------------------------------ */
+#include <thread>
+/* -------------------------------------------------------------------------- */
 
 void startServer() {
   auto valid_port = false;
@@ -19,7 +22,9 @@ void startServer() {
   if (!valid_host) return;
   if (!valid_port) return;
 
-  aegis::server()->listen(host, port);
+  auto server_thread =
+      std::thread{[host, port]() { aegis::server().listen(host, port); }};
+  server_thread.detach();
 }
 
 #if defined(AEGIS_OS_WINDOWS)

@@ -1,7 +1,7 @@
 /* ----------------------------------- Local -------------------------------- */
 #include "aegis/record/recorder.h"
 
-#include "aegis/manager.h"
+#include "aegis/module.h"
 #include "aegis/record/action.h"
 #include "aegis/record/strategy.h"
 /* ------------------------------------ Qt ---------------------------------- */
@@ -53,14 +53,14 @@ namespace aegis {
   return widget;
 }
 
-/* ------------------------------- WidgetListener --------------------------- */
+/* --------------------------- RecorderWidgetListener ----------------------- */
 
-WidgetListener::WidgetListener(QObject *parent)
+RecorderWidgetListener::RecorderWidgetListener(QObject *parent)
     : QObject(parent), m_current_widget(nullptr) {}
 
-WidgetListener::~WidgetListener() = default;
+RecorderWidgetListener::~RecorderWidgetListener() = default;
 
-bool WidgetListener::eventFilter(QObject *obj, QEvent *event) {
+bool RecorderWidgetListener::eventFilter(QObject *obj, QEvent *event) {
   switch (event->type()) {
     case QEvent::KeyPress:
     case QEvent::KeyRelease: {
@@ -80,14 +80,14 @@ bool WidgetListener::eventFilter(QObject *obj, QEvent *event) {
   return QObject::eventFilter(obj, event);
 }
 
-void WidgetListener::setWidget(QWidget *widget) {
+void RecorderWidgetListener::setWidget(QWidget *widget) {
   if (m_current_widget != widget) {
     m_current_widget = widget;
     Q_EMIT currentWidgetChanged(widget);
   }
 }
 
-QWidget *WidgetListener::findWidget(QWidget *widget) const {
+QWidget *RecorderWidgetListener::findWidget(QWidget *widget) const {
   static const auto find_exceptions = {
       &findScrollAreaException, &findComboBoxException, &findTabBarException};
 
@@ -105,9 +105,10 @@ QWidget *WidgetListener::findWidget(QWidget *widget) const {
 Recorder::Recorder(QObject *parent)
     : QObject(parent),
       m_current_strategy(nullptr),
-      m_widget_listener(new WidgetListener(this)),
+      m_widget_listener(new RecorderWidgetListener),
       m_running(false) {
-  connect(m_widget_listener, &WidgetListener::currentWidgetChanged, this,
+  connect(m_widget_listener.get(),
+          &RecorderWidgetListener::currentWidgetChanged, this,
           &Recorder::onCurrentWidgetChanged);
 }
 
@@ -116,7 +117,7 @@ Recorder::~Recorder() = default;
 void Recorder::start() {
   Q_ASSERT(!m_running);
 
-  qApp->installEventFilter(m_widget_listener);
+  qApp->installEventFilter(m_widget_listener.get());
 
   m_running = true;
 }
@@ -124,15 +125,15 @@ void Recorder::start() {
 void Recorder::stop() {
   Q_ASSERT(m_running);
 
-  qApp->removeEventFilter(m_widget_listener);
+  qApp->removeEventFilter(m_widget_listener.get());
   onCurrentWidgetChanged(nullptr);
 
   m_running = false;
 }
 
-void Recorder::clearRecordedActions() { m_recorded_actions.clear(); }
+void Recorder::clear() { m_recorded_actions.clear(); }
 
-QQueue<RecordedAction> Recorder::getRecordedActions() const {
+QQueue<RecordedAction> Recorder::report() const {
   auto recorded_actions = m_recorded_actions;
   if (m_current_strategy) {
     recorded_actions.append(m_current_strategy->getRecordedActions());
@@ -141,26 +142,12 @@ QQueue<RecordedAction> Recorder::getRecordedActions() const {
   return recorded_actions;
 }
 
+bool Recorder::isRecording() const { return m_running; }
+
 bool Recorder::addStrategy(std::unique_ptr<RecordStrategy> &&strategy) {
   if (m_strategies.contains(strategy->getType())) return false;
 
   m_strategies.insert(std::make_pair(strategy->getType(), std::move(strategy)));
-  return true;
-}
-
-std::unique_ptr<RecordStrategy> Recorder::takeStrategy(int type) {
-  if (!m_strategies.contains(type)) return nullptr;
-
-  auto strategy = std::move(m_strategies[type]);
-  m_strategies.erase(type);
-
-  return strategy;
-}
-
-bool Recorder::removeStrategy(int type) {
-  if (!m_strategies.contains(type)) return false;
-
-  m_strategies.erase(type);
   return true;
 }
 

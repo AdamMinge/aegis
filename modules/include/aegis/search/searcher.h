@@ -1,5 +1,5 @@
-#ifndef AEGIS_SEARCH_QUERY_H
-#define AEGIS_SEARCH_QUERY_H
+#ifndef AEGIS_SEARCH_Searcher_H
+#define AEGIS_SEARCH_Searcher_H
 
 /* ------------------------------------ Qt ---------------------------------- */
 #include <QObject>
@@ -16,19 +16,21 @@ namespace aegis {
 
 class SearchStrategy;
 
-/* ----------------------------------- Searcher ----------------------------- */
+/* -------------------------------- Searcher --------------------------- */
 
 class LIB_AEGIS_API Searcher : public QObject {
   Q_OBJECT
 
  public:
-  explicit Searcher(QObject* parent = nullptr);
+  explicit Searcher();
   ~Searcher() override;
 
   [[nodiscard]] QObject* getObject(const ObjectQuery& query) const;
   [[nodiscard]] QList<QObject*> getObjects(const ObjectQuery& query) const;
 
-  [[nodiscard]] ObjectQuery getQuery(QObject* object) const;
+  [[nodiscard]] ObjectQuery getQuery(const QObject* object) const;
+
+  void addStrategy(std::unique_ptr<SearchStrategy>&& strategy);
 
  private:
   [[nodiscard]] QList<QObject*> findObjects(
@@ -36,9 +38,9 @@ class LIB_AEGIS_API Searcher : public QObject {
       qsizetype limit = std::numeric_limits<qsizetype>::max()) const;
 
  private:
-  std::list<std::unique_ptr<SearchStrategy>> m_search_strategies;
+  std::list<std::unique_ptr<SearchStrategy>> m_strategies;
 };
 
 }  // namespace aegis
 
-#endif  // AEGIS_SEARCH_QUERY_H
+#endif  // AEGIS_SEARCH_Searcher_H

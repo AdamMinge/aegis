@@ -43,5 +43,5 @@ endif()
 # -------------------------- Setup Dependency --------------------------- #
 # ----------------------------------------------------------------------- #
 aegis_setup_dependency(${AEGIS_BUILD_DEPS_DIR} qt)
-aegis_setup_dependency(${AEGIS_BUILD_DEPS_DIR} qtils)
+aegis_setup_dependency(${AEGIS_BUILD_DEPS_DIR} grpc)
 # ----------------------------------------------------------------------- #

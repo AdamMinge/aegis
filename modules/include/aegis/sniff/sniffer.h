@@ -1,5 +1,5 @@
-#ifndef AEGIS_SNIFFER_H
-#define AEGIS_SNIFFER_H
+#ifndef AEGIS_SNIFF_SNIFFER_H
+#define AEGIS_SNIFF_SNIFFER_H
 
 /* ------------------------------------ Qt ---------------------------------- */
 #include <QMouseEvent>
@@ -10,19 +10,39 @@
 
 namespace aegis {
 
+/* --------------------------- SnifferWidgetListener ------------------------ */
+
+class LIB_AEGIS_API SnifferWidgetListener : public QObject {
+  Q_OBJECT
+
+ public:
+  explicit SnifferWidgetListener(QObject *parent = nullptr);
+  ~SnifferWidgetListener() override;
+
+ Q_SIGNALS:
+  void currentWidgetChanged(QWidget *widget);
+
+ protected Q_SLOTS:
+  bool eventFilter(QObject *obj, QEvent *event) override;
+
+ private:
+  void setWidget(QWidget *widget);
+
+ private:
+  QWidget *m_current_widget;
+};
+
 /* ---------------------------------- Sniffer ------------------------------- */
 
 class SnifferWidgetTooltip;
 class SnifferWidgetMarker;
-
-class SnifferPrivate;
 
 class LIB_AEGIS_API Sniffer : public QObject {
   Q_OBJECT
 
  public:
   Sniffer(QObject *parent = nullptr);
-  ~Sniffer() override;
+  ~Sniffer();
 
   void start();
   void stop();
@@ -33,15 +53,15 @@ class LIB_AEGIS_API Sniffer : public QObject {
   void setMarkerColor(QColor color);
 
  protected Q_SLOTS:
-  bool eventFilter(QObject *obj, QEvent *event) override;
-  void onMouseMove(QMouseEvent *event);
+  void onCurrentWidgetChanged(QWidget *widget);
 
  private:
   bool m_sniffing;
   QScopedPointer<SnifferWidgetTooltip> m_tooltip;
   QScopedPointer<SnifferWidgetMarker> m_marker;
+  QScopedPointer<SnifferWidgetListener> m_widget_listener;
 };
 
 }  // namespace aegis
 
-#endif  // AEGIS_SNIFFER_H
+#endif  // AEGIS_SNIFF_SNIFFER_H

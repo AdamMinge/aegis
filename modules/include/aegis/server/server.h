@@ -12,6 +12,7 @@
 namespace grpc {
 
 class Server;
+class Service;
 class ServerCompletionQueue;
 
 }  // namespace grpc
@@ -19,6 +20,12 @@ class ServerCompletionQueue;
 namespace aegis {
 
 class Service;
+
+/* ------------------------------- IsValidService --------------------------- */
+
+template <typename TYPE>
+concept IsValidService = std::is_base_of_v<aegis::Service, TYPE> &&
+    std::is_base_of_v<grpc::Service, TYPE>;
 
 /* ----------------------------------- Server ------------------------------- */
 
@@ -29,8 +36,8 @@ class LIB_AEGIS_API Server {
 
   void listen(const QHostAddress& host, quint16 port);
 
-  template <typename GRPCService, typename... Args>
-  void registerService(Args&&... args);
+  template <IsValidService SERVICE, typename... ARGS>
+  void registerService(ARGS&&... args);
 
  private:
   void startLoop();
@@ -40,10 +47,10 @@ class LIB_AEGIS_API Server {
   std::unique_ptr<grpc::ServerCompletionQueue> m_queue;
 };
 
-template <typename Service, typename... Args>
-void Server::registerService(Args&&... args) {
+template <IsValidService SERVICE, typename... ARGS>
+void Server::registerService(ARGS&&... args) {
   m_services.emplace_back(
-      std::make_unique<Service>(std::forward<Args>(args)...));
+      std::make_unique<SERVICE>(std::forward<ARGS>(args)...));
 }
 
 }  // namespace aegis

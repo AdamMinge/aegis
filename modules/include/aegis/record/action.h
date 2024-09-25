@@ -87,19 +87,19 @@ class LIB_AEGIS_API RecordedAction {
   };
 
  public:
-  template <typename ActionSubtype>
-  RecordedAction(const ActionSubtype &action);
+  template <typename ACTION_SUBTYPE>
+  RecordedAction(const ACTION_SUBTYPE &action);
 
-  template <typename ActionSubtype>
+  template <typename ACTION_SUBTYPE>
   [[nodiscard]] bool is() const;
 
-  template <typename ActionSubtype>
-  [[nodiscard]] const ActionSubtype *getIf() const;
+  template <typename ACTION_SUBTYPE>
+  [[nodiscard]] const ACTION_SUBTYPE *getIf() const;
 
   [[nodiscard]] std::size_t index() const;
 
-  template <typename T>
-  decltype(auto) visit(T &&visitor) const;
+  template <typename TYPE>
+  decltype(auto) visit(TYPE &&visitor) const;
 
  private:
   std::variant<ContextMenuOpened, ButtonClicked, ButtonToggled,
@@ -110,24 +110,24 @@ class LIB_AEGIS_API RecordedAction {
       m_data;
 };
 
-template <typename ActionSubtype>
-RecordedAction::RecordedAction(const ActionSubtype &action) {
+template <typename ACTION_SUBTYPE>
+RecordedAction::RecordedAction(const ACTION_SUBTYPE &action) {
   m_data = action;
 }
 
-template <typename ActionSubtype>
+template <typename ACTION_SUBTYPE>
 bool RecordedAction::is() const {
-  return std::holds_alternative<ActionSubtype>(m_data);
+  return std::holds_alternative<ACTION_SUBTYPE>(m_data);
 }
 
-template <typename ActionSubtype>
-const ActionSubtype *RecordedAction::getIf() const {
-  return std::get_if<ActionSubtype>(&m_data);
+template <typename ACTION_SUBTYPE>
+const ACTION_SUBTYPE *RecordedAction::getIf() const {
+  return std::get_if<ACTION_SUBTYPE>(&m_data);
 }
 
-template <typename T>
-decltype(auto) RecordedAction::visit(T &&visitor) const {
-  return std::visit(std::forward<T>(visitor), m_data);
+template <typename TYPE>
+decltype(auto) RecordedAction::visit(TYPE &&visitor) const {
+  return std::visit(std::forward<TYPE>(visitor), m_data);
 }
 
 }  // namespace aegis

@@ -42,10 +42,10 @@ class LIB_AEGIS_API RecordStrategy : public QObject {
   void recordAction(RecordedAction &&action);
   void recordActionWithMerge(RecordedAction &&action);
 
-  template <typename Type, typename... Args>
-  void recordAction(Args &&...args);
-  template <typename Type, typename... Args>
-  void recordActionWithMerge(Args &&...args);
+  template <typename TYPE, typename... ARGS>
+  void recordAction(ARGS &&...args);
+  template <typename TYPE, typename... ARGS>
+  void recordActionWithMerge(ARGS &&...args);
 
  private:
   int m_type;
@@ -62,14 +62,14 @@ TYPE *RecordStrategy::getWidgetAs() const {
   return specific_widget;
 }
 
-template <typename Type, typename... Args>
-void RecordStrategy::recordAction(Args &&...args) {
-  recordAction(Type{getWidgetAsQuery(), std::forward<Args>(args)...});
+template <typename TYPE, typename... ARGS>
+void RecordStrategy::recordAction(ARGS &&...args) {
+  recordAction(TYPE{getWidgetAsQuery(), std::forward<ARGS>(args)...});
 }
 
-template <typename Type, typename... Args>
-void RecordStrategy::recordActionWithMerge(Args &&...args) {
-  recordActionWithMerge(Type{getWidgetAsQuery(), std::forward<Args>(args)...});
+template <typename TYPE, typename... ARGS>
+void RecordStrategy::recordActionWithMerge(ARGS &&...args) {
+  recordActionWithMerge(TYPE{getWidgetAsQuery(), std::forward<ARGS>(args)...});
 }
 
 /* ---------------------------- RecordWidgetStrategy ------------------------ */

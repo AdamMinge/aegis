@@ -25,8 +25,12 @@ void Server::listen(const QHostAddress& host, quint16 port) {
 
   grpc::ServerBuilder builder;
   builder.AddListeningPort(address, grpc::InsecureServerCredentials());
-  for (const auto& service : m_services)
-    builder.RegisterService(service->grpc());
+  for (const auto& service : m_services) {
+    auto grpc_service = dynamic_cast<grpc::Service*>(service.get());
+    Q_ASSERT(grpc_service);
+
+    builder.RegisterService(grpc_service);
+  }
 
   m_queue = builder.AddCompletionQueue();
   m_server = builder.BuildAndStart();

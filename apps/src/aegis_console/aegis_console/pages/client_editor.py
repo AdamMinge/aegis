@@ -1,12 +1,9 @@
-import json
-
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
     QLineEdit,
     QPushButton,
     QTreeWidget,
-    QTreeWidgetItem,
 )
 from PySide6.QtCore import Signal, Slot, Qt
 

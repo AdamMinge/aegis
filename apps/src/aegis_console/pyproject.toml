@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "Aegis_Client"
+name = "Aegis_Console"
 version = "0.1.0"
 description = ""
 authors = ["Adam Minge <minge.adam@gmail.com>"]

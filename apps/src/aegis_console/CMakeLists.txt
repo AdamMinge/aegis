@@ -1,15 +1,17 @@
 # ----------------------------------------------------------------------- #
 # ---------------------------- Set CMake Version ------------------------ #
 # ----------------------------------------------------------------------- #
+# ---------------------------- Set CMake Version ------------------------ #
+# ----------------------------------------------------------------------- #
 cmake_minimum_required(VERSION 3.11)
 # ----------------------------------------------------------------------- #
 # ---------------------------- Set files variable ----------------------- #
 # ----------------------------------------------------------------------- #
-set(source_root ${AEGIS_SOURCE_DIR}/apps/src/aegis_client)
-set(resource_root ${AEGIS_SOURCE_DIR}/apps/resource/aegis_client)
+set(module_root ${AEGIS_SOURCE_DIR}/apps/src/aegis_console/aegis_console)
+set(resource_root ${AEGIS_SOURCE_DIR}/apps/resource/aegis_console)
 # ----------------------------------------------------------------------- #
 # -------------------------------- Setup VENV --------------------------- #
 # ----------------------------------------------------------------------- #
-aegis_add_python_app(aegis_client SOURCE ${source_root} QRC
-                     ${resource_root}/aegis_client.qrc)
+aegis_add_python_app(pyaegis_console MODULE ${module_root} QRC
+                     ${resource_root}/aegis_console.qrc)
 # ----------------------------------------------------------------------- #

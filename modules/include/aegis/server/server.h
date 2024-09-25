@@ -6,12 +6,11 @@
 /* --------------------------------- Standard ------------------------------- */
 #include <memory>
 /* ----------------------------------- Local -------------------------------- */
-#include "aegis/server/call.h"
+#include "aegis/export.h"
 /* -------------------------------------------------------------------------- */
 
 namespace grpc {
 
-class Service;
 class Server;
 class ServerCompletionQueue;
 
@@ -19,7 +18,11 @@ class ServerCompletionQueue;
 
 namespace aegis {
 
-class Server {
+class Service;
+
+/* ----------------------------------- Server ------------------------------- */
+
+class LIB_AEGIS_API Server {
  public:
   explicit Server();
   ~Server();
@@ -32,15 +35,15 @@ class Server {
  private:
   void startLoop();
 
-  std::list<std::unique_ptr<grpc::Service>> m_services;
+  std::list<std::unique_ptr<Service>> m_services;
   std::unique_ptr<grpc::Server> m_server;
   std::unique_ptr<grpc::ServerCompletionQueue> m_queue;
 };
 
-template <typename GRPCService, typename... Args>
+template <typename Service, typename... Args>
 void Server::registerService(Args&&... args) {
-  m_services.emplace_back(std::make_unique<GRPCService>(
-      m_queue.get(), std::forward<Args>(args)...));
+  m_services.emplace_back(
+      std::make_unique<Service>(std::forward<Args>(args)...));
 }
 
 }  // namespace aegis

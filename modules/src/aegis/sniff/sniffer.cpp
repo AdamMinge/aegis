@@ -5,37 +5,34 @@
 #include "aegis/sniff/widget_tooltip.h"
 /* ------------------------------------ Qt ---------------------------------- */
 #include <QApplication>
-#include <QCursor>
 #include <QMouseEvent>
 /* -------------------------------------------------------------------------- */
 
 namespace aegis {
 
-/* --------------------------- SnifferWidgetListener ------------------------ */
+/* ------------------------------ SnifferListener --------------------------- */
 
-SnifferWidgetListener::SnifferWidgetListener(QObject *parent)
+SnifferListener::SnifferListener(QObject *parent)
     : QObject(parent), m_current_widget(nullptr) {}
 
-SnifferWidgetListener::~SnifferWidgetListener() = default;
+SnifferListener::~SnifferListener() = default;
 
-bool SnifferWidgetListener::eventFilter(QObject *obj, QEvent *event) {
+bool SnifferListener::eventFilter(QObject *obj, QEvent *event) {
   if (event->type() == QEvent::MouseMove) {
     const auto mouse_event = static_cast<QMouseEvent *>(event);
 
     const auto global_pos = mouse_event->globalPosition().toPoint();
     const auto widget = qApp->widgetAt(global_pos);
 
-    setWidget(widget);
+    Q_EMIT mouseMoved(global_pos);
+
+    if (m_current_widget != widget) {
+      m_current_widget = widget;
+      Q_EMIT currentWidgetChanged(widget);
+    }
   }
 
   return QObject::eventFilter(obj, event);
-}
-
-void SnifferWidgetListener::setWidget(QWidget *widget) {
-  if (m_current_widget != widget) {
-    m_current_widget = widget;
-    Q_EMIT currentWidgetChanged(widget);
-  }
 }
 
 /* ---------------------------------- Sniffer ------------------------------- */
@@ -45,32 +42,44 @@ Sniffer::Sniffer(QObject *parent)
       m_sniffing(false),
       m_tooltip(new SnifferWidgetTooltip),
       m_marker(new SnifferWidgetMarker),
-      m_widget_listener(new SnifferWidgetListener) {
-  connect(m_widget_listener.get(), &SnifferWidgetListener::currentWidgetChanged,
-          this, &Sniffer::onCurrentWidgetChanged);
+      m_listener(new SnifferListener) {
+  connect(m_listener.get(), &SnifferListener::currentWidgetChanged, this,
+          &Sniffer::onCurrentWidgetChanged);
+  connect(m_listener.get(), &SnifferListener::mouseMoved, this,
+          &Sniffer::onMouseMoved);
 }
 
 Sniffer::~Sniffer() = default;
 
 void Sniffer::start() {
   if (!m_sniffing) {
-    m_sniffing = true;
+    QMetaObject::invokeMethod(
+        qApp,
+        [this]() {
+          m_sniffing = true;
 
-    qApp->installEventFilter(m_widget_listener.get());
+          qApp->installEventFilter(m_listener.get());
 
-    m_tooltip->show();
-    m_marker->show();
+          m_tooltip->show();
+          m_marker->show();
+        },
+        Qt::QueuedConnection);
   }
 }
 
 void Sniffer::stop() {
   if (m_sniffing) {
-    m_sniffing = false;
+    QMetaObject::invokeMethod(
+        qApp,
+        [this]() {
+          m_sniffing = false;
 
-    qApp->removeEventFilter(m_widget_listener.get());
+          qApp->removeEventFilter(m_listener.get());
 
-    m_tooltip->hide();
-    m_marker->hide();
+          m_tooltip->hide();
+          m_marker->hide();
+        },
+        Qt::QueuedConnection);
   }
 }
 
@@ -81,10 +90,12 @@ QColor Sniffer::getMarkerColor() const { return m_marker->getColor(); }
 void Sniffer::setMarkerColor(QColor color) { m_marker->setColor(color); }
 
 void Sniffer::onCurrentWidgetChanged(QWidget *widget) {
-  const auto cursor_pos = QCursor::pos();
-  m_tooltip->move(cursor_pos + QPoint(10, 10));
   m_tooltip->setWidget(widget);
   m_marker->setWidget(widget);
+}
+
+void Sniffer::onMouseMoved(const QPoint &position) {
+  m_tooltip->move(position + QPoint(10, 10));
 }
 
 }  // namespace aegis

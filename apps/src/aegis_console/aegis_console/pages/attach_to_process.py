@@ -16,9 +16,9 @@ from PySide6.QtCore import Signal, Slot, QSize, QSortFilterProxyModel, Qt, QMode
 from PySide6.QtGui import QIcon, QPixmap, QStandardItemModel, QStandardItem
 from PySide6.QtNetwork import QHostAddress
 
-from aegis import Client, ClientException
-from aegis_client import AEGIS_CLIENT_PORT, AEGIS_CLIENT_DLL
-from aegis_client.pages.page import PageWithBack
+from aegis import Client, ClientException, attach_client_to_existing_process
+from aegis_console import AEGIS_CLIENT_PORT, AEGIS_CLIENT_DLL
+from aegis_console.pages.page import PageWithBack
 
 
 @dataclasses.dataclass
@@ -186,12 +186,13 @@ class AttachToProcess(PageWithBack):
         assert process != None
 
         try:
-            client = Client.attach_to_existing_process(
+            client = attach_client_to_existing_process(
                 QHostAddress(QHostAddress.SpecialAddress.LocalHost),
                 AEGIS_CLIENT_PORT,
                 process.id,
                 AEGIS_CLIENT_DLL,
             )
+
         except ClientException as e:
             return
 

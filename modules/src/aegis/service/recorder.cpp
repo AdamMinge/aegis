@@ -182,7 +182,11 @@ RecorderReportCall::ProcessResult RecorderReportCall::process(
 
 /* ------------------------------- RecorderService -------------------------- */
 
-RecorderService::RecorderService(grpc::ServerCompletionQueue* queue) {
+RecorderService::RecorderService() = default;
+
+RecorderService::~RecorderService() = default;
+
+void RecorderService::start(grpc::ServerCompletionQueue* queue) {
   auto start_call = new RecorderStartCall(this, queue);
   auto stop_call = new RecorderStopCall(this, queue);
   auto pause_call = new RecorderClearCall(this, queue);
@@ -193,7 +197,5 @@ RecorderService::RecorderService(grpc::ServerCompletionQueue* queue) {
   stop_call->proceed();
   report_call->proceed();
 }
-
-RecorderService::~RecorderService() = default;
 
 }  // namespace aegis

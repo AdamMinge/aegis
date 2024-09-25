@@ -7,6 +7,7 @@
 /* ----------------------------------- Local -------------------------------- */
 #include "aegis/export.h"
 #include "aegis/server/call.h"
+#include "aegis/server/service.h"
 /* -------------------------------------------------------------------------- */
 
 namespace aegis {
@@ -47,10 +48,13 @@ class LIB_AEGIS_API SnifferStopCall : public SnifferStartCallData {
 
 /* ------------------------------- SnifferService --------------------------- */
 
-class LIB_AEGIS_API SnifferService : public aegis_proto::Sniffer::AsyncService {
+class LIB_AEGIS_API SnifferService
+    : public ServiceWrapper<aegis_proto::Sniffer::AsyncService> {
  public:
-  explicit SnifferService(grpc::ServerCompletionQueue* queue);
+  explicit SnifferService();
   ~SnifferService() override;
+
+  void start(grpc::ServerCompletionQueue* queue) override;
 };
 
 }  // namespace aegis

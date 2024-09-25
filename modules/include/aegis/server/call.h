@@ -5,19 +5,21 @@
 #include <grpc++/grpc++.h>
 /* --------------------------------- Standard ------------------------------- */
 #include <memory>
+/* ----------------------------------- Local -------------------------------- */
+#include "aegis/export.h"
 /* -------------------------------------------------------------------------- */
 
 namespace aegis {
 
 /* ---------------------------------- CallTag ------------------------------- */
 
-struct CallTag {
+struct LIB_AEGIS_API CallTag {
   void* callable;
 };
 
 /* ---------------------------------- Callable ------------------------------ */
 
-class Callable {
+class LIB_AEGIS_API Callable {
  protected:
  public:
   explicit Callable();

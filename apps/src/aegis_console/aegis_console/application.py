@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Slot
 
 from aegis import Client
-from aegis_client.pages import (
+from aegis_console.pages import (
     StackedPage,
     AttachToProcess,
     ClientEditor,
@@ -29,7 +29,7 @@ class MainWindow(QMainWindow):
         self.__init_pages()
 
     def __init_ui(self):
-        self.setWindowTitle("Aegis Simple Client")
+        self.setWindowTitle("Aegis Client")
         self.resize(800, 600)
         self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
 
@@ -75,7 +75,7 @@ class MainWindow(QMainWindow):
         elif strategy == InjectionModeSelector.Mode.StartNewProcess:
             self.__stack.setCurrentWidget(self.__start_new_process_page)
 
-    @Slot(int)
+    @Slot(Client)
     def __handle_attached_process(self, client: Client):
         self.__stack.setCurrentWidget(self.__client_editor_page, client=client)
 

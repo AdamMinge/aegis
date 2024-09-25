@@ -1,6 +1,6 @@
 import sys
 
-from aegis_ide.__generated__ import rcc
+from aegis_ide import rcc
 from aegis_ide.application import Application, MainWindow
 
 

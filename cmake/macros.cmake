@@ -28,7 +28,7 @@ endmacro()
 # ----------------------------------------------------------------------- # ----
 # Define a macro that create proto libs and link it to target ------ #
 # ----------------------------------------------------------------------- #
-macro(aegis_add_proto_modules target)
+macro(__aegis_add_proto_modules target)
   cmake_parse_arguments(THIS "" "" "PROTOS" ${ARGN})
   if(NOT "${THIS_UNPARSED_ARGUMENTS}" STREQUAL "")
     message(
@@ -37,70 +37,51 @@ macro(aegis_add_proto_modules target)
     )
   endif()
 
-  find_package(Protobuf REQUIRED)
+  find_package(protobuf REQUIRED)
   find_package(gRPC REQUIRED)
-
-  if(NOT gRPC_CPP_PLUGIN)
-    find_program(
-      gRPC_CPP_PLUGIN
-      NAMES grpc_cpp_plugin
-      HINTS ${gRPC_ROOT} ENV PATH
-      DOC "Path to grpc_cpp_plugin")
-
-    if(NOT gRPC_CPP_PLUGIN)
-      message(FATAL_ERROR "grpc_cpp_plugin executable not found.")
-    else()
-      message(STATUS "Using manually found gRPC C++ plugin: ${gRPC_CPP_PLUGIN}")
-    endif()
-  endif()
 
   foreach(PROTO_FILE ${THIS_PROTOS})
     get_filename_component(PROTO_FILENAME_WE ${PROTO_FILE} NAME_WE)
-    get_filename_component(PROTO_DIRECTORY ${PROTO_FILE} DIRECTORY)
+    get_filename_component(PROTO_IMPORT_DIRS ${PROTO_FILE} DIRECTORY)
 
     set(PROTO_TARGET ${PROTO_FILENAME_WE}_proto)
-    set(GENERATED_PROTO_DIR
-        ${CMAKE_CURRENT_BINARY_DIR}/generated/${PROTO_TARGET})
-
-    set(PROTO_SRC ${GENERATED_PROTO_DIR}/${PROTO_FILENAME_WE}.pb.cc)
-    set(PROTO_HDR ${GENERATED_PROTO_DIR}/${PROTO_FILENAME_WE}.pb.h)
-    set(GRPC_SRC ${GENERATED_PROTO_DIR}/${PROTO_FILENAME_WE}.grpc.pb.cc)
-    set(GRPC_HDR ${GENERATED_PROTO_DIR}/${PROTO_FILENAME_WE}.grpc.pb.h)
+    set(PROTO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated/${PROTO_TARGET})
 
     add_custom_target(
-      create_generated_dir ALL
-      COMMAND ${CMAKE_COMMAND} -E make_directory ${GENERATED_PROTO_DIR}
-      COMMENT "Creating directory ${GENERATED_PROTO_DIR}")
+      ${PROTO_TARGET}_create_proto_dir ALL
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${PROTO_BINARY_DIR}
+      COMMENT "Creating directory ${PROTO_BINARY_DIR}")
 
-    add_custom_command(
-      OUTPUT ${PROTO_SRC} ${PROTO_HDR} ${GRPC_SRC} ${GRPC_HDR}
-      COMMAND
-        ${Protobuf_PROTOC_EXECUTABLE} ARGS --proto_path=${PROTO_DIRECTORY}
-        --cpp_out=${GENERATED_PROTO_DIR} --grpc_out=${GENERATED_PROTO_DIR}
-        --plugin=protoc-gen-grpc=${gRPC_CPP_PLUGIN} ${PROTO_FILE}
-      DEPENDS ${PROTO_FILE}
-      COMMENT "Generating C++ code from ${PROTO_FILE}")
+    add_library(${PROTO_TARGET} OBJECT ${PROTO_FILE})
+    target_link_libraries(${PROTO_TARGET} PUBLIC protobuf::libprotobuf
+                                                 gRPC::grpc++)
+    target_include_directories(${PROTO_TARGET}
+                               PUBLIC $<BUILD_INTERFACE:${PROTO_BINARY_DIR}/..>)
+    add_dependencies(${PROTO_TARGET} ${PROTO_TARGET}_create_proto_dir)
+    set_target_properties(${PROTO_TARGET} PROPERTIES POSITION_INDEPENDENT_CODE
+                                                     TRUE)
 
-    add_library(${PROTO_TARGET} ${PROTO_SRC} ${PROTO_HDR} ${GRPC_SRC}
-                                ${GRPC_HDR})
+    protobuf_generate(TARGET ${PROTO_TARGET} IMPORT_DIRS ${PROTO_IMPORT_DIRS}
+                      PROTOC_OUT_DIR ${PROTO_BINARY_DIR})
 
-    target_link_libraries(${PROTO_TARGET} PRIVATE protobuf::libprotobuf
-                                                  gRPC::grpc++)
-
-    __aegis_prepare_module_target(${PROTO_TARGET})
-
-    target_include_directories(
+    protobuf_generate(
+      TARGET
       ${PROTO_TARGET}
-      PUBLIC $<BUILD_INTERFACE:${GENERATED_PROTO_DIR}/..>
-      INTERFACE $<INSTALL_INTERFACE:include>)
+      LANGUAGE
+      grpc
+      GENERATE_EXTENSIONS
+      .grpc.pb.h
+      .grpc.pb.cc
+      PLUGIN
+      "protoc-gen-grpc=\$<TARGET_FILE:gRPC::grpc_cpp_plugin>"
+      IMPORT_DIRS
+      ${PROTO_IMPORT_DIRS}
+      PROTOC_OUT_DIR
+      ${PROTO_BINARY_DIR})
 
     target_link_libraries(${target} PRIVATE ${PROTO_TARGET})
 
-    add_dependencies(${PROTO_TARGET} create_generated_dir)
-
   endforeach()
-
-  target_link_libraries(${target} PRIVATE protobuf::libprotobuf gRPC::grpc++)
 
 endmacro()
 # ----------------------------------------------------------------------- #
@@ -153,7 +134,7 @@ macro(aegis_add_module target)
   __aegis_prepare_module_target(${target})
 
   if(THIS_PROTOS)
-    aegis_add_proto_modules(${target} PROTOS ${THIS_PROTOS})
+    __aegis_add_proto_modules(${target} PROTOS ${THIS_PROTOS})
   endif()
 
   if(THIS_DEPENDS)
@@ -356,11 +337,15 @@ macro(__aegis_create_python_venv)
 
   find_package(Python 3.10 REQUIRED)
 
-  execute_process(COMMAND ${Python_EXECUTABLE} "-m" "pip" "install" "--upgrade"
-                          "pip" WORKING_DIRECTORY ${THIS_WORKING_DIRECTORY})
+  execute_process(
+    COMMAND ${Python_EXECUTABLE} "-m" "pip" "install" "--upgrade" "pip"
+    WORKING_DIRECTORY ${THIS_WORKING_DIRECTORY}
+    OUTPUT_QUIET)
 
-  execute_process(COMMAND ${Python_EXECUTABLE} "-m" "pip" "install" "poetry"
-                  WORKING_DIRECTORY ${THIS_WORKING_DIRECTORY})
+  execute_process(
+    COMMAND ${Python_EXECUTABLE} "-m" "pip" "install" "poetry"
+    WORKING_DIRECTORY ${THIS_WORKING_DIRECTORY}
+    OUTPUT_QUIET)
 
   if(AEGIS_OS_WINDOWS)
     set(poetry ${venv_path}/Scripts/poetry.exe)
@@ -373,14 +358,75 @@ macro(__aegis_create_python_venv)
     WORKING_DIRECTORY ${THIS_WORKING_DIRECTORY})
 endmacro()
 # ----------------------------------------------------------------------- #
-# -------------- Define a macro that helps add python module ------------ #
+# -------------- Define a macro that helps add python venv -------------- #
 # ----------------------------------------------------------------------- #
-macro(aegis_add_python_module target)
-  cmake_parse_arguments(THIS "" "" "" ${ARGN})
+macro(__aegis_generate_python_proto target)
+
+  cmake_parse_arguments(THIS "" "" "PROTOS" ${ARGN})
   if(NOT "${THIS_UNPARSED_ARGUMENTS}" STREQUAL "")
     message(
       FATAL_ERROR
-        "Extra unparsed arguments when calling aegis_python_venv: ${THIS_UNPARSED_ARGUMENTS}"
+        "Extra unparsed arguments when calling aegis_add_python_module: ${THIS_UNPARSED_ARGUMENTS}"
+    )
+  endif()
+
+  find_package(protobuf REQUIRED)
+  find_package(gRPC REQUIRED)
+
+  set(GENERATED_FILES "")
+  foreach(PROTO_FILE ${THIS_PROTOS})
+    get_filename_component(PROTO_IMPORT_DIRS ${PROTO_FILE} DIRECTORY)
+
+    set(PROTO_IMPORT_DIRS ${PROTO_IMPORT_DIRS}/..)
+    set(PROTO_BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
+    protobuf_generate(
+      PROTOS
+      ${PROTO_FILE}
+      LANGUAGE
+      python
+      IMPORT_DIRS
+      ${PROTO_IMPORT_DIRS}
+      PROTOC_OUT_DIR
+      ${PROTO_BINARY_DIR}
+      OUT_VAR
+      GENERATE_OUT)
+
+    list(APPEND GENERATED_FILES ${GENERATE_OUT})
+
+    protobuf_generate(
+      PROTOS
+      ${PROTO_FILE}
+      LANGUAGE
+      grpc
+      GENERATE_EXTENSIONS
+      _pb2_grpc.py
+      PLUGIN
+      "protoc-gen-grpc=\$<TARGET_FILE:gRPC::grpc_python_plugin>"
+      IMPORT_DIRS
+      ${PROTO_IMPORT_DIRS}
+      PROTOC_OUT_DIR
+      ${PROTO_BINARY_DIR}
+      OUT_VAR
+      GENERATE_OUT)
+
+    list(APPEND GENERATED_FILES ${GENERATE_OUT})
+
+  endforeach()
+
+  add_custom_target(${target}_proto_files DEPENDS ${GENERATED_FILES})
+  add_dependencies(${target} ${target}_proto_files)
+
+endmacro()
+# ----------------------------------------------------------------------- #
+# -------------- Define a macro that helps add python module ------------ #
+# ----------------------------------------------------------------------- #
+macro(aegis_add_python_module target)
+  cmake_parse_arguments(THIS "" "" "PROTOS" ${ARGN})
+  if(NOT "${THIS_UNPARSED_ARGUMENTS}" STREQUAL "")
+    message(
+      FATAL_ERROR
+        "Extra unparsed arguments when calling aegis_add_python_module: ${THIS_UNPARSED_ARGUMENTS}"
     )
   endif()
 
@@ -389,16 +435,21 @@ macro(aegis_add_python_module target)
   __aegis_create_python_venv(VENV ${venv_path} WORKING_DIRECTORY
                              ${CMAKE_CURRENT_SOURCE_DIR})
 
+  if(THIS_PROTOS)
+    add_custom_target(${target} ALL)
+    __aegis_generate_python_proto(${target} PROTOS ${THIS_PROTOS})
+  endif()
+
 endmacro()
 # ----------------------------------------------------------------------- #
 # --------------- Define a macro that helps add python app -------------- #
 # ----------------------------------------------------------------------- #
 macro(aegis_add_python_app target)
-  cmake_parse_arguments(THIS "" "SOURCE;QRC" "" ${ARGN})
+  cmake_parse_arguments(THIS "" "MODULE;QRC" "" ${ARGN})
   if(NOT "${THIS_UNPARSED_ARGUMENTS}" STREQUAL "")
     message(
       FATAL_ERROR
-        "Extra unparsed arguments when calling aegis_python_venv: ${THIS_UNPARSED_ARGUMENTS}"
+        "Extra unparsed arguments when calling aegis_add_python_app: ${THIS_UNPARSED_ARGUMENTS}"
     )
   endif()
 
@@ -418,26 +469,28 @@ macro(aegis_add_python_app target)
   add_custom_target(
     ${target}_build_rcc
     COMMAND ${CMAKE_COMMAND} -E env VIRTUAL_ENV=${venv_path} ${pyside6_rcc}
-            ${THIS_QRC} -o ${THIS_SOURCE}/${target}/__generated__/rcc.py
+            ${THIS_QRC} -o ${THIS_MODULE}/rcc.py
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     COMMENT "Build ${target} resources")
 
-  configure_file(${THIS_SOURCE}/pysidedeploy.spec.in
-                 ${THIS_SOURCE}/${target}/__generated__/pysidedeploy.spec)
+  configure_file(${THIS_MODULE}/../pysidedeploy.spec.in
+                 ${CMAKE_CURRENT_BINARY_DIR}/pysidedeploy.spec)
 
   add_custom_target(
-    ${target}_setup ALL
+    ${target}_setup
     COMMENT
       "Setting up ${target} (creating venv, installing dependencies and build rcc)"
     DEPENDS ${target}_build_rcc)
+
+  add_custom_target(${target} ALL)
+  add_dependencies(${target} ${target}_setup)
 
   add_custom_target(
     ${target}_deploy
     COMMAND
       ${CMAKE_COMMAND} -E env VIRTUAL_ENV=${venv_path} ${pyside6_deploy}
-      ${THIS_SOURCE}/${target}/main.py -c
-      ${THIS_SOURCE}/${target}/__generated__/pysidedeploy.spec
-    WORKING_DIRECTORY ${THIS_SOURCE}/${target}
+      ${THIS_MODULE}/main.py -c ${CMAKE_CURRENT_BINARY_DIR}/pysidedeploy.spec
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Deploing ${target}")
 
   install(

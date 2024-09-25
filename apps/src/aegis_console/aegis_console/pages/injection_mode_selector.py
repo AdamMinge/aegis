@@ -4,7 +4,7 @@ from PySide6.QtWidgets import QHBoxLayout, QToolButton
 from PySide6.QtCore import Signal, Slot, QSize
 from PySide6.QtGui import QIcon, QPixmap
 
-from aegis_client.pages.page import Page
+from aegis_console.pages.page import Page
 
 
 class InjectionModeSelector(Page):

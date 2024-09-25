@@ -1,11 +1,16 @@
 /* ----------------------------------- Local -------------------------------- */
 #include "aegis/server/server.h"
+
+#include "aegis/server/call.h"
+#include "aegis/server/service.h"
 /* ----------------------------------- GRPC --------------------------------- */
 #include <grpc++/grpc++.h>
 #include <grpc++/impl/service_type.h>
 /* -------------------------------------------------------------------------- */
 
 namespace aegis {
+
+/* ----------------------------------- Server ------------------------------- */
 
 Server::Server() = default;
 
@@ -20,7 +25,8 @@ void Server::listen(const QHostAddress& host, quint16 port) {
 
   grpc::ServerBuilder builder;
   builder.AddListeningPort(address, grpc::InsecureServerCredentials());
-  for (const auto& service : m_services) builder.RegisterService(service.get());
+  for (const auto& service : m_services)
+    builder.RegisterService(service->grpc());
 
   m_queue = builder.AddCompletionQueue();
   m_server = builder.BuildAndStart();
@@ -32,6 +38,8 @@ void Server::startLoop() {
   auto tag = (void*)nullptr;
   auto ok = false;
 
+  for (const auto& service : m_services) service->start(m_queue.get());
+
   while (true) {
     if (m_queue->Next(&tag, &ok) && ok) {
       auto call_tag = static_cast<CallTag*>(tag);
@@ -40,7 +48,6 @@ void Server::startLoop() {
       if (callable) {
         callable->proceed();
       }
-
     } else {
       // TODO !!!
     }

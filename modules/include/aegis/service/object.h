@@ -9,6 +9,7 @@
 /* ----------------------------------- Local -------------------------------- */
 #include "aegis/export.h"
 #include "aegis/server/call.h"
+#include "aegis/server/service.h"
 /* -------------------------------------------------------------------------- */
 
 namespace aegis {
@@ -170,10 +171,13 @@ class LIB_AEGIS_API ObjectDumpPropertiesCall
 
 /* -------------------------------- ObjectService --------------------------- */
 
-class LIB_AEGIS_API ObjectService : public aegis_proto::Object::AsyncService {
+class LIB_AEGIS_API ObjectService
+    : public ServiceWrapper<aegis_proto::Object::AsyncService> {
  public:
-  explicit ObjectService(grpc::ServerCompletionQueue* queue);
+  explicit ObjectService();
   ~ObjectService() override;
+
+  void start(grpc::ServerCompletionQueue* queue) override;
 };
 
 }  // namespace aegis

@@ -7,6 +7,7 @@
 /* ----------------------------------- Local -------------------------------- */
 #include "aegis/export.h"
 #include "aegis/server/call.h"
+#include "aegis/server/service.h"
 /* -------------------------------------------------------------------------- */
 
 namespace aegis {
@@ -82,10 +83,12 @@ class LIB_AEGIS_API RecorderReportCall : public RecorderReportCallData {
 /* ------------------------------ RecorderService --------------------------- */
 
 class LIB_AEGIS_API RecorderService
-    : public aegis_proto::Recorder::AsyncService {
+    : public ServiceWrapper<aegis_proto::Recorder::AsyncService> {
  public:
-  explicit RecorderService(grpc::ServerCompletionQueue* queue);
+  explicit RecorderService();
   ~RecorderService() override;
+
+  void start(grpc::ServerCompletionQueue* queue) override;
 };
 
 }  // namespace aegis

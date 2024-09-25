@@ -2,7 +2,7 @@
 title = Aegis IDE
 project_dir = .
 input_file = @CMAKE_CURRENT_SOURCE_DIR@/aegis_ide/main.py
-exec_directory = @CMAKE_CURRENT_BINARY_DIR@/
+exec_directory = @CMAKE_INSTALL_PREFIX@/bin/
 project_file = 
 icon =
 

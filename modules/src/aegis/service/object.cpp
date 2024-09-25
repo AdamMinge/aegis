@@ -503,8 +503,26 @@ aegis_proto::ObjectProperties ObjectDumpPropertiesCall::properties(
 
 /* ------------------------------- ObjectService ---------------------------- */
 
-ObjectService::ObjectService(grpc::ServerCompletionQueue* queue) {}
+ObjectService::ObjectService() = default;
 
 ObjectService::~ObjectService() = default;
+
+void ObjectService::start(grpc::ServerCompletionQueue* queue) {
+  auto find_call = new ObjectFindCall(this, queue);
+  auto parent_call = new ObjectParentCall(this, queue);
+  auto children_call = new ObjectChildrenCall(this, queue);
+  auto invoke_method_call = new ObjectInvokeMethodCall(this, queue);
+  auto set_property_call = new ObjectSetPropertyCall(this, queue);
+  auto dump_methods_call = new ObjectDumpMethodsCall(this, queue);
+  auto dump_properties_call = new ObjectDumpPropertiesCall(this, queue);
+
+  find_call->proceed();
+  parent_call->proceed();
+  children_call->proceed();
+  invoke_method_call->proceed();
+  set_property_call->proceed();
+  dump_methods_call->proceed();
+  dump_properties_call->proceed();
+}
 
 }  // namespace aegis

@@ -1,8 +1,8 @@
 [app]
-title = Aegis Client
+title = Aegis Console
 project_dir = .
-input_file = @CMAKE_CURRENT_SOURCE_DIR@/aegis_client/main.py
-exec_directory = @CMAKE_CURRENT_BINARY_DIR@/
+input_file = @CMAKE_CURRENT_SOURCE_DIR@/aegis_console/main.py
+exec_directory = @CMAKE_INSTALL_PREFIX@/bin
 project_file = 
 icon =
 

@@ -6,6 +6,6 @@ cmake_minimum_required(VERSION 3.11)
 # ---------------------------- Set files variable ----------------------- #
 # ----------------------------------------------------------------------- #
 add_subdirectory(src/aegis)
-add_subdirectory(src/aegis_client)
+add_subdirectory(src/aegis_console)
 add_subdirectory(src/aegis_ide)
 # ----------------------------------------------------------------------- #

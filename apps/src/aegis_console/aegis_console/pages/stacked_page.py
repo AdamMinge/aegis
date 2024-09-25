@@ -2,7 +2,7 @@ from PySide6.QtWidgets import (
     QStackedWidget,
 )
 
-from aegis_client.pages.page import Page
+from aegis_console.pages.page import Page
 
 
 class StackedPage(QStackedWidget):

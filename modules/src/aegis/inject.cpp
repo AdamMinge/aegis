@@ -2,10 +2,24 @@
 #include "aegis/config.h"
 #include "aegis/module.h"
 /* ------------------------------------ Qt ---------------------------------- */
+#include <QThread>
 #include <QtGlobal>
-/* ---------------------------------- Standard ------------------------------ */
-#include <thread>
 /* -------------------------------------------------------------------------- */
+
+class ServerThread : public QThread {
+ public:
+  ServerThread(aegis::AegisModule& aegis, const QHostAddress& host,
+               quint16 port)
+      : m_aegis(aegis), m_host(host), m_port(port) {}
+
+ protected:
+  void run() override { m_aegis.getServer().listen(m_host, m_port); }
+
+ private:
+  aegis::AegisModule& m_aegis;
+  QHostAddress m_host;
+  quint16 m_port;
+};
 
 void startServer() {
   auto valid_port = false;
@@ -23,8 +37,8 @@ void startServer() {
   if (!valid_port) return;
 
   auto server_thread =
-      std::thread{[host, port]() { aegis::server().listen(host, port); }};
-  server_thread.detach();
+      new ServerThread(aegis::AegisModule::getInstance(), host, port);
+  server_thread->start();
 }
 
 #if defined(AEGIS_OS_WINDOWS)

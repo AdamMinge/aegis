@@ -10,23 +10,21 @@
 
 namespace aegis {
 
-/* --------------------------- SnifferWidgetListener ------------------------ */
+/* ------------------------------ SnifferListener --------------------------- */
 
-class LIB_AEGIS_API SnifferWidgetListener : public QObject {
+class LIB_AEGIS_API SnifferListener : public QObject {
   Q_OBJECT
 
  public:
-  explicit SnifferWidgetListener(QObject *parent = nullptr);
-  ~SnifferWidgetListener() override;
+  explicit SnifferListener(QObject *parent = nullptr);
+  ~SnifferListener() override;
 
  Q_SIGNALS:
   void currentWidgetChanged(QWidget *widget);
+  void mouseMoved(const QPoint &position);
 
  protected Q_SLOTS:
   bool eventFilter(QObject *obj, QEvent *event) override;
-
- private:
-  void setWidget(QWidget *widget);
 
  private:
   QWidget *m_current_widget;
@@ -54,12 +52,13 @@ class LIB_AEGIS_API Sniffer : public QObject {
 
  protected Q_SLOTS:
   void onCurrentWidgetChanged(QWidget *widget);
+  void onMouseMoved(const QPoint &position);
 
  private:
   bool m_sniffing;
   QScopedPointer<SnifferWidgetTooltip> m_tooltip;
   QScopedPointer<SnifferWidgetMarker> m_marker;
-  QScopedPointer<SnifferWidgetListener> m_widget_listener;
+  QScopedPointer<SnifferListener> m_listener;
 };
 
 }  // namespace aegis

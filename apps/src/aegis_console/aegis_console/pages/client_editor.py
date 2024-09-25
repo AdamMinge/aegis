@@ -10,8 +10,8 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Signal, Slot, Qt
 
-from aegis import Client, ClientResponse
-from aegis_client.pages.page import Page
+from aegis import Client
+from aegis_console.pages.page import Page
 
 
 class ConsoleWidget(QWidget):
@@ -32,27 +32,6 @@ class ConsoleWidget(QWidget):
         self.__main_layout.addWidget(self.__console_output)
 
         self.setLayout(self.__main_layout)
-
-    def append(self, request: str, response: ClientResponse):
-        response_color = Qt.GlobalColor.white
-        if response.level == ClientResponse.Level.Error:
-            request_color = Qt.GlobalColor.red
-        elif response.level == ClientResponse.Level.Warning:
-            request_color = Qt.GlobalColor.yellow
-        else:
-            request_color = Qt.GlobalColor.green
-
-        request_item = QTreeWidgetItem([request])
-        request_item.setForeground(0, request_color)
-
-        if response.body:
-            json_body = json.dumps(response.body, indent=4, sort_keys=True)
-
-            response_item = QTreeWidgetItem([json_body])
-            response_item.setForeground(0, response_color)
-            request_item.addChild(response_item)
-
-        self.__console_output.addTopLevelItem(request_item)
 
     def clear(self):
         self.__console_output.clear()
@@ -90,14 +69,14 @@ class ClientEditor(Page):
     def activate_page(self, **kwargs):
         self.__set_client(kwargs["client"])
 
+    def __set_client(self, client: Client):
+        assert client != None
+        self.__client = client
+        self.__client.disconnected.connect(self.detached)
+
     def deactivate_page(self):
         self.__console_widget.clear()
         self.__command_line.clear()
-
-    @Slot()
-    def __set_client(self, client: Client):
-        self.__client = client
-        self.__client.closed.connect(self.__handle_closed)
 
     @Slot()
     def __clear_console_command(self):
@@ -112,17 +91,14 @@ class ClientEditor(Page):
 
     @Slot()
     def __handle_command_entered(self):
-        command = self.__command_line.text()
-        if not self.__handle_special_command(command):
-            response = self.__client.send(command)
-            self.__console_widget.append(command, response)
+        # command = self.__command_line.text()
+        # if not self.__handle_special_command(command):
+        #   response = self.__client.send(command)
+        #   self.__console_widget.append(command, response)
 
         self.__command_line.clear()
 
     @Slot()
-    def __handle_closed(self):
-        self.detached.emit()
-
-    @Slot()
     def __handle_close_pressed(self):
         self.__client.close()
+        self.detached.emit()

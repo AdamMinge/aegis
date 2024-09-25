@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 3.11)
 set(source_root ${AEGIS_SOURCE_DIR}/modules/src/aegis)
 set(include_root ${AEGIS_SOURCE_DIR}/modules/include/aegis)
 set(resource_root ${AEGIS_SOURCE_DIR}/modules/resource/aegis)
-set(proto_root ${AEGIS_SOURCE_DIR}/proto)
+set(proto_root ${AEGIS_SOURCE_DIR}/modules/proto/aegis)
 
 set(sources
     ${source_root}/inject.cpp
@@ -32,6 +32,7 @@ set(includes
     ${include_root}/config.h
     ${include_root}/export.h
     ${include_root}/module.h
+    ${include_root}/server/service.h
     ${include_root}/server/server.h
     ${include_root}/server/call.h
     ${include_root}/service/sniffer.h

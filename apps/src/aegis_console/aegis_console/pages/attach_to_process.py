@@ -16,7 +16,7 @@ from PySide6.QtCore import Signal, Slot, QSize, QSortFilterProxyModel, Qt, QMode
 from PySide6.QtGui import QIcon, QPixmap, QStandardItemModel, QStandardItem
 from PySide6.QtNetwork import QHostAddress
 
-from aegis import Client, ClientException, attach_client_to_existing_process
+from aegis import CommandClient, ClientException
 from aegis_console import AEGIS_CLIENT_PORT, AEGIS_CLIENT_DLL
 from aegis_console.pages.page import PageWithBack
 
@@ -49,18 +49,18 @@ class ProcessTable(QTableView):
 
     def __init__(self):
         super().__init__()
-        self.__init_ui()
+        self._init_ui()
 
-    def __init_ui(self):
-        self.__model = QStandardItemModel(0, 3, self)
-        self.__model.setHorizontalHeaderLabels(["Process", "ID", "User"])
+    def _init_ui(self):
+        self._model = QStandardItemModel(0, 3, self)
+        self._model.setHorizontalHeaderLabels(["Process", "ID", "User"])
 
-        self.__proxy_model = ProcessTable.SortFilterProxyModel(self)
-        self.__proxy_model.setSourceModel(self.__model)
-        self.__proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
-        self.__proxy_model.setFilterKeyColumn(0)
+        self._proxy_model = ProcessTable.SortFilterProxyModel(self)
+        self._proxy_model.setSourceModel(self._model)
+        self._proxy_model.setFilterCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive)
+        self._proxy_model.setFilterKeyColumn(0)
 
-        self.setModel(self.__proxy_model)
+        self.setModel(self._proxy_model)
         self.setSelectionBehavior(QTableView.SelectionBehavior.SelectRows)
         self.setSelectionMode(QTableView.SelectionMode.SingleSelection)
         self.setSortingEnabled(True)
@@ -70,20 +70,20 @@ class ProcessTable(QTableView):
         self.horizontalHeader().setSectionsClickable(True)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
 
-        self.selectionModel().selectionChanged.connect(self.__handle_current_changed)
+        self.selectionModel().selectionChanged.connect(self._handle_current_changed)
 
     def filter(self, filter):
-        self.__proxy_model.setFilterWildcard(filter)
+        self._proxy_model.setFilterWildcard(filter)
 
     def refresh(self):
-        self.__model.removeRows(0, self.__model.rowCount())
+        self._model.removeRows(0, self._model.rowCount())
 
         for proc in psutil.process_iter(["pid", "name", "username"]):
             try:
                 name = proc.info["name"]
                 pid = proc.info["pid"]
                 username = proc.info["username"]
-                self.__append_process(Process(name, pid, username))
+                self._append_process(Process(name, pid, username))
 
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 continue
@@ -94,13 +94,13 @@ class ProcessTable(QTableView):
             return None
 
         index = indexes[0]
-        name = str(self.__model.item(index.row(), ProcessTable.Columns.Name).text())
-        id = int(self.__model.item(index.row(), ProcessTable.Columns.ID).text())
-        username = str(self.__model.item(index.row(), ProcessTable.Columns.User).text())
+        name = str(self._model.item(index.row(), ProcessTable.Columns.Name).text())
+        id = int(self._model.item(index.row(), ProcessTable.Columns.ID).text())
+        username = str(self._model.item(index.row(), ProcessTable.Columns.User).text())
 
         return Process(name, id, username)
 
-    def __append_process(self, process: Process):
+    def _append_process(self, process: Process):
         name = QStandardItem(process.name)
         id = QStandardItem(str(process.id))
         username = QStandardItem(process.user)
@@ -109,84 +109,82 @@ class ProcessTable(QTableView):
         id.setFlags(Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled)
         username.setFlags(Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled)
 
-        self.__model.appendRow([name, id, username])
+        self._model.appendRow([name, id, username])
 
     @Slot()
-    def __handle_current_changed(self):
+    def _handle_current_changed(self):
         self.current_changed.emit(self.current())
 
 
 class AttachToProcess(PageWithBack):
-    attached = Signal(Client)
+    attached = Signal(CommandClient)
     back_clicked = Signal()
 
-    def __init__(self):
-        super().__init__()
-        self.__init_ui()
+    def _init_ui(self):
+        super()._init_ui()
 
-    def __init_ui(self):
-        self.__filter_processes = QLineEdit(self)
-        self.__filter_processes.setPlaceholderText("Filter Processes")
+        self._filter_processes = QLineEdit(self)
+        self._filter_processes.setPlaceholderText("Filter Processes")
 
-        self.__process_table = ProcessTable()
+        self._process_table = ProcessTable()
 
-        self.__refresh_button = QToolButton(self)
-        self.__refresh_button.setText("Refresh")
-        self.__refresh_button.setToolTip("Refresh process list")
-        self.__refresh_button.setIcon(QIcon(QPixmap(":/icons/refresh.png")))
-        self.__refresh_button.setIconSize(QSize(32, 32))
+        self._refresh_button = QToolButton(self)
+        self._refresh_button.setText("Refresh")
+        self._refresh_button.setToolTip("Refresh process list")
+        self._refresh_button.setIcon(QIcon(QPixmap(":/icons/refresh.png")))
+        self._refresh_button.setIconSize(QSize(32, 32))
 
-        self.__attach_button = QPushButton(self)
-        self.__attach_button.setText("Attach")
-        self.__attach_button.setToolTip("Attach to selected process")
+        self._attach_button = QPushButton(self)
+        self._attach_button.setText("Attach")
+        self._attach_button.setToolTip("Attach to selected process")
 
         button_layout = QVBoxLayout()
-        button_layout.addWidget(self.__refresh_button)
-        button_layout.addWidget(self.__attach_button)
+        button_layout.addWidget(self._refresh_button)
+        button_layout.addWidget(self._attach_button)
 
         attach_button_layout = QHBoxLayout()
         attach_button_layout.addStretch()
-        attach_button_layout.addWidget(self.__attach_button)
+        attach_button_layout.addWidget(self._attach_button)
 
-        self.layout().addWidget(self.__filter_processes)
-        self.layout().addWidget(self.__process_table)
-        self.layout().addWidget(self.__refresh_button)
+        self.layout().addWidget(self._filter_processes)  # type: ignore
+        self.layout().addWidget(self._process_table)  # type: ignore
+        self.layout().addWidget(self._refresh_button)  # type: ignore
         self.layout().addLayout(attach_button_layout)  # type: ignore
 
-        self.__filter_processes.textChanged.connect(self.__handle_filter_changed)
-        self.__process_table.current_changed.connect(self.__handle_process_changed)
-        self.__refresh_button.pressed.connect(self.__handle_refresh_pressed)
-        self.__attach_button.pressed.connect(self.__handle_attach_pressed)
+        self._filter_processes.textChanged.connect(self._handle_filter_changed)
+        self._process_table.current_changed.connect(self._handle_process_changed)
+        self._refresh_button.pressed.connect(self._handle_refresh_pressed)
+        self._attach_button.pressed.connect(self._handle_attach_pressed)
 
     def deactivate_page(self):
-        self.__clear()
+        self._clear()
 
     @Slot()
-    def __clear(self):
-        self.__filter_processes.clear()
-        self.__process_table.refresh()
-        self.__handle_process_changed(None)
+    def _clear(self):
+        self._filter_processes.clear()
+        self._process_table.refresh()
+        self._handle_process_changed(None)
 
     @Slot()
-    def __handle_refresh_pressed(self):
-        self.__process_table.refresh()
+    def _handle_refresh_pressed(self):
+        self._process_table.refresh()
 
     @Slot(Process, type(None))
-    def __handle_process_changed(self, process: typing.Optional[Process]):
-        self.__attach_button.setDisabled(process == None)
+    def _handle_process_changed(self, process: typing.Optional[Process]):
+        self._attach_button.setDisabled(process == None)
 
     @Slot()
-    def __handle_filter_changed(self):
-        filter = self.__filter_processes.text().lower()
-        self.__process_table.filter(filter)
+    def _handle_filter_changed(self):
+        filter = self._filter_processes.text().lower()
+        self._process_table.filter(filter)
 
     @Slot()
-    def __handle_attach_pressed(self):
-        process = self.__process_table.current()
+    def _handle_attach_pressed(self):
+        process = self._process_table.current()
         assert process != None
 
         try:
-            client = attach_client_to_existing_process(
+            client = CommandClient.attach_to_existing_process(
                 QHostAddress(QHostAddress.SpecialAddress.LocalHost),
                 AEGIS_CLIENT_PORT,
                 process.id,

@@ -9,61 +9,59 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Signal, Slot
 from PySide6.QtNetwork import QHostAddress
 
-from aegis import Client, ClientException, attach_client_to_new_process
+from aegis import CommandClient, ClientException
 from aegis_console import AEGIS_CLIENT_PORT, AEGIS_CLIENT_DLL
 from aegis_console.pages.page import PageWithBack
 
 
 class StartNewProcess(PageWithBack):
-    attached = Signal(Client)
+    attached = Signal(CommandClient)
     back_clicked = Signal()
 
-    def __init__(self):
-        super().__init__()
-        self.__init_ui()
+    def _init_ui(self):
+        super()._init_ui()
 
-    def __init_ui(self):
-        self.__application_path = QLineEdit(self)
-        self.__application_path.setPlaceholderText("Enter path to application...")
+        self._application_path = QLineEdit(self)
+        self._application_path.setPlaceholderText("Enter path to application...")
 
-        self.__browse_application = QPushButton("Browse")
+        self._browse_application = QPushButton("Browse")
 
-        self.__attach_button = QPushButton(self)
-        self.__attach_button.setText("Attach")
-        self.__attach_button.setToolTip("Attach to selected process")
+        self._attach_button = QPushButton(self)
+        self._attach_button.setText("Attach")
+        self._attach_button.setToolTip("Attach to selected process")
 
         application_path_layout = QHBoxLayout()
-        application_path_layout.addWidget(self.__application_path)
-        application_path_layout.addWidget(self.__browse_application)
+        application_path_layout.addWidget(self._application_path)
+        application_path_layout.addWidget(self._browse_application)
 
         attach_button_layout = QHBoxLayout()
         attach_button_layout.addStretch()
-        attach_button_layout.addWidget(self.__attach_button)
+        attach_button_layout.addWidget(self._attach_button)
 
         self.layout().addLayout(application_path_layout)  # type: ignore
         self.layout().addStretch()  # type: ignore
         self.layout().addLayout(attach_button_layout)  # type: ignore
 
-        self.__application_path.textChanged.connect(self.__handle_application_changed)
-        self.__browse_application.pressed.connect(self.__handle_browse_pressed)
-        self.__attach_button.pressed.connect(self.__handle_attach_pressed)
+        self._application_path.textChanged.connect(self._handle_application_changed)
+        self._browse_application.pressed.connect(self._handle_browse_pressed)
+        self._attach_button.pressed.connect(self._handle_attach_pressed)
 
     def deactivate_page(self):
-        self.__clear()
+        self._clear()
 
     @Slot()
-    def __clear(self):
-        self.__application_path.clear()
-        self.__handle_application_changed()
+    def _clear(self):
+        self._application_path.clear()
+        self._handle_application_changed()
 
     @Slot()
-    def __handle_application_changed(self):
-        path = self.__application_path.text()
+    def _handle_application_changed(self):
+        path = self._application_path.text()
         is_executable = os.path.isfile(path) and os.access(path, os.X_OK)
-        self.__attach_button.setEnabled(is_executable)
+        self._attach_button.setEnabled(is_executable)
 
     @Slot()
-    def __handle_browse_pressed(self):
+    def _handle_browse_pressed(self):
         if os.name == "nt":
             file_filter = "Executable Files (*.exe);;All Files (*)"
         else:
@@ -75,22 +73,19 @@ class StartNewProcess(PageWithBack):
             self, "Select Application", "", file_filter
         )
         if file_path:
-            self.__application_path.setText(file_path)
+            self._application_path.setText(file_path)
 
     @Slot()
-    def __handle_attach_pressed(self):
+    def _handle_attach_pressed(self):
         try:
-            client = attach_client_to_new_process(
+            client = CommandClient.attach_to_new_process(
                 QHostAddress(QHostAddress.SpecialAddress.LocalHost),
                 AEGIS_CLIENT_PORT,
-                self.__application_path.text(),
+                self._application_path.text(),
                 AEGIS_CLIENT_DLL,
             )
 
         except ClientException as e:
-            print(e)
             return
-
-        print("post __handle_attach_pressed")
 
         self.attached.emit(client)

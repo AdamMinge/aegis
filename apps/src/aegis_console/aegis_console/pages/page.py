@@ -25,30 +25,30 @@ class PageWithBack(Page):
 
     def __init__(self):
         super().__init__()
-        self.__init_ui()
+        self._init_ui()
 
-    def __init_ui(self):
-        self.__back_button = QToolButton(self)
-        self.__back_button.setIcon(QIcon(QPixmap(":/icons/arrow_left.png")))
-        self.__back_button.setIconSize(QSize(32, 32))
-        self.__back_button.setToolTip("Go back")
+    def _init_ui(self):
+        self._back_button = QToolButton(self)
+        self._back_button.setIcon(QIcon(QPixmap(":/icons/arrow_left.png")))
+        self._back_button.setIconSize(QSize(32, 32))
+        self._back_button.setToolTip("Go back")
 
-        self.__line_separator = QFrame()
-        self.__line_separator.setFrameShape(QFrame.Shape.HLine)
-        self.__line_separator.setFrameShadow(QFrame.Shadow.Sunken)
+        self._line_separator = QFrame()
+        self._line_separator.setFrameShape(QFrame.Shape.HLine)
+        self._line_separator.setFrameShadow(QFrame.Shadow.Sunken)
 
         back_button_layout = QHBoxLayout()
         back_button_layout.addStretch()
-        back_button_layout.addWidget(self.__back_button)
+        back_button_layout.addWidget(self._back_button)
 
-        self.__main_layout = QVBoxLayout()
-        self.__main_layout.addLayout(back_button_layout)
-        self.__main_layout.addWidget(self.__line_separator)
+        self._main_layout = QVBoxLayout()
+        self._main_layout.addLayout(back_button_layout)
+        self._main_layout.addWidget(self._line_separator)
 
-        self.setLayout(self.__main_layout)
+        self.setLayout(self._main_layout)
 
-        self.__back_button.pressed.connect(self.__handle_back_pressed)
+        self._back_button.pressed.connect(self._handle_back_pressed)
 
     @Slot()
-    def __handle_back_pressed(self):
+    def _handle_back_pressed(self):
         self.back_clicked.emit()

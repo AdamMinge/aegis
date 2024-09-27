@@ -13,9 +13,9 @@ class Application(QApplication):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.__init_ui()
+        self._init_ui()
 
-    def __init_ui(self):
+    def _init_ui(self):
         self.setWindowTitle("Aegis IDE")
         self.resize(800, 600)
         self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)

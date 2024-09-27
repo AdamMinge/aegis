@@ -47,8 +47,8 @@ void Server::startLoop() {
   while (true) {
     if (m_queue->Next(&tag, &ok) && ok) {
       auto call_tag = static_cast<CallTag*>(tag);
-
       auto callable = static_cast<Callable*>(call_tag->callable);
+
       if (callable) {
         callable->proceed();
       }

@@ -67,7 +67,10 @@ SnifferService::~SnifferService() = default;
 
 void SnifferService::start(grpc::ServerCompletionQueue* queue) {
   auto start_call = new SnifferStartCall(this, queue);
+  auto stop_call = new SnifferStopCall(this, queue);
+
   start_call->proceed();
+  stop_call->proceed();
 }
 
 }  // namespace aegis

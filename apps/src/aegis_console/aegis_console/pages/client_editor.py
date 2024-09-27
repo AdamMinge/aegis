@@ -1,14 +1,27 @@
+import enum
+
 from PySide6.QtWidgets import (
     QWidget,
     QVBoxLayout,
     QLineEdit,
     QPushButton,
     QTreeWidget,
+    QTreeWidgetItem,
 )
 from PySide6.QtCore import Signal, Slot, Qt
 
-from aegis import Client
+from aegis import CommandClient, ClientException
 from aegis_console.pages.page import Page
+
+
+class Response:
+    class Level(enum.Enum):
+        Info = 1
+        Error = 2
+
+    def __init__(self, message: str, level: Level):
+        self.message = message
+        self.level = level
 
 
 class ConsoleWidget(QWidget):
@@ -16,22 +29,39 @@ class ConsoleWidget(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.__init_ui()
+        self._init_ui()
 
-    def __init_ui(self):
-        self.__console_output = QTreeWidget(self)
-        self.__console_output.setHeaderHidden(True)
-        self.__console_output.setStyleSheet("background-color: black; color: white;")
-        self.__console_output.setSelectionMode(QTreeWidget.SelectionMode.NoSelection)
-        self.__console_output.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+    def append(self, request: str, response: Response):
+        request_color = Qt.GlobalColor.green
+        response_color = Qt.GlobalColor.white
 
-        self.__main_layout = QVBoxLayout(self)
-        self.__main_layout.addWidget(self.__console_output)
+        if response.level == Response.Level.Error:
+            request_color = Qt.GlobalColor.red
 
-        self.setLayout(self.__main_layout)
+        request_item = QTreeWidgetItem([request])
+        request_item.setForeground(0, request_color)
+
+        if len(response.message) > 0:
+            response_item = QTreeWidgetItem([response.message])
+            response_item.setForeground(0, response_color)
+            request_item.addChild(response_item)
+
+        self._console_output.addTopLevelItem(request_item)
 
     def clear(self):
-        self.__console_output.clear()
+        self._console_output.clear()
+
+    def _init_ui(self):
+        self._console_output = QTreeWidget(self)
+        self._console_output.setHeaderHidden(True)
+        self._console_output.setStyleSheet("background-color: black; color: white;")
+        self._console_output.setSelectionMode(QTreeWidget.SelectionMode.NoSelection)
+        self._console_output.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+
+        self._main_layout = QVBoxLayout(self)
+        self._main_layout.addWidget(self._console_output)
+
+        self.setLayout(self._main_layout)
 
 
 class ClientEditor(Page):
@@ -39,63 +69,53 @@ class ClientEditor(Page):
 
     def __init__(self):
         super().__init__()
-        self.__init_ui()
-        self.__init_predefined_commands()
-
-    def __init_ui(self):
-        self.__main_layout = QVBoxLayout(self)
-
-        self.__console_widget = ConsoleWidget(self)
-        self.__close_button = QPushButton("Close", self)
-
-        self.__command_line = QLineEdit(self)
-        self.__command_line.setStyleSheet("background-color: black; color: white;")
-        self.__command_line.setPlaceholderText("Enter command here...")
-
-        self.__main_layout.addWidget(self.__console_widget)
-        self.__main_layout.addWidget(self.__command_line)
-        self.__main_layout.addWidget(self.__close_button)
-
-        self.__command_line.returnPressed.connect(self.__handle_command_entered)
-        self.__close_button.clicked.connect(self.__handle_close_pressed)
-
-    def __init_predefined_commands(self):
-        self.__predefined_commands = {}
-        self.__predefined_commands["clear"] = self.__clear_console_command
+        self._init_ui()
 
     def activate_page(self, **kwargs):
-        self.__set_client(kwargs["client"])
-
-    def __set_client(self, client: Client):
-        assert client != None
-        self.__client = client
-        self.__client.disconnected.connect(self.detached)
+        self._set_client(kwargs["client"])
 
     def deactivate_page(self):
-        self.__console_widget.clear()
-        self.__command_line.clear()
+        self._console_widget.clear()
+        self._command_line.clear()
+
+    def _init_ui(self):
+        self._main_layout = QVBoxLayout(self)
+
+        self._console_widget = ConsoleWidget(self)
+        self._close_button = QPushButton("Close", self)
+
+        self._command_line = QLineEdit(self)
+        self._command_line.setStyleSheet("background-color: black; color: white;")
+        self._command_line.setPlaceholderText("Enter command here...")
+
+        self._main_layout.addWidget(self._console_widget)
+        self._main_layout.addWidget(self._command_line)
+        self._main_layout.addWidget(self._close_button)
+
+        self._command_line.returnPressed.connect(self._handle_command_entered)
+        self._close_button.clicked.connect(self._handle_close_pressed)
+
+    def _set_client(self, client: CommandClient):
+        assert client != None
+        self._client = client
+        self._client.disconnected.connect(self.detached)
 
     @Slot()
-    def __clear_console_command(self):
-        self.__console_widget.clear()
+    def _handle_command_entered(self):
+        request = self._command_line.text()
+
+        try:
+            self._client._sniffer_stub
+            response = self._client.execute(request)
+            self._console_widget.append(
+                request, Response(str(response), Response.Level.Info)
+            )
+        except ClientException as e:
+            self._console_widget.append(request, Response(str(e), Response.Level.Error))
+
+        self._command_line.clear()
 
     @Slot()
-    def __handle_special_command(self, command: str) -> bool:
-        if command in self.__predefined_commands:
-            self.__predefined_commands[command]()
-            return True
-        return False
-
-    @Slot()
-    def __handle_command_entered(self):
-        # command = self.__command_line.text()
-        # if not self.__handle_special_command(command):
-        #   response = self.__client.send(command)
-        #   self.__console_widget.append(command, response)
-
-        self.__command_line.clear()
-
-    @Slot()
-    def __handle_close_pressed(self):
-        self.__client.close()
+    def _handle_close_pressed(self):
+        self._client.close()
         self.detached.emit()

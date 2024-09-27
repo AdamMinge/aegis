@@ -8,7 +8,7 @@
 /* ----------------------------------- Local -------------------------------- */
 #include "aegis/export.h"
 /* -------------------------------------------------------------------------- */
-
+#include <qdebug.h>
 namespace aegis {
 
 /* ---------------------------------- CallTag ------------------------------- */
@@ -80,6 +80,7 @@ CallData<SERVICE, REQUEST, RESPONSE>::CallData(
       m_queue(queue),
       m_tag(tag),
       m_request_method(REQUEST_method),
+      m_status(CallStatus::Create),
       m_responder(&m_context) {}
 
 template <typename SERVICE, typename REQUEST, typename RESPONSE>

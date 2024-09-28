@@ -85,10 +85,81 @@ class CommandClient(Client):
         )
         parser_sniffer.set_defaults(func=self._execute_sniffer)
 
+        parser_recorder = subparsers.add_parser("recorder")
+        parser_recorder.add_argument(
+            "action",
+            choices=["start", "stop", "clear", "report"],
+            help="Start, stop, clear and get report of recorder",
+        )
+        parser_recorder.set_defaults(func=self._execute_recorder)
+
+        parser_find = subparsers.add_parser("find")
+        parser_find.add_argument(
+            "object", type=str, help="The object query used to finding objects"
+        )
+        parser_find.set_defaults(func=self._execute_find)
+
+        parser_parent = subparsers.add_parser("parent")
+        parser_parent.add_argument(
+            "object", type=str, help="The object query used to finding objects"
+        )
+        parser_parent.set_defaults(func=self._execute_parent)
+
+        parser_children = subparsers.add_parser("children")
+        parser_children.add_argument(
+            "object", type=str, help="The object query used to finding objects"
+        )
+        parser_children.set_defaults(func=self._execute_children)
+
+        parser_invoke_method = subparsers.add_parser("invoke_method")
+        parser_invoke_method.set_defaults(func=self._execute_invoke_method)
+
+        parser_set_property = subparsers.add_parser("set_property")
+        parser_set_property.set_defaults(func=self._execute_set_property)
+
+        parser_dump_methods = subparsers.add_parser("dump_methods")
+        parser_dump_methods.set_defaults(func=self._execute_dump_methods)
+
+        parser_dump_properties = subparsers.add_parser("dump_properties")
+        parser_dump_properties.set_defaults(func=self._execute_dump_properties)
+
     def _execute_sniffer(self, args) -> empty_pb2.Empty:
         if args.action == "start":
-            self._sniffer_stub.Start(empty_pb2.Empty())
+            return self._sniffer_stub.Start(empty_pb2.Empty())
         elif args.action == "stop":
-            self._sniffer_stub.Stop(empty_pb2.Empty())
+            return self._sniffer_stub.Stop(empty_pb2.Empty())
 
+        return empty_pb2.Empty()
+
+    def _execute_recorder(self, args) -> empty_pb2.Empty | aegis_pb2.ReportResponse:
+        if args.action == "start":
+            return self._recorder_stub.Start(empty_pb2.Empty())
+        elif args.action == "stop":
+            return self._recorder_stub.Stop(empty_pb2.Empty())
+        elif args.action == "clear":
+            return self._recorder_stub.Clear(empty_pb2.Empty())
+        elif args.action == "report":
+            return self._recorder_stub.Report(empty_pb2.Empty())
+
+        return empty_pb2.Empty()
+
+    def _execute_find(self, args) -> empty_pb2.Empty:
+        return self._object_stub.Find(aegis_pb2.ObjectRequest(object=args.object))
+
+    def _execute_parent(self, args) -> empty_pb2.Empty:
+        return self._object_stub.Parent(aegis_pb2.ObjectRequest(object=args.object))
+
+    def _execute_children(self, args) -> empty_pb2.Empty:
+        return self._object_stub.Children(aegis_pb2.ObjectRequest(object=args.object))
+
+    def _execute_invoke_method(self, args) -> empty_pb2.Empty:
+        return empty_pb2.Empty()
+
+    def _execute_set_property(self, args) -> empty_pb2.Empty:
+        return empty_pb2.Empty()
+
+    def _execute_dump_methods(self, args) -> empty_pb2.Empty:
+        return empty_pb2.Empty()
+
+    def _execute_dump_properties(self, args) -> empty_pb2.Empty:
         return empty_pb2.Empty()

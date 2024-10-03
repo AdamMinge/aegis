@@ -37,8 +37,8 @@ macro(__aegis_add_proto_modules target)
     )
   endif()
 
-  find_package(protobuf REQUIRED)
-  find_package(gRPC REQUIRED)
+  find_package(protobuf CONFIG REQUIRED)
+  find_package(gRPC CONFIG REQUIRED)
 
   foreach(PROTO_FILE ${THIS_PROTOS})
     get_filename_component(PROTO_FILENAME_WE ${PROTO_FILE} NAME_WE)
@@ -370,8 +370,8 @@ macro(__aegis_generate_python_proto target)
     )
   endif()
 
-  find_package(protobuf REQUIRED)
-  find_package(gRPC REQUIRED)
+  find_package(protobuf CONFIG REQUIRED)
+  find_package(gRPC CONFIG REQUIRED)
 
   set(GENERATED_FILES "")
   foreach(PROTO_FILE ${THIS_PROTOS})

@@ -171,7 +171,7 @@ class LIB_AEGIS_API ObjectDumpPropertiesCall
 
 /* -------------------------------- ObjectService --------------------------- */
 
-class LIB_AEGIS_API ObjectService
+class ObjectService
     : public ServiceWrapper<aegis_proto::Object::AsyncService> {
  public:
   explicit ObjectService();

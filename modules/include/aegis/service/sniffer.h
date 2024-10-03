@@ -48,7 +48,7 @@ class LIB_AEGIS_API SnifferStopCall : public SnifferStartCallData {
 
 /* ------------------------------- SnifferService --------------------------- */
 
-class LIB_AEGIS_API SnifferService
+class SnifferService
     : public ServiceWrapper<aegis_proto::Sniffer::AsyncService> {
  public:
   explicit SnifferService();

@@ -3,6 +3,7 @@
 
 /* ------------------------------------ Qt ---------------------------------- */
 #include <QLatin1String>
+#include <QObject>
 /* ----------------------------------- Local -------------------------------- */
 #include "aegis/export.h"
 /* -------------------------------------------------------------------------- */
@@ -26,7 +27,7 @@ class LIB_AEGIS_API SearchStrategy {
 
 class LIB_AEGIS_API TypeSearch : public SearchStrategy {
  public:
-  static constexpr QLatin1String type_query = QLatin1String("type");
+  static constexpr auto type_query = "type";
 
  public:
   explicit TypeSearch();
@@ -42,7 +43,7 @@ class LIB_AEGIS_API TypeSearch : public SearchStrategy {
 
 class LIB_AEGIS_API PropertiesSearch : public SearchStrategy {
  public:
-  static constexpr QLatin1String properties_query = QLatin1String("properties");
+  static constexpr auto properties_query = "properties";
 
  public:
   explicit PropertiesSearch();
@@ -62,7 +63,7 @@ class LIB_AEGIS_API PropertiesSearch : public SearchStrategy {
 
 class LIB_AEGIS_API PathSearch : public SearchStrategy {
  public:
-  static constexpr QLatin1String path_query = QLatin1String("path");
+  static constexpr auto path_query = "path";
 
  public:
   explicit PathSearch();

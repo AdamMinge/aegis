@@ -82,7 +82,7 @@ class LIB_AEGIS_API RecorderReportCall : public RecorderReportCallData {
 
 /* ------------------------------ RecorderService --------------------------- */
 
-class LIB_AEGIS_API RecorderService
+class RecorderService
     : public ServiceWrapper<aegis_proto::Recorder::AsyncService> {
  public:
   explicit RecorderService();

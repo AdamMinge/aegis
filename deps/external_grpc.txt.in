@@ -13,6 +13,16 @@ set(src_dir ${prefix_dir}/src/grpc)
 set(build_dir ${prefix_dir}/src/grpc-build)
 set(install_dir ${prefix_dir}/src/grpc-install)
 
+if(CMAKE_CONFIGURATION_TYPES)
+    set(build_config "$<CONFIG>")
+else() 
+    if(CMAKE_BUILD_TYPE)
+        set(build_config "${CMAKE_BUILD_TYPE}")
+    else()
+        set(build_config "Release")
+    endif()
+endif()
+
 include(ExternalProject)
 ExternalProject_Add(
     grpc
@@ -34,10 +44,12 @@ ExternalProject_Add(
     BUILD_COMMAND       
         ${CMAKE_COMMAND} 
         --build ${build_dir}
+        --config ${build_config}
     INSTALL_COMMAND     
         ${CMAKE_COMMAND} 
         --build ${build_dir} 
         --target install
+        --config ${build_config}
     TEST_COMMAND        
         "")
 # ----------------------------------------------------------------------- #

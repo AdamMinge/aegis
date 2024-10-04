@@ -52,8 +52,6 @@ void Server::startLoop() {
       if (callable) {
         callable->proceed();
       }
-    } else {
-      // TODO !!!
     }
   }
 }

@@ -24,21 +24,21 @@ from aegis_console.pages.page import PageWithBack
 @dataclasses.dataclass
 class Process:
     name: str
-    id: int
-    user: str
+    pid: int
+    username: str
 
 
 class ProcessTable(QTableView):
     class Columns(enum.IntEnum):
         Name = 0
-        ID = 1
+        PID = 1
         User = 2
 
     class SortFilterProxyModel(QSortFilterProxyModel):
         def lessThan(self, left: QModelIndex, right: QModelIndex) -> bool:
             column = left.column()
 
-            if column == ProcessTable.Columns.ID:
+            if column == ProcessTable.Columns.PID:
                 left_value = int(left.data())
                 right_value = int(right.data())
                 return left_value < right_value
@@ -83,7 +83,7 @@ class ProcessTable(QTableView):
                 name = proc.info["name"]
                 pid = proc.info["pid"]
                 username = proc.info["username"]
-                self._append_process(Process(name, pid, username))
+                self._append_process(Process(name=name, pid=pid, username=username))
 
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 continue
@@ -95,21 +95,21 @@ class ProcessTable(QTableView):
 
         index = indexes[0]
         name = str(self._model.item(index.row(), ProcessTable.Columns.Name).text())
-        id = int(self._model.item(index.row(), ProcessTable.Columns.ID).text())
+        id = int(self._model.item(index.row(), ProcessTable.Columns.PID).text())
         username = str(self._model.item(index.row(), ProcessTable.Columns.User).text())
 
         return Process(name, id, username)
 
     def _append_process(self, process: Process):
         name = QStandardItem(process.name)
-        id = QStandardItem(str(process.id))
-        username = QStandardItem(process.user)
+        pid = QStandardItem(str(process.pid))
+        username = QStandardItem(process.username)
 
         name.setFlags(Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled)
-        id.setFlags(Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled)
+        pid.setFlags(Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled)
         username.setFlags(Qt.ItemFlag.ItemIsSelectable | Qt.ItemFlag.ItemIsEnabled)
 
-        self._model.appendRow([name, id, username])
+        self._model.appendRow([name, pid, username])
 
     @Slot()
     def _handle_current_changed(self):
@@ -187,7 +187,7 @@ class AttachToProcess(PageWithBack):
             client = CommandClient.attach_to_existing_process(
                 QHostAddress(QHostAddress.SpecialAddress.LocalHost),
                 AEGIS_CLIENT_PORT,
-                process.id,
+                process.pid,
                 AEGIS_CLIENT_DLL,
             )
 

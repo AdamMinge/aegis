@@ -261,7 +261,7 @@ ObjectInvokeMethodCall::ProcessResult ObjectInvokeMethodCall::invoke(
             {}};
   }
 
-  auto parameters = std::array<QGenericArgument, 10>{};
+  auto parameters = QVariantList{};
   for (auto i = 0; i < meta_method.parameterCount(); ++i) {
     const auto parameter_meta_type = meta_method.parameterMetaType(i);
     auto parameter = convertIntoVariant(arguments[i]);
@@ -276,14 +276,21 @@ ObjectInvokeMethodCall::ProcessResult ObjectInvokeMethodCall::invoke(
           {}};
     }
 
-    parameters[i] = QGenericArgument(parameter.typeName(), parameter.data());
+    parameters.push_back(std::move(parameter));
   }
 
   for (auto object : objects) {
-    meta_method.invoke(object, Qt::DirectConnection, parameters[0],
-                       parameters[1], parameters[2], parameters[3],
-                       parameters[4], parameters[5], parameters[6],
-                       parameters[7], parameters[8], parameters[9]);
+    const auto _generic_arg = [&parameters](auto index) {
+      return parameters.size() > index
+                 ? QGenericArgument(parameters[index].typeName(),
+                                    parameters[index].data())
+                 : QGenericArgument{};
+    };
+
+    meta_method.invoke(object, Qt::DirectConnection, _generic_arg(0),
+                       _generic_arg(1), _generic_arg(2), _generic_arg(3),
+                       _generic_arg(4), _generic_arg(5), _generic_arg(6),
+                       _generic_arg(7), _generic_arg(8), _generic_arg(9));
   }
 
   return {grpc::Status::OK, {}};

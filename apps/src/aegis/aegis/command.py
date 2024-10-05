@@ -194,18 +194,18 @@ class InvokeMethodCommand(Command):
             help="The method to call",
         )
         parser_invoke_method.add_argument(
-            "-a",
-            "--arguments",
+            "-v",
+            "--values",
             type=str,
             nargs="*",
-            help="The arguments used as call parameters",
+            help="The method values used to call",
         )
         parser_invoke_method.set_defaults(func=self._execute)
 
     def _execute(self, args):
         arguments = (
-            [struct_pb2.Value(string_value=arg) for arg in args.arguments]
-            if args.arguments
+            [struct_pb2.Value(string_value=arg) for arg in args.values]
+            if args.values
             else []
         )
 
@@ -246,7 +246,7 @@ class SetPropertyCommand(Command):
         return self._client._object_stub.SetProperty(  # type: ignore
             aegis_pb2.SetPropertyRequest(  # type: ignore
                 object=args.object,
-                method=args.method,
+                property=args.property,
                 value=struct_pb2.Value(string_value=args.value),
             )
         )

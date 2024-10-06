@@ -287,7 +287,7 @@ ObjectInvokeMethodCall::ProcessResult ObjectInvokeMethodCall::invoke(
                  : QGenericArgument{};
     };
 
-    meta_method.invoke(object, Qt::DirectConnection, _generic_arg(0),
+    meta_method.invoke(object, Qt::QueuedConnection, _generic_arg(0),
                        _generic_arg(1), _generic_arg(2), _generic_arg(3),
                        _generic_arg(4), _generic_arg(5), _generic_arg(6),
                        _generic_arg(7), _generic_arg(8), _generic_arg(9));

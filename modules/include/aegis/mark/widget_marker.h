@@ -1,5 +1,5 @@
-#ifndef AEGIS_SNIFF_WIDGET_MARKER_H
-#define AEGIS_SNIFF_WIDGET_MARKER_H
+#ifndef AEGIS_MARK_WIDGET_MARKER_H
+#define AEGIS_MARK_WIDGET_MARKER_H
 
 /* ------------------------------------ Qt ---------------------------------- */
 #include <QColor>
@@ -10,14 +10,14 @@
 
 namespace aegis {
 
-/* ----------------------------- SnifferWidgetMarker ------------------------ */
+/* ----------------------------- MarkerWidgetMarker ------------------------ */
 
-class LIB_AEGIS_API SnifferWidgetMarker : public QLabel {
+class LIB_AEGIS_API MarkerWidgetMarker : public QLabel {
   Q_OBJECT
 
  public:
-  explicit SnifferWidgetMarker(QWidget *parent = nullptr);
-  ~SnifferWidgetMarker() override;
+  explicit MarkerWidgetMarker(QWidget *parent = nullptr);
+  ~MarkerWidgetMarker() override;
 
   [[nodiscard]] QWidget *getWidget() const;
   void setWidget(QWidget *widget);
@@ -35,4 +35,4 @@ class LIB_AEGIS_API SnifferWidgetMarker : public QLabel {
 
 }  // namespace aegis
 
-#endif  // AEGIS_SNIFF_WIDGET_MARKER_H
+#endif  // AEGIS_MARK_WIDGET_MARKER_H

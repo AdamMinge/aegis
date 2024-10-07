@@ -29,13 +29,13 @@ class LIB_AEGIS_API SnifferStartCall : public SnifferStartCallData {
   std::unique_ptr<SnifferStartCallData> clone() const override;
 };
 
-/* ------------------------------ SnifferStartCall -------------------------- */
+/* ------------------------------ SnifferStopCall --------------------------- */
 
-using SnifferStartCallData =
+using SnifferStopCallData =
     CallData<aegis_proto::Sniffer::AsyncService, google::protobuf::Empty,
              google::protobuf::Empty>;
 
-class LIB_AEGIS_API SnifferStopCall : public SnifferStartCallData {
+class LIB_AEGIS_API SnifferStopCall : public SnifferStopCallData {
  public:
   explicit SnifferStopCall(aegis_proto::Sniffer::AsyncService* service,
                            grpc::ServerCompletionQueue* queue);
@@ -43,10 +43,27 @@ class LIB_AEGIS_API SnifferStopCall : public SnifferStartCallData {
 
   ProcessResult process(const Request& request) const override;
 
-  std::unique_ptr<SnifferStartCallData> clone() const override;
+  std::unique_ptr<SnifferStopCallData> clone() const override;
 };
 
-/* ------------------------------- SnifferService --------------------------- */
+/* --------------------------- SnifferListenCallData ------------------------ */
+
+using SnifferListenCallData =
+    StreamCallData<aegis_proto::Sniffer::AsyncService, google::protobuf::Empty,
+                   aegis_proto::ListenResponse>;
+
+class LIB_AEGIS_API SnifferListenCall : public SnifferListenCallData {
+ public:
+  explicit SnifferListenCall(aegis_proto::Sniffer::AsyncService* service,
+                             grpc::ServerCompletionQueue* queue);
+  ~SnifferListenCall() override;
+
+  ProcessResult process(const Request& request) const override;
+
+  std::unique_ptr<SnifferListenCallData> clone() const override;
+};
+
+/* ------------------------------- SnifferService -------------------------- */
 
 class SnifferService
     : public ServiceWrapper<aegis_proto::Sniffer::AsyncService> {

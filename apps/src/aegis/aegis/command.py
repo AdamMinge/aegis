@@ -76,13 +76,34 @@ class Command:
         raise NotImplementedError("Subclasses should implement this method.")
 
 
+class MarkerCommand(Command):
+    def register(self, parser):
+        parser_marker = parser.add_parser("marker")
+        parser_marker.add_argument(
+            "-a",
+            "--action",
+            choices=["start", "stop"],
+            required=True,
+            help="Start or stop the marker",
+        )
+        parser_marker.set_defaults(func=self._execute)
+
+    def _execute(self, args):
+        if args.action == "start":
+            return self._client._marker_stub.Start(empty_pb2.Empty())  # type: ignore
+        elif args.action == "stop":
+            return self._client._marker_stub.Stop(empty_pb2.Empty())  # type: ignore
+
+        return empty_pb2.Empty()
+
+
 class SnifferCommand(Command):
     def register(self, parser):
         parser_sniffer = parser.add_parser("sniffer")
         parser_sniffer.add_argument(
             "-a",
             "--action",
-            choices=["start", "stop"],
+            choices=["start", "stop", "listen"],
             required=True,
             help="Start or stop the sniffer",
         )
@@ -93,6 +114,8 @@ class SnifferCommand(Command):
             return self._client._sniffer_stub.Start(empty_pb2.Empty())  # type: ignore
         elif args.action == "stop":
             return self._client._sniffer_stub.Stop(empty_pb2.Empty())  # type: ignore
+        elif args.action == "listen":
+            return self._client._sniffer_stub.Listen(empty_pb2.Empty())  # type: ignore
 
         return empty_pb2.Empty()
 
@@ -304,6 +327,7 @@ class CommandClient(Client):
         subparsers = self._parser.add_subparsers(required=True)
 
         self.commands = [
+            MarkerCommand(self),
             SnifferCommand(self),
             RecorderCommand(self),
             FindCommand(self),

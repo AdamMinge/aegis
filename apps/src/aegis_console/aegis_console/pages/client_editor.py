@@ -105,7 +105,7 @@ class ClientEditor(Page):
         request = self._command_line.text()
 
         try:
-            self._client._sniffer_stub
+            self._client._marker_stub
             response = self._client.execute(request)
             self._console_widget.append(
                 request, Response(str(response), Response.Level.Info)

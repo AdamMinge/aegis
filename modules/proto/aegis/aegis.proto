@@ -5,11 +5,23 @@ import "google/protobuf/struct.proto";
 
 package aegis_proto;
 
-// --------------------------------- Sniffer --------------------------------- //
+// --------------------------------- Marker --------------------------------- //
+
+service Marker {
+    rpc Start (google.protobuf.Empty) returns (google.protobuf.Empty) {}
+    rpc Stop (google.protobuf.Empty) returns (google.protobuf.Empty) {}
+}
+
+// --------------------------------- Sniffer -------------------------------- //
 
 service Sniffer {
     rpc Start (google.protobuf.Empty) returns (google.protobuf.Empty) {}
     rpc Stop (google.protobuf.Empty) returns (google.protobuf.Empty) {}
+    rpc Listen (google.protobuf.Empty)  returns (stream ListenResponse) {}
+}
+
+message ListenResponse {
+    string event = 1;
 }
 
 // --------------------------------- Recorder -------------------------------- //

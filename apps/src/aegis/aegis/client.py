@@ -7,7 +7,7 @@ import os
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtNetwork import QHostAddress
 
-from aegis.aegis_pb2_grpc import RecorderStub, SnifferStub, ObjectStub
+from aegis.aegis_pb2_grpc import RecorderStub, MarkerStub, ObjectStub, SnifferStub
 
 
 class ClientException(Exception):
@@ -64,6 +64,7 @@ class Client(QObject):
         self._channel.subscribe(self._on_channel_state_change, try_to_connect=True)
 
         self._recorder_stub = RecorderStub(self._channel)
+        self._marker_stub = MarkerStub(self._channel)
         self._sniffer_stub = SnifferStub(self._channel)
         self._object_stub = ObjectStub(self._channel)
 

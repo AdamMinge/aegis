@@ -1,5 +1,5 @@
 /* ----------------------------------- Local -------------------------------- */
-#include "aegis/sniff/widget_tooltip.h"
+#include "aegis/mark/widget_tooltip.h"
 
 #include "aegis/module.h"
 /* ------------------------------------ Qt ---------------------------------- */
@@ -8,18 +8,18 @@
 
 namespace aegis {
 
-/* ---------------------------- SnifferWidgetTooltip ------------------------ */
+/* ---------------------------- MarkerWidgetTooltip ------------------------ */
 
-SnifferWidgetTooltip::SnifferWidgetTooltip(QWidget *parent)
+MarkerWidgetTooltip::MarkerWidgetTooltip(QWidget *parent)
     : QDialog(parent), m_widget(nullptr) {
   initUi();
 }
 
-SnifferWidgetTooltip::~SnifferWidgetTooltip() {}
+MarkerWidgetTooltip::~MarkerWidgetTooltip() {}
 
-QWidget *SnifferWidgetTooltip::getWidget() const { return m_widget; }
+QWidget *MarkerWidgetTooltip::getWidget() const { return m_widget; }
 
-void SnifferWidgetTooltip::setWidget(QWidget *widget) {
+void MarkerWidgetTooltip::setWidget(QWidget *widget) {
   if (m_widget != widget) {
     m_widget = widget;
 
@@ -33,7 +33,7 @@ void SnifferWidgetTooltip::setWidget(QWidget *widget) {
   }
 }
 
-void SnifferWidgetTooltip::initUi() {
+void MarkerWidgetTooltip::initUi() {
   setVisible(false);
   setWindowFlags(Qt::FramelessWindowHint | Qt::ToolTip);
   setAttribute(Qt::WA_TranslucentBackground);

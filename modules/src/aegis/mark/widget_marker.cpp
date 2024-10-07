@@ -1,14 +1,14 @@
 /* ----------------------------------- Local -------------------------------- */
-#include "aegis/sniff/widget_marker.h"
+#include "aegis/mark/widget_marker.h"
 /* ------------------------------------ Qt ---------------------------------- */
 #include <QPainter>
 /* -------------------------------------------------------------------------- */
 
 namespace aegis {
 
-/* ----------------------------- SnifferWidgetMarker ------------------------ */
+/* ----------------------------- MarkerWidgetMarker ------------------------ */
 
-SnifferWidgetMarker::SnifferWidgetMarker(QWidget *parent)
+MarkerWidgetMarker::MarkerWidgetMarker(QWidget *parent)
     : QLabel(parent), m_widget(nullptr), m_color(Qt::red) {
   setVisible(false);
   setWindowFlags(Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint |
@@ -19,11 +19,11 @@ SnifferWidgetMarker::SnifferWidgetMarker(QWidget *parent)
   setAttribute(Qt::WA_TransparentForMouseEvents);
 }
 
-SnifferWidgetMarker::~SnifferWidgetMarker() = default;
+MarkerWidgetMarker::~MarkerWidgetMarker() = default;
 
-QWidget *SnifferWidgetMarker::getWidget() const { return m_widget; }
+QWidget *MarkerWidgetMarker::getWidget() const { return m_widget; }
 
-void SnifferWidgetMarker::setWidget(QWidget *widget) {
+void MarkerWidgetMarker::setWidget(QWidget *widget) {
   if (m_widget != widget) {
     m_widget = widget;
 
@@ -38,11 +38,11 @@ void SnifferWidgetMarker::setWidget(QWidget *widget) {
   }
 }
 
-QColor SnifferWidgetMarker::getColor() const { return m_color; }
+QColor MarkerWidgetMarker::getColor() const { return m_color; }
 
-void SnifferWidgetMarker::setColor(QColor color) { m_color = color; }
+void MarkerWidgetMarker::setColor(QColor color) { m_color = color; }
 
-void SnifferWidgetMarker::paintEvent(QPaintEvent *event) {
+void MarkerWidgetMarker::paintEvent(QPaintEvent *event) {
   if (!m_widget) return;
 
   auto painter = QPainter(this);

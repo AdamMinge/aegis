@@ -1,5 +1,5 @@
-#ifndef AEGIS_SNIFF_WIDGET_TOOLTIP_H
-#define AEGIS_SNIFF_WIDGET_TOOLTIP_H
+#ifndef AEGIS_MARK_WIDGET_TOOLTIP_H
+#define AEGIS_MARK_WIDGET_TOOLTIP_H
 
 /* ------------------------------------ Qt ---------------------------------- */
 #include <QDialog>
@@ -10,14 +10,14 @@
 
 namespace aegis {
 
-/* ---------------------------- SnifferWidgetTooltip ------------------------ */
+/* ---------------------------- MarkerWidgetTooltip ------------------------ */
 
-class LIB_AEGIS_API SnifferWidgetTooltip : public QDialog {
+class LIB_AEGIS_API MarkerWidgetTooltip : public QDialog {
   Q_OBJECT
 
  public:
-  explicit SnifferWidgetTooltip(QWidget *parent = nullptr);
-  ~SnifferWidgetTooltip() override;
+  explicit MarkerWidgetTooltip(QWidget *parent = nullptr);
+  ~MarkerWidgetTooltip() override;
 
   [[nodiscard]] QWidget *getWidget() const;
   void setWidget(QWidget *object);
@@ -32,4 +32,4 @@ class LIB_AEGIS_API SnifferWidgetTooltip : public QDialog {
 
 }  // namespace aegis
 
-#endif  // AEGIS_SNIFF_WIDGET_TOOLTIP_H
+#endif  // AEGIS_MARK_WIDGET_TOOLTIP_H

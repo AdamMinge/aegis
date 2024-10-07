@@ -6,8 +6,129 @@ from aegis import aegis_pb2 as aegis_dot_aegis__pb2
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
+class MarkerStub(object):
+    """--------------------------------- Marker --------------------------------- //
+
+    """
+
+    def __init__(self, channel):
+        """Constructor.
+
+        Args:
+            channel: A grpc.Channel.
+        """
+        self.Start = channel.unary_unary(
+                '/aegis_proto.Marker/Start',
+                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                _registered_method=True)
+        self.Stop = channel.unary_unary(
+                '/aegis_proto.Marker/Stop',
+                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                _registered_method=True)
+
+
+class MarkerServicer(object):
+    """--------------------------------- Marker --------------------------------- //
+
+    """
+
+    def Start(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Stop(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+
+def add_MarkerServicer_to_server(servicer, server):
+    rpc_method_handlers = {
+            'Start': grpc.unary_unary_rpc_method_handler(
+                    servicer.Start,
+                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            ),
+            'Stop': grpc.unary_unary_rpc_method_handler(
+                    servicer.Stop,
+                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            ),
+    }
+    generic_handler = grpc.method_handlers_generic_handler(
+            'aegis_proto.Marker', rpc_method_handlers)
+    server.add_generic_rpc_handlers((generic_handler,))
+    server.add_registered_method_handlers('aegis_proto.Marker', rpc_method_handlers)
+
+
+ # This class is part of an EXPERIMENTAL API.
+class Marker(object):
+    """--------------------------------- Marker --------------------------------- //
+
+    """
+
+    @staticmethod
+    def Start(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/aegis_proto.Marker/Start',
+            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def Stop(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/aegis_proto.Marker/Stop',
+            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+
 class SnifferStub(object):
-    """--------------------------------- Sniffer --------------------------------- //
+    """--------------------------------- Sniffer -------------------------------- //
 
     """
 
@@ -27,10 +148,15 @@ class SnifferStub(object):
                 request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 _registered_method=True)
+        self.Listen = channel.unary_stream(
+                '/aegis_proto.Sniffer/Listen',
+                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                response_deserializer=aegis_dot_aegis__pb2.ListenResponse.FromString,
+                _registered_method=True)
 
 
 class SnifferServicer(object):
-    """--------------------------------- Sniffer --------------------------------- //
+    """--------------------------------- Sniffer -------------------------------- //
 
     """
 
@@ -41,6 +167,12 @@ class SnifferServicer(object):
         raise NotImplementedError('Method not implemented!')
 
     def Stop(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Listen(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -59,6 +191,11 @@ def add_SnifferServicer_to_server(servicer, server):
                     request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
+            'Listen': grpc.unary_stream_rpc_method_handler(
+                    servicer.Listen,
+                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                    response_serializer=aegis_dot_aegis__pb2.ListenResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
             'aegis_proto.Sniffer', rpc_method_handlers)
@@ -68,7 +205,7 @@ def add_SnifferServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class Sniffer(object):
-    """--------------------------------- Sniffer --------------------------------- //
+    """--------------------------------- Sniffer -------------------------------- //
 
     """
 
@@ -116,6 +253,33 @@ class Sniffer(object):
             '/aegis_proto.Sniffer/Stop',
             google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def Listen(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/aegis_proto.Sniffer/Listen',
+            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            aegis_dot_aegis__pb2.ListenResponse.FromString,
             options,
             channel_credentials,
             insecure,

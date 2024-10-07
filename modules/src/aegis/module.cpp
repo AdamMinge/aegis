@@ -3,6 +3,7 @@
 
 #include "aegis/record/strategy.h"
 #include "aegis/search/strategy.h"
+#include "aegis/service/marker.h"
 #include "aegis/service/object.h"
 #include "aegis/service/recorder.h"
 #include "aegis/service/sniffer.h"
@@ -23,11 +24,13 @@ void AegisModule::deleteInstance() { m_instance.reset(nullptr); }
 
 AegisModule::AegisModule()
     : m_server(std::make_unique<Server>()),
+      m_marker(std::make_unique<Marker>()),
       m_sniffer(std::make_unique<Sniffer>()),
       m_searcher(std::make_unique<Searcher>()),
       m_recorder(std::make_unique<Recorder>()) {
   m_server->registerService<ObjectService>();
   m_server->registerService<RecorderService>();
+  m_server->registerService<MarkerService>();
   m_server->registerService<SnifferService>();
 
   m_searcher->addStrategy(std::make_unique<TypeSearch>());
@@ -51,6 +54,8 @@ AegisModule::AegisModule()
 AegisModule::~AegisModule() = default;
 
 Server& AegisModule::getServer() const { return *m_server; }
+
+Marker& AegisModule::getMarker() const { return *m_marker; }
 
 Sniffer& AegisModule::getSniffer() const { return *m_sniffer; }
 

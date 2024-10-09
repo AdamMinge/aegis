@@ -105,7 +105,7 @@ class SnifferCommand(Command):
             "--action",
             choices=["start", "stop", "listen"],
             required=True,
-            help="Start or stop the sniffer",
+            help="Start or stop and listen the sniffer",
         )
         parser_sniffer.set_defaults(func=self._execute)
 
@@ -126,9 +126,9 @@ class RecorderCommand(Command):
         parser_recorder.add_argument(
             "-a",
             "--action",
-            choices=["start", "stop", "clear", "report"],
+            choices=["start", "stop", "listen"],
             required=True,
-            help="Start, stop, clear and get report of recorder",
+            help="Start, stop and listen the ecorder",
         )
         parser_recorder.set_defaults(func=self._execute)
 
@@ -137,10 +137,8 @@ class RecorderCommand(Command):
             return self._client._recorder_stub.Start(empty_pb2.Empty())  # type: ignore
         elif args.action == "stop":
             return self._client._recorder_stub.Stop(empty_pb2.Empty())  # type: ignore
-        elif args.action == "clear":
-            return self._client._recorder_stub.Clear(empty_pb2.Empty())  # type: ignore
-        elif args.action == "report":
-            return self._client._recorder_stub.Report(empty_pb2.Empty())  # type: ignore
+        elif args.action == "listen":
+            return self._client._recorder_stub.Listen(empty_pb2.Empty())  # type: ignore
 
         return empty_pb2.Empty()
 

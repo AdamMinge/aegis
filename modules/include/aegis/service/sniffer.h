@@ -50,7 +50,7 @@ class LIB_AEGIS_API SnifferStopCall : public SnifferStopCallData {
 
 using SnifferListenCallData =
     StreamCallData<aegis_proto::Sniffer::AsyncService, google::protobuf::Empty,
-                   aegis_proto::ListenResponse>;
+                   aegis_proto::SnifferListenResponse>;
 
 class LIB_AEGIS_API SnifferListenCall : public SnifferListenCallData {
  public:

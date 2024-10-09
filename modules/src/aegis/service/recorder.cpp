@@ -132,52 +132,23 @@ RecorderStopCall::ProcessResult RecorderStopCall::process(
   return {grpc::Status::OK, google::protobuf::Empty{}};
 }
 
-/* ------------------------------ RecorderClearCall ------------------------- */
+/* ----------------------------- RecorderListenCall ------------------------ */
 
-RecorderClearCall::RecorderClearCall(
+RecorderListenCall::RecorderListenCall(
     aegis_proto::Recorder::AsyncService* service,
     grpc::ServerCompletionQueue* queue)
-    : CallData(service, queue, CallTag{this},
-               &aegis_proto::Recorder::AsyncService::RequestClear) {}
+    : StreamCallData(service, queue, CallTag{this},
+                     &aegis_proto::Recorder::AsyncService::RequestListen) {}
 
-RecorderClearCall::~RecorderClearCall() = default;
+RecorderListenCall::~RecorderListenCall() = default;
 
-std::unique_ptr<RecorderClearCallData> RecorderClearCall::clone() const {
-  return std::make_unique<RecorderClearCall>(getService(), getQueue());
+std::unique_ptr<RecorderListenCallData> RecorderListenCall::clone() const {
+  return std::make_unique<RecorderListenCall>(getService(), getQueue());
 }
 
-RecorderClearCall::ProcessResult RecorderClearCall::process(
+RecorderListenCall::ProcessResult RecorderListenCall::process(
     const Request& request) const {
-  recorder().clear();
-  return {grpc::Status::OK, google::protobuf::Empty{}};
-}
-
-/* ------------------------------ RecorderReportCall ------------------------ */
-
-RecorderReportCall::RecorderReportCall(
-    aegis_proto::Recorder::AsyncService* service,
-    grpc::ServerCompletionQueue* queue)
-    : CallData(service, queue, CallTag{this},
-               &aegis_proto::Recorder::AsyncService::RequestReport) {}
-
-RecorderReportCall::~RecorderReportCall() = default;
-
-std::unique_ptr<RecorderReportCallData> RecorderReportCall::clone() const {
-  return std::make_unique<RecorderReportCall>(getService(), getQueue());
-}
-
-RecorderReportCall::ProcessResult RecorderReportCall::process(
-    const Request& request) const {
-  const auto actions_mapper = RecordedActionsMapper{};
-  const auto report = recorder().report();
-
-  auto response = RecorderReportCall::Response{};
-  for (const auto& action : report) {
-    const auto command = action.visit(actions_mapper);
-    response.add_commands(command.toStdString());
-  }
-
-  return {grpc::Status::OK, response};
+  return grpc::Status::OK;
 }
 
 /* ------------------------------- RecorderService -------------------------- */
@@ -189,13 +160,11 @@ RecorderService::~RecorderService() = default;
 void RecorderService::start(grpc::ServerCompletionQueue* queue) {
   auto start_call = new RecorderStartCall(this, queue);
   auto stop_call = new RecorderStopCall(this, queue);
-  auto pause_call = new RecorderClearCall(this, queue);
-  auto report_call = new RecorderReportCall(this, queue);
+  auto listen_call = new RecorderListenCall(this, queue);
 
   start_call->proceed();
-  pause_call->proceed();
   stop_call->proceed();
-  report_call->proceed();
+  listen_call->proceed();
 }
 
 }  // namespace aegis

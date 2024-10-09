@@ -151,7 +151,7 @@ class SnifferStub(object):
         self.Listen = channel.unary_stream(
                 '/aegis_proto.Sniffer/Listen',
                 request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-                response_deserializer=aegis_dot_aegis__pb2.ListenResponse.FromString,
+                response_deserializer=aegis_dot_aegis__pb2.SnifferListenResponse.FromString,
                 _registered_method=True)
 
 
@@ -194,7 +194,7 @@ def add_SnifferServicer_to_server(servicer, server):
             'Listen': grpc.unary_stream_rpc_method_handler(
                     servicer.Listen,
                     request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
-                    response_serializer=aegis_dot_aegis__pb2.ListenResponse.SerializeToString,
+                    response_serializer=aegis_dot_aegis__pb2.SnifferListenResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -279,7 +279,7 @@ class Sniffer(object):
             target,
             '/aegis_proto.Sniffer/Listen',
             google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-            aegis_dot_aegis__pb2.ListenResponse.FromString,
+            aegis_dot_aegis__pb2.SnifferListenResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -317,10 +317,10 @@ class RecorderStub(object):
                 request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 _registered_method=True)
-        self.Report = channel.unary_unary(
+        self.Report = channel.unary_stream(
                 '/aegis_proto.Recorder/Report',
                 request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-                response_deserializer=aegis_dot_aegis__pb2.ReportResponse.FromString,
+                response_deserializer=aegis_dot_aegis__pb2.RecorderListenResponse.FromString,
                 _registered_method=True)
 
 
@@ -371,10 +371,10 @@ def add_RecorderServicer_to_server(servicer, server):
                     request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
-            'Report': grpc.unary_unary_rpc_method_handler(
+            'Report': grpc.unary_stream_rpc_method_handler(
                     servicer.Report,
                     request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
-                    response_serializer=aegis_dot_aegis__pb2.ReportResponse.SerializeToString,
+                    response_serializer=aegis_dot_aegis__pb2.RecorderListenResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -481,12 +481,12 @@ class Recorder(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(
+        return grpc.experimental.unary_stream(
             request,
             target,
             '/aegis_proto.Recorder/Report',
             google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-            aegis_dot_aegis__pb2.ReportResponse.FromString,
+            aegis_dot_aegis__pb2.RecorderListenResponse.FromString,
             options,
             channel_credentials,
             insecure,

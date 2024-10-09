@@ -46,38 +46,21 @@ class LIB_AEGIS_API RecorderStopCall : public RecorderStopCallData {
   std::unique_ptr<RecorderStopCallData> clone() const override;
 };
 
-/* ------------------------------ RecorderClearCall ------------------------- */
+/* ----------------------------- RecorderListenCall ------------------------ */
 
-using RecorderClearCallData =
-    CallData<aegis_proto::Recorder::AsyncService, google::protobuf::Empty,
-             google::protobuf::Empty>;
+using RecorderListenCallData =
+    StreamCallData<aegis_proto::Recorder::AsyncService, google::protobuf::Empty,
+                   aegis_proto::RecorderListenResponse>;
 
-class LIB_AEGIS_API RecorderClearCall : public RecorderClearCallData {
+class LIB_AEGIS_API RecorderListenCall : public RecorderListenCallData {
  public:
-  explicit RecorderClearCall(aegis_proto::Recorder::AsyncService* service,
-                             grpc::ServerCompletionQueue* queue);
-  ~RecorderClearCall() override;
-
-  ProcessResult process(const Request& request) const override;
-
-  std::unique_ptr<RecorderClearCallData> clone() const override;
-};
-
-/* ------------------------------ RecorderReportCall ------------------------ */
-
-using RecorderReportCallData =
-    CallData<aegis_proto::Recorder::AsyncService, google::protobuf::Empty,
-             aegis_proto::ReportResponse>;
-
-class LIB_AEGIS_API RecorderReportCall : public RecorderReportCallData {
- public:
-  explicit RecorderReportCall(aegis_proto::Recorder::AsyncService* service,
+  explicit RecorderListenCall(aegis_proto::Recorder::AsyncService* service,
                               grpc::ServerCompletionQueue* queue);
-  ~RecorderReportCall() override;
+  ~RecorderListenCall() override;
 
   ProcessResult process(const Request& request) const override;
 
-  std::unique_ptr<RecorderReportCallData> clone() const override;
+  std::unique_ptr<RecorderListenCallData> clone() const override;
 };
 
 /* ------------------------------ RecorderService --------------------------- */

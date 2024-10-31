@@ -312,13 +312,8 @@ class RecorderStub(object):
                 request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 _registered_method=True)
-        self.Clear = channel.unary_unary(
-                '/aegis_proto.Recorder/Clear',
-                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
-                _registered_method=True)
-        self.Report = channel.unary_stream(
-                '/aegis_proto.Recorder/Report',
+        self.Listen = channel.unary_stream(
+                '/aegis_proto.Recorder/Listen',
                 request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
                 response_deserializer=aegis_dot_aegis__pb2.RecorderListenResponse.FromString,
                 _registered_method=True)
@@ -341,13 +336,7 @@ class RecorderServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def Clear(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def Report(self, request, context):
+    def Listen(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -366,13 +355,8 @@ def add_RecorderServicer_to_server(servicer, server):
                     request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
-            'Clear': grpc.unary_unary_rpc_method_handler(
-                    servicer.Clear,
-                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
-                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-            ),
-            'Report': grpc.unary_stream_rpc_method_handler(
-                    servicer.Report,
+            'Listen': grpc.unary_stream_rpc_method_handler(
+                    servicer.Listen,
                     request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                     response_serializer=aegis_dot_aegis__pb2.RecorderListenResponse.SerializeToString,
             ),
@@ -444,34 +428,7 @@ class Recorder(object):
             _registered_method=True)
 
     @staticmethod
-    def Clear(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/aegis_proto.Recorder/Clear',
-            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def Report(request,
+    def Listen(request,
             target,
             options=(),
             channel_credentials=None,
@@ -484,7 +441,7 @@ class Recorder(object):
         return grpc.experimental.unary_stream(
             request,
             target,
-            '/aegis_proto.Recorder/Report',
+            '/aegis_proto.Recorder/Listen',
             google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             aegis_dot_aegis__pb2.RecorderListenResponse.FromString,
             options,

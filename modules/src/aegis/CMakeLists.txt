@@ -8,7 +8,7 @@ cmake_minimum_required(VERSION 3.11)
 set(source_root ${AEGIS_SOURCE_DIR}/modules/src/aegis)
 set(include_root ${AEGIS_SOURCE_DIR}/modules/include/aegis)
 set(resource_root ${AEGIS_SOURCE_DIR}/modules/resource/aegis)
-set(proto_root ${AEGIS_SOURCE_DIR}/modules/proto/aegis)
+set(proto_root ${AEGIS_SOURCE_DIR}/proto/aegis)
 
 set(sources
     ${source_root}/inject.cpp

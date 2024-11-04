@@ -13,6 +13,7 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QPushButton,
     QToolButton,
+    QLabel,
 )
 from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtCore import QSize, Slot
@@ -35,10 +36,19 @@ class AttachToNewProcessPage(QWizardPage):
         self._application_path.setPlaceholderText("Enter path to application...")
         self._browse_application = QPushButton("Browse")
 
-        self._layout = QHBoxLayout()
-        self._layout.addWidget(self._application_path)
-        self._layout.addWidget(self._browse_application)
-        self.setLayout(self._layout)
+        self._subprocess_name = QLineEdit(self)
+        self._subprocess_name.setPlaceholderText("Enter optional subprocess name...")
+
+        path_layout = QHBoxLayout()
+        path_layout.addWidget(self._application_path)
+        path_layout.addWidget(self._browse_application)
+
+        layout = QVBoxLayout()
+        layout.addLayout(path_layout)
+        layout.addWidget(QLabel("Optional: Subprocess Name"))
+        layout.addWidget(self._subprocess_name)
+
+        self.setLayout(layout)
 
         self._browse_application.pressed.connect(self._handle_browse_pressed)
 
@@ -49,6 +59,8 @@ class AttachToNewProcessPage(QWizardPage):
             "text",
             self._application_path.textChanged,
         )
+
+        self.registerField("subprocess_name", self._subprocess_name)
 
     @Slot()
     def _handle_browse_pressed(self):
@@ -195,6 +207,7 @@ class AttachWizard(QWizard):
             )
 
         elif self.currentId() == Pages.Page_AttachToNewProcess:
+            subprocess_name = self.field("subprocess_name")
             application_path = self.field("application_path")
             assert application_path
 
@@ -203,6 +216,7 @@ class AttachWizard(QWizard):
                 port=constants.AEGIS_SERVER_PORT,
                 app=application_path,
                 library=constants.AEGIS_SERVER_DLL,
+                subprocess_name=subprocess_name,
             )
 
         return None

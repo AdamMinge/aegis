@@ -1,5 +1,7 @@
 import pyinjector
 import subprocess
+import typing
+import psutil
 import time
 import os
 
@@ -38,13 +40,41 @@ def attach_to_existing_process(
     return client
 
 
+def _find_subprocess(pid: int, subprocess_name: str) -> typing.Optional[int]:
+    main_process = psutil.Process(pid)
+
+    matching_subprocess = None
+    for child in main_process.children(recursive=True):
+        if child.name() == subprocess_name:
+            matching_subprocess = child
+            break
+
+    if matching_subprocess:
+        return matching_subprocess.pid
+
+    return None
+
+
 def attach_to_new_process(
-    host: QHostAddress, port: int, app: str, library: str
+    host: QHostAddress,
+    port: int,
+    app: str,
+    library: str,
+    subprocess_name: typing.Optional[str] = None,
 ) -> Client:
     try:
         process = subprocess.Popen([app], env=os.environ)
         time.sleep(ATTACHING_TIMEOUT)
     except OSError as e:
         raise AttachException(str(e))
+
+    pid = process.pid
+    if subprocess_name:
+        child_pid = _find_subprocess(pid, subprocess_name)
+        if not child_pid:
+            raise AttachException(
+                f"Subprocess with name '{subprocess_name}' not found."
+            )
+        pid = child_pid
 
     return attach_to_existing_process(host, port, process.pid, library)

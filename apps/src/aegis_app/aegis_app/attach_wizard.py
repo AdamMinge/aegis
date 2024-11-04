@@ -17,8 +17,9 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QIcon, QPixmap
 from PySide6.QtCore import QSize, Slot
 
+from aegis_app import constants
 from aegis_app.widgets import ProcessTable
-from aegis_app.client import Client, ClientException
+from aegis_app.client import Client, attach_to_existing_process, attach_to_new_process
 
 
 class AttachToNewProcessPage(QWizardPage):
@@ -184,9 +185,24 @@ class AttachWizard(QWizard):
 
         if self.currentId() == Pages.Page_AttachToExistingProcess:
             selected_process = self.field("selected_process")
-            print(f"selected_process = {selected_process}")
+            assert selected_process
+
+            return attach_to_existing_process(
+                host=constants.AEGIS_SERVER_HOST,
+                port=constants.AEGIS_SERVER_PORT,
+                pid=selected_process.pid,
+                library=constants.AEGIS_SERVER_DLL,
+            )
+
         elif self.currentId() == Pages.Page_AttachToNewProcess:
             application_path = self.field("application_path")
-            print(f"application_path = {application_path}")
+            assert application_path
+
+            return attach_to_new_process(
+                host=constants.AEGIS_SERVER_HOST,
+                port=constants.AEGIS_SERVER_PORT,
+                app=application_path,
+                library=constants.AEGIS_SERVER_DLL,
+            )
 
         return None

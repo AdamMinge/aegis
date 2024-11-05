@@ -32,25 +32,19 @@ class LIB_AEGIS_API RecordStrategy : public QObject {
 
   [[nodiscard]] int getType() const;
 
-  [[nodiscard]] const QQueue<RecordedAction> &getRecordedActions();
-  void clearRecordedActions();
+ Q_SIGNALS:
+  void actionRecorded(const RecordedAction &action);
 
  protected:
   virtual void installConnections(QWidget *widget);
   virtual void removeConnections(QWidget *widget);
 
-  void recordAction(RecordedAction &&action);
-  void recordActionWithMerge(RecordedAction &&action);
-
   template <typename TYPE, typename... ARGS>
   void recordAction(ARGS &&...args);
-  template <typename TYPE, typename... ARGS>
-  void recordActionWithMerge(ARGS &&...args);
 
  private:
   int m_type;
   QPointer<QWidget> m_widget;
-  QQueue<RecordedAction> m_recorded_actions;
 };
 
 template <typename TYPE>
@@ -64,12 +58,7 @@ TYPE *RecordStrategy::getWidgetAs() const {
 
 template <typename TYPE, typename... ARGS>
 void RecordStrategy::recordAction(ARGS &&...args) {
-  recordAction(TYPE{getWidgetAsQuery(), std::forward<ARGS>(args)...});
-}
-
-template <typename TYPE, typename... ARGS>
-void RecordStrategy::recordActionWithMerge(ARGS &&...args) {
-  recordActionWithMerge(TYPE{getWidgetAsQuery(), std::forward<ARGS>(args)...});
+  Q_EMIT actionRecorded(TYPE{getWidgetAsQuery(), std::forward<ARGS>(args)...});
 }
 
 /* ---------------------------- RecordWidgetStrategy ------------------------ */

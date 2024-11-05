@@ -3,6 +3,8 @@
 
 #include "aegis/module.h"
 #include "aegis/record/action.h"
+#include "aegis/record/recorder.h"
+#include "aegis/record/strategy.h"
 /* -------------------------------------------------------------------------- */
 
 namespace aegis {
@@ -77,68 +79,28 @@ class RecordedActionsMapper {
   }
 };
 
-/* ------------------------------ RecorderStartCall ------------------------- */
-
-RecorderStartCall::RecorderStartCall(
-    aegis_proto::Recorder::AsyncService* service,
-    grpc::ServerCompletionQueue* queue)
-    : CallData(service, queue, CallTag{this},
-               &aegis_proto::Recorder::AsyncService::RequestStart) {}
-
-RecorderStartCall::~RecorderStartCall() = default;
-
-std::unique_ptr<RecorderStartCallData> RecorderStartCall::clone() const {
-  return std::make_unique<RecorderStartCall>(getService(), getQueue());
-}
-
-RecorderStartCall::ProcessResult RecorderStartCall::process(
-    const Request& request) const {
-  if (recorder().isRecording()) {
-    return {
-        grpc::Status(
-            grpc::StatusCode::INVALID_ARGUMENT,
-            "The start cannot be triggered, the recorder is already working"),
-        {}};
-  }
-
-  recorder().start();
-  return {grpc::Status::OK, google::protobuf::Empty{}};
-}
-
-/* ------------------------------ RecorderStopCall -------------------------- */
-
-RecorderStopCall::RecorderStopCall(aegis_proto::Recorder::AsyncService* service,
-                                   grpc::ServerCompletionQueue* queue)
-    : CallData(service, queue, CallTag{this},
-               &aegis_proto::Recorder::AsyncService::RequestStop) {}
-
-RecorderStopCall::~RecorderStopCall() = default;
-
-std::unique_ptr<RecorderStopCallData> RecorderStopCall::clone() const {
-  return std::make_unique<RecorderStopCall>(getService(), getQueue());
-}
-
-RecorderStopCall::ProcessResult RecorderStopCall::process(
-    const Request& request) const {
-  if (!recorder().isRecording()) {
-    return {
-        grpc::Status(
-            grpc::StatusCode::INVALID_ARGUMENT,
-            "The stop cannot be triggered, the recorder is already stopped"),
-        {}};
-  }
-
-  recorder().stop();
-  return {grpc::Status::OK, google::protobuf::Empty{}};
-}
-
 /* ----------------------------- RecorderListenCall ------------------------ */
 
 RecorderListenCall::RecorderListenCall(
     aegis_proto::Recorder::AsyncService* service,
     grpc::ServerCompletionQueue* queue)
     : StreamCallData(service, queue, CallTag{this},
-                     &aegis_proto::Recorder::AsyncService::RequestListen) {}
+                     &aegis_proto::Recorder::AsyncService::RequestListen),
+      m_recorder(std::make_unique<Recorder>()),
+      m_mapper(std::make_unique<RecordedActionsMapper>()) {
+  m_recorder->addStrategy(std::make_unique<RecordWidgetStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordButtonStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordComboBoxStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordSpinBoxStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordSliderStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordTabBarStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordToolBoxStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordMenuStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordTextEditStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordLineEditStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordItemViewStrategy>());
+  m_recorder->addStrategy(std::make_unique<RecordButtonStrategy>());
+}
 
 RecorderListenCall::~RecorderListenCall() = default;
 
@@ -148,7 +110,15 @@ std::unique_ptr<RecorderListenCallData> RecorderListenCall::clone() const {
 
 RecorderListenCall::ProcessResult RecorderListenCall::process(
     const Request& request) const {
-  return grpc::Status::OK;
+  if (m_recorder->isEmpty()) return {};
+
+  const auto recorded_action = m_recorder->popAction();
+  const auto command = recorded_action.visit(*m_mapper);
+
+  auto response = aegis_proto::RecorderListenResponse{};
+  response.set_command(command.toStdString());
+
+  return response;
 }
 
 /* ------------------------------- RecorderService -------------------------- */
@@ -158,12 +128,7 @@ RecorderService::RecorderService() = default;
 RecorderService::~RecorderService() = default;
 
 void RecorderService::start(grpc::ServerCompletionQueue* queue) {
-  auto start_call = new RecorderStartCall(this, queue);
-  auto stop_call = new RecorderStopCall(this, queue);
   auto listen_call = new RecorderListenCall(this, queue);
-
-  start_call->proceed();
-  stop_call->proceed();
   listen_call->proceed();
 }
 

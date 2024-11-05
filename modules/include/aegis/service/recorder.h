@@ -12,39 +12,8 @@
 
 namespace aegis {
 
-/* ------------------------------ RecorderStartCall ------------------------- */
-
-using RecorderStartCallData =
-    CallData<aegis_proto::Recorder::AsyncService, google::protobuf::Empty,
-             google::protobuf::Empty>;
-
-class LIB_AEGIS_API RecorderStartCall : public RecorderStartCallData {
- public:
-  explicit RecorderStartCall(aegis_proto::Recorder::AsyncService* service,
-                             grpc::ServerCompletionQueue* queue);
-  ~RecorderStartCall() override;
-
-  ProcessResult process(const Request& request) const override;
-
-  std::unique_ptr<RecorderStartCallData> clone() const override;
-};
-
-/* ------------------------------ RecorderStopCall -------------------------- */
-
-using RecorderStopCallData =
-    CallData<aegis_proto::Recorder::AsyncService, google::protobuf::Empty,
-             google::protobuf::Empty>;
-
-class LIB_AEGIS_API RecorderStopCall : public RecorderStopCallData {
- public:
-  explicit RecorderStopCall(aegis_proto::Recorder::AsyncService* service,
-                            grpc::ServerCompletionQueue* queue);
-  ~RecorderStopCall() override;
-
-  ProcessResult process(const Request& request) const override;
-
-  std::unique_ptr<RecorderStopCallData> clone() const override;
-};
+class Recorder;
+class RecordedActionsMapper;
 
 /* ----------------------------- RecorderListenCall ------------------------ */
 
@@ -61,6 +30,10 @@ class LIB_AEGIS_API RecorderListenCall : public RecorderListenCallData {
   ProcessResult process(const Request& request) const override;
 
   std::unique_ptr<RecorderListenCallData> clone() const override;
+
+ private:
+  std::unique_ptr<Recorder> m_recorder;
+  std::unique_ptr<RecordedActionsMapper> m_mapper;
 };
 
 /* ------------------------------ RecorderService --------------------------- */

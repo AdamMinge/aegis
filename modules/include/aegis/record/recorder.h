@@ -51,15 +51,17 @@ class LIB_AEGIS_API Recorder : public QObject {
 
   void start();
   void stop();
-  void clear();
-  [[nodiscard]] QQueue<RecordedAction> report() const;
 
   [[nodiscard]] bool isRecording() const;
+
+  [[nodiscard]] bool isEmpty() const;
+  [[nodiscard]] RecordedAction popAction();
 
   bool addStrategy(std::unique_ptr<RecordStrategy> &&strategy);
 
  protected Q_SLOTS:
   void onCurrentWidgetChanged(QWidget *widget);
+  void onActionReported(const RecordedAction &action);
 
  private:
   [[nodiscard]] RecordStrategy *findStrategy(QWidget *widget) const;

@@ -18,7 +18,6 @@ set(sources
     ${source_root}/service/marker.cpp
     ${source_root}/service/recorder.cpp
     ${source_root}/service/object.cpp
-    ${source_root}/service/sniffer.cpp
     ${source_root}/record/action.cpp
     ${source_root}/record/recorder.cpp
     ${source_root}/record/strategy.cpp
@@ -27,8 +26,7 @@ set(sources
     ${source_root}/search/strategy.cpp
     ${source_root}/mark/marker.cpp
     ${source_root}/mark/widget_marker.cpp
-    ${source_root}/mark/widget_tooltip.cpp
-    ${source_root}/sniff/sniffer.cpp)
+    ${source_root}/mark/widget_tooltip.cpp)
 
 set(includes
     ${include_root}/config.h
@@ -40,7 +38,6 @@ set(includes
     ${include_root}/service/marker.h
     ${include_root}/service/recorder.h
     ${include_root}/service/object.h
-    ${include_root}/service/sniffer.h
     ${include_root}/record/action.h
     ${include_root}/record/recorder.h
     ${include_root}/record/strategy.h
@@ -49,8 +46,7 @@ set(includes
     ${include_root}/search/strategy.h
     ${include_root}/mark/marker.h
     ${include_root}/mark/widget_marker.h
-    ${include_root}/mark/widget_tooltip.h
-    ${include_root}/sniff/sniffer.h)
+    ${include_root}/mark/widget_tooltip.h)
 
 set(resources ${resource_root}/aegis.qrc)
 

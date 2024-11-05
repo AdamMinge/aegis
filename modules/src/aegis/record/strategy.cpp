@@ -56,7 +56,6 @@ void RecordStrategy::setWidget(QWidget *widget) {
   }
 
   m_widget = widget;
-  clearRecordedActions();
 
   if (m_widget) {
     installConnections(m_widget);
@@ -79,27 +78,6 @@ void RecordStrategy::installConnections(QWidget *widget) { Q_UNUSED(widget); }
 
 void RecordStrategy::removeConnections(QWidget *widget) {
   m_widget->disconnect(this);
-}
-
-const QQueue<RecordedAction> &RecordStrategy::getRecordedActions() {
-  return m_recorded_actions;
-}
-
-void RecordStrategy::clearRecordedActions() { m_recorded_actions.clear(); }
-
-void RecordStrategy::recordAction(RecordedAction &&action) {
-  m_recorded_actions.enqueue(std::move(action));
-}
-
-void RecordStrategy::recordActionWithMerge(RecordedAction &&action) {
-  if (!m_recorded_actions.isEmpty()) {
-    const auto &last_action = m_recorded_actions.back();
-    if (last_action.index() == action.index()) {
-      m_recorded_actions.pop_back();
-    }
-  }
-
-  recordAction(std::move(action));
 }
 
 /* ---------------------------- RecordWidgetStrategy ------------------------ */
@@ -396,7 +374,7 @@ void RecordTextEditStrategy::installConnections(QWidget *widget) {
 }
 
 void RecordTextEditStrategy::onTextChanged(const QString &text) {
-  recordActionWithMerge<RecordedAction::TextEditTextChanged>(text);
+  recordAction<RecordedAction::TextEditTextChanged>(text);
 }
 
 /* --------------------------- RecordLineEditStrategy ----------------------- */
@@ -434,7 +412,7 @@ bool RecordLineEditStrategy::eventFilter(QObject *obj, QEvent *event) {
 }
 
 void RecordLineEditStrategy::onTextChanged(const QString &text) {
-  recordActionWithMerge<RecordedAction::LineEditTextChanged>(text);
+  recordAction<RecordedAction::LineEditTextChanged>(text);
 }
 
 void RecordLineEditStrategy::onReturnPressed() {

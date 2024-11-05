@@ -131,18 +131,11 @@ void Recorder::stop() {
   m_running = false;
 }
 
-void Recorder::clear() { m_recorded_actions.clear(); }
-
-QQueue<RecordedAction> Recorder::report() const {
-  auto recorded_actions = m_recorded_actions;
-  if (m_current_strategy) {
-    recorded_actions.append(m_current_strategy->getRecordedActions());
-  }
-
-  return recorded_actions;
-}
-
 bool Recorder::isRecording() const { return m_running; }
+
+bool Recorder::isEmpty() const { return m_recorded_actions.empty(); }
+
+RecordedAction Recorder::popAction() { return m_recorded_actions.takeFirst(); }
 
 bool Recorder::addStrategy(std::unique_ptr<RecordStrategy> &&strategy) {
   if (m_strategies.contains(strategy->getType())) return false;
@@ -155,15 +148,22 @@ void Recorder::onCurrentWidgetChanged(QWidget *widget) {
   auto strategy = findStrategy(widget);
 
   if (m_current_strategy) {
-    m_recorded_actions.append(m_current_strategy->getRecordedActions());
     m_current_strategy->setWidget(nullptr);
+    disconnect(m_current_strategy, &RecordStrategy::actionRecorded, this,
+               &Recorder::onActionReported);
   }
 
   m_current_strategy = strategy;
 
   if (m_current_strategy) {
     m_current_strategy->setWidget(widget);
+    connect(m_current_strategy, &RecordStrategy::actionRecorded, this,
+            &Recorder::onActionReported);
   }
+}
+
+void Recorder::onActionReported(const RecordedAction &action) {
+  m_recorded_actions.push_back(action);
 }
 
 RecordStrategy *Recorder::findStrategy(QWidget *widget) const {

@@ -12,23 +12,9 @@ service Marker {
     rpc Stop (google.protobuf.Empty) returns (google.protobuf.Empty) {}
 }
 
-// --------------------------------- Sniffer -------------------------------- //
-
-service Sniffer {
-    rpc Start (google.protobuf.Empty) returns (google.protobuf.Empty) {}
-    rpc Stop (google.protobuf.Empty) returns (google.protobuf.Empty) {}
-    rpc Listen (google.protobuf.Empty)  returns (stream SnifferListenResponse) {}
-}
-
-message SnifferListenResponse {
-    string event = 1;
-}
-
 // --------------------------------- Recorder -------------------------------- //
 
 service Recorder {
-    rpc Start (google.protobuf.Empty) returns (google.protobuf.Empty) {}
-    rpc Stop (google.protobuf.Empty) returns (google.protobuf.Empty) {}
     rpc Listen (google.protobuf.Empty) returns (stream RecorderListenResponse) {}
 }
 

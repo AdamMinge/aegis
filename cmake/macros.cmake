@@ -323,7 +323,7 @@ macro(__aegis_create_python_venv)
   endif()
 
   if(NOT EXISTS ${THIS_VENV})
-    find_package(Python 3.10 REQUIRED)
+    find_package(Python 3 REQUIRED)
     execute_process(COMMAND ${Python_EXECUTABLE} "-m" "venv" ${THIS_VENV}
                     WORKING_DIRECTORY ${THIS_WORKING_DIRECTORY})
     unset(${Python_EXECUTABLE})
@@ -335,7 +335,7 @@ macro(__aegis_create_python_venv)
     set(Python_EXECUTABLE ${THIS_VENV}/bin/python)
   endif()
 
-  find_package(Python 3.10 REQUIRED)
+  find_package(Python 3 REQUIRED)
 
   execute_process(
     COMMAND ${Python_EXECUTABLE} "-m" "pip" "install" "--upgrade" "pip"

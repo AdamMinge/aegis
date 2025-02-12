@@ -17,10 +17,13 @@ set(sources
     ${source_root}/server/call.cpp
     ${source_root}/service/marker.cpp
     ${source_root}/service/recorder.cpp
+    ${source_root}/service/searcher.cpp
     ${source_root}/service/object.cpp
+    ${source_root}/service/utils.cpp
     ${source_root}/record/action.cpp
     ${source_root}/record/recorder.cpp
     ${source_root}/record/strategy.cpp
+    ${source_root}/search/utils.cpp
     ${source_root}/search/query.cpp
     ${source_root}/search/searcher.cpp
     ${source_root}/search/strategy.cpp
@@ -37,10 +40,13 @@ set(includes
     ${include_root}/server/call.h
     ${include_root}/service/marker.h
     ${include_root}/service/recorder.h
+    ${include_root}/service/searcher.h
     ${include_root}/service/object.h
+    ${include_root}/service/utils.h
     ${include_root}/record/action.h
     ${include_root}/record/recorder.h
     ${include_root}/record/strategy.h
+    ${include_root}/search/utils.h
     ${include_root}/search/query.h
     ${include_root}/search/searcher.h
     ${include_root}/search/strategy.h

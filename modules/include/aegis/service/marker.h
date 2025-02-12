@@ -14,34 +14,36 @@ namespace aegis {
 
 /* ------------------------------ MarkerStartCall -------------------------- */
 
-using MarkerStartCallData =
-    CallData<aegis_proto::Marker::AsyncService, google::protobuf::Empty,
-             google::protobuf::Empty>;
+using MarkerStartCallData = CallData<
+  aegis_proto::Marker::AsyncService, google::protobuf::Empty,
+  google::protobuf::Empty>;
 
 class LIB_AEGIS_API MarkerStartCall : public MarkerStartCallData {
- public:
-  explicit MarkerStartCall(aegis_proto::Marker::AsyncService* service,
-                           grpc::ServerCompletionQueue* queue);
+public:
+  explicit MarkerStartCall(
+    aegis_proto::Marker::AsyncService *service,
+    grpc::ServerCompletionQueue *queue);
   ~MarkerStartCall() override;
 
-  ProcessResult process(const Request& request) const override;
+  ProcessResult process(const Request &request) const override;
 
   std::unique_ptr<MarkerStartCallData> clone() const override;
 };
 
 /* ------------------------------ MarkerStartCall -------------------------- */
 
-using MarkerStartCallData =
-    CallData<aegis_proto::Marker::AsyncService, google::protobuf::Empty,
-             google::protobuf::Empty>;
+using MarkerStartCallData = CallData<
+  aegis_proto::Marker::AsyncService, google::protobuf::Empty,
+  google::protobuf::Empty>;
 
 class LIB_AEGIS_API MarkerStopCall : public MarkerStartCallData {
- public:
-  explicit MarkerStopCall(aegis_proto::Marker::AsyncService* service,
-                          grpc::ServerCompletionQueue* queue);
+public:
+  explicit MarkerStopCall(
+    aegis_proto::Marker::AsyncService *service,
+    grpc::ServerCompletionQueue *queue);
   ~MarkerStopCall() override;
 
-  ProcessResult process(const Request& request) const override;
+  ProcessResult process(const Request &request) const override;
 
   std::unique_ptr<MarkerStartCallData> clone() const override;
 };
@@ -49,13 +51,13 @@ class LIB_AEGIS_API MarkerStopCall : public MarkerStartCallData {
 /* ------------------------------- MarkerService --------------------------- */
 
 class MarkerService : public ServiceWrapper<aegis_proto::Marker::AsyncService> {
- public:
+public:
   explicit MarkerService();
   ~MarkerService() override;
 
-  void start(grpc::ServerCompletionQueue* queue) override;
+  void start(grpc::ServerCompletionQueue *queue) override;
 };
 
-}  // namespace aegis
+}// namespace aegis
 
-#endif  // AEGIS_SERVICE_MARKER_H
+#endif// AEGIS_SERVICE_MARKER_H

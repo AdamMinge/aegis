@@ -1,5 +1,7 @@
 /* ----------------------------------- Local -------------------------------- */
 #include "aegis/search/strategy.h"
+
+#include "aegis/search/utils.h"
 /* --------------------------------- Standard ------------------------------- */
 #include <set>
 /* ------------------------------------ Qt ---------------------------------- */
@@ -35,8 +37,8 @@ TypeSearch::TypeSearch() = default;
 
 TypeSearch::~TypeSearch() = default;
 
-bool TypeSearch::matchesObjectQuery(const QObject* object,
-                                    const QVariantMap& query) const {
+bool TypeSearch::matchesObjectQuery(
+  const QObject *object, const QVariantMap &query) const {
   if (query.contains(type_query)) {
     return object->metaObject()->className() == query[type_query];
   }
@@ -44,7 +46,7 @@ bool TypeSearch::matchesObjectQuery(const QObject* object,
   return true;
 }
 
-QVariantMap TypeSearch::createObjectQuery(const QObject* object) const {
+QVariantMap TypeSearch::createObjectQuery(const QObject *object) const {
   auto query = QVariantMap{};
   query[type_query] = object->metaObject()->className();
 
@@ -57,13 +59,13 @@ PropertiesSearch::PropertiesSearch() = default;
 
 PropertiesSearch::~PropertiesSearch() = default;
 
-bool PropertiesSearch::matchesObjectQuery(const QObject* object,
-                                          const QVariantMap& query) const {
+bool PropertiesSearch::matchesObjectQuery(
+  const QObject *object, const QVariantMap &query) const {
   if (query.contains(properties_query)) {
     const auto properties = query[properties_query].toMap();
 
     const auto used_properties = getUsedProperties(object);
-    for (const auto& property : used_properties) {
+    for (const auto &property : used_properties) {
       if (object->property(property.toUtf8().data()) != properties[property])
         return false;
     }
@@ -72,12 +74,12 @@ bool PropertiesSearch::matchesObjectQuery(const QObject* object,
   return true;
 }
 
-QVariantMap PropertiesSearch::createObjectQuery(const QObject* object) const {
+QVariantMap PropertiesSearch::createObjectQuery(const QObject *object) const {
   auto query = QVariantMap{};
   auto properties = QVariantMap{};
 
   const auto used_properties = getUsedProperties(object);
-  for (const auto& property : used_properties) {
+  for (const auto &property : used_properties) {
     if (auto value = object->property(property.toUtf8().data());
         value.isValid()) {
       properties[property] = value;
@@ -89,7 +91,7 @@ QVariantMap PropertiesSearch::createObjectQuery(const QObject* object) const {
   return query;
 }
 
-QSet<QString> PropertiesSearch::getUsedProperties(const QObject* object) {
+QSet<QString> PropertiesSearch::getUsedProperties(const QObject *object) {
   static const auto type_to_properties = getTypeToProperties();
 
   auto used_properties = QSet<QString>{};
@@ -110,27 +112,27 @@ QSet<QString> PropertiesSearch::getUsedProperties(const QObject* object) {
 }
 
 QMap<int, QSet<QString>> PropertiesSearch::getTypeToProperties() {
-#define DEF_PROP(Object, ...)                                  \
-  {                                                            \
-    qMetaTypeId<Object>(),                                     \
-        (QSet<QString>({"objectName", "visible", "enabled"}) + \
-         QSet<QString>({__VA_ARGS__}))                         \
+#define DEF_PROP(Object, ...)                                                  \
+  {                                                                            \
+    qMetaTypeId<Object>(),                                                     \
+      (QSet<QString>({"objectName", "visible", "enabled"}) +                   \
+       QSet<QString>({__VA_ARGS__}))                                           \
   }
 
   const auto type_to_properties = QMap<int, QSet<QString>>{
-      DEF_PROP(QWidget),
-      DEF_PROP(QPushButton, "text"),
-      DEF_PROP(QLineEdit, "text", "placeholderText"),
-      DEF_PROP(QLabel, "text"),
-      DEF_PROP(QMenu, "title"),
-      DEF_PROP(QCheckBox, "checked", "text"),
-      DEF_PROP(QComboBox, "currentText"),
-      DEF_PROP(QRadioButton, "checked", "text"),
-      DEF_PROP(QAbstractSlider, "value", "maximum", "minimum"),
-      DEF_PROP(QProgressBar, "value", "maximum", "minimum"),
-      DEF_PROP(QTabWidget, "currentIndex", "count"),
-      DEF_PROP(QTableWidget, "rowCount", "columnCount"),
-      DEF_PROP(QPlainTextEdit, "plainText"),
+    DEF_PROP(QWidget),
+    DEF_PROP(QPushButton, "text"),
+    DEF_PROP(QLineEdit, "text", "placeholderText"),
+    DEF_PROP(QLabel, "text"),
+    DEF_PROP(QMenu, "title"),
+    DEF_PROP(QCheckBox, "checked", "text"),
+    DEF_PROP(QComboBox, "currentText"),
+    DEF_PROP(QRadioButton, "checked", "text"),
+    DEF_PROP(QAbstractSlider, "value", "maximum", "minimum"),
+    DEF_PROP(QProgressBar, "value", "maximum", "minimum"),
+    DEF_PROP(QTabWidget, "currentIndex", "count"),
+    DEF_PROP(QTableWidget, "rowCount", "columnCount"),
+    DEF_PROP(QPlainTextEdit, "plainText"),
   };
 
 #undef DEF_PROP
@@ -144,8 +146,8 @@ PathSearch::PathSearch() = default;
 
 PathSearch::~PathSearch() = default;
 
-bool PathSearch::matchesObjectQuery(const QObject* object,
-                                    const QVariantMap& query) const {
+bool PathSearch::matchesObjectQuery(
+  const QObject *object, const QVariantMap &query) const {
   if (query.contains(path_query)) {
     return getPath(object).contains(query[path_query].toString());
   }
@@ -153,14 +155,14 @@ bool PathSearch::matchesObjectQuery(const QObject* object,
   return true;
 }
 
-QVariantMap PathSearch::createObjectQuery(const QObject* object) const {
+QVariantMap PathSearch::createObjectQuery(const QObject *object) const {
   auto query = QVariantMap{};
   query[path_query] = getPath(object);
 
   return query;
 }
 
-QString PathSearch::getPath(const QObject* object) const {
+QString PathSearch::getPath(const QObject *object) const {
   auto objects_path = QStringList{};
 
   while (object) {
@@ -176,4 +178,35 @@ QString PathSearch::getPath(const QObject* object) const {
   return objects_path.join(".");
 }
 
-}  // namespace aegis
+/* -------------------------------- OrderIndex ------------------------------ */
+
+OrderIndex::OrderIndex() = default;
+
+OrderIndex::~OrderIndex() = default;
+
+bool OrderIndex::matchesObjectQuery(
+  const QObject *object, const QVariantMap &query) const {
+  if (query.contains(order_index_query)) {
+    return getOrderIndex(object) == query[order_index_query];
+  }
+
+  return true;
+}
+
+QVariantMap OrderIndex::createObjectQuery(const QObject *object) const {
+  auto query = QVariantMap{};
+  query[order_index_query] = getOrderIndex(object);
+
+  return query;
+}
+
+uint OrderIndex::getOrderIndex(const QObject *object) const {
+  if (auto parent = object->parent(); parent) {
+    return parent->children().indexOf(object);
+  }
+
+  auto topObjects = getTopLevelObjects();
+  return topObjects.indexOf(object);
+}
+
+}// namespace aegis

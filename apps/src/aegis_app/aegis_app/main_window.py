@@ -17,21 +17,21 @@ from pyside6_utils.widgets import DataClassTreeView
 from pyside6_utils.widgets.delegates import DataclassEditorsDelegate
 
 from aegis_app.client import Client
-from aegis_app.models import MethodsModel, ObjectsModel
+from aegis_app.models import MethodsModel, GRPCObjectsModel
 
 
 class ObjectsDock(QDockWidget):
-    def __init__(self):
+    def __init__(self, client: Client):
         super().__init__("Objects")
+        self._client = client
         self._init_ui()
 
     def _init_ui(self):
-        self._model = ObjectsModel()
+        self._model = GRPCObjectsModel(self._client)
         self._view = QTreeView()
         self._view.setModel(self._model)
         self._view.setSelectionBehavior(QTableView.SelectionBehavior.SelectRows)
         self._view.setAlternatingRowColors(True)
-        self._view.setHeaderHidden(True)
 
         container = QWidget()
         layout = QVBoxLayout()
@@ -106,6 +106,7 @@ class ViewerWidget(QWidget):
 class MainWindow(QMainWindow):
     def __init__(self, client: Client):
         super().__init__()
+        self._client = client
         self._init_ui()
 
     def _init_ui(self):
@@ -113,7 +114,7 @@ class MainWindow(QMainWindow):
         self.resize(800, 600)
         self.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
 
-        self._objects_dock = ObjectsDock()
+        self._objects_dock = ObjectsDock(self._client)
         self._properties_dock = PropertiesDock()
         self._methods_dock = MethodsDock()
         self._terminal_dock = TerminalDock()

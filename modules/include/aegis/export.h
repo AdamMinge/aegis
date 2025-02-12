@@ -11,4 +11,4 @@
 #define LIB_AEGIS_API AEGIS_API_IMPORT
 #endif
 
-#endif  // AEGIS_EXPORT_H
+#endif// AEGIS_EXPORT_H

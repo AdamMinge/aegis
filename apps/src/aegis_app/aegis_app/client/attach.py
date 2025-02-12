@@ -10,7 +10,7 @@ from PySide6.QtNetwork import QHostAddress
 from aegis_app.client import Client
 
 
-CONNECTING_TIMEOUT = 0.5
+CONNECTING_TIMEOUT = 2.0
 ATTACHING_TIMEOUT = 0.5
 
 

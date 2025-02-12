@@ -22,10 +22,61 @@ message RecorderListenResponse {
     string command = 1;
 }
 
+// -------------------------------- Searcher --------------------------------- //
+
+service Searcher {
+    rpc Tree (OptionalObjectRequest) returns (TreeResponse) {}
+    rpc ListenTreeChanges (google.protobuf.Empty) returns (stream TreeChangeResponse) {}
+    rpc Find (FindRequest) returns (FindResponse) {}
+}
+
+message OptionalObjectRequest {
+    optional string object = 1;
+}
+
+message TreeResponse {
+    repeated TreeNode nodes = 1;
+}
+
+message TreeNode {
+    string object = 1;
+    repeated TreeNode nodes = 2;
+}
+
+message TreeChangeResponse {
+    oneof change_type {
+        ObjectAdded added = 1;
+        ObjectRemoved removed = 2;
+        ObjectReplaced replaced = 3;
+    }
+}
+
+message ObjectAdded {
+    string parent = 1;
+    string object = 2;
+}
+
+message ObjectRemoved {
+    string parent = 1;
+    string object = 2;
+}
+
+message ObjectReplaced {
+    string from = 1;
+    string to = 2;
+}
+
+message FindRequest {
+    string object = 1;
+}
+
+message FindResponse {
+    repeated string objects = 1;
+}
+
 // --------------------------------- Object ---------------------------------- //
 
 service Object {
-    rpc Find (ObjectRequest) returns (FindResponse) {}
     rpc Parent (ObjectRequest) returns (ParentResponse) {}
     rpc Children (ObjectRequest) returns (ChildrenResponse) {}
 
@@ -40,6 +91,14 @@ message ObjectRequest {
     string object = 1;
 }
 
+message ParentResponse {
+    optional string parent = 1;
+}
+
+message ChildrenResponse {
+    repeated string children = 1;
+}
+
 message InvokeMethodRequest {
     string object = 1;
     string method = 2;
@@ -52,44 +111,12 @@ message SetPropertyRequest {
     google.protobuf.Value value = 3;
 }
 
-message FindResponse {
-    repeated string objects = 1;
-}
-
-message ParentResponse {
-    repeated ObjectParent objects = 1;
-}
-
-message ObjectParent {
-    string object = 1;
-    string parent = 2;
-}
-
-message ChildrenResponse {
-    repeated ObjectChildren objects = 1;
-}
-
-message ObjectChildren {
-    string object = 1;
-    repeated string children = 2;
-}
-
 message DumpMethodsResponse {
-    repeated ObjectMethods objects = 1;
-}
-
-message ObjectMethods {
-    string object = 1;
-    repeated string methods = 2;
+    repeated string methods = 1;
 }
 
 message DumpPropertiesResponse {
-    repeated ObjectProperties objects = 1;
-}
-
-message ObjectProperties {
-    string object = 1;
-    repeated PropertyValue properties = 2;
+    repeated PropertyValue properties = 1;
 }
 
 message PropertyValue {

@@ -1,5 +1,5 @@
-#ifndef AEGIS_SEARCH_Searcher_H
-#define AEGIS_SEARCH_Searcher_H
+#ifndef AEGIS_SEARCH_SEARCHER_H
+#define AEGIS_SEARCH_SEARCHER_H
 
 /* ------------------------------------ Qt ---------------------------------- */
 #include <QObject>
@@ -16,31 +16,36 @@ namespace aegis {
 
 class SearchStrategy;
 
-/* -------------------------------- Searcher --------------------------- */
+/* ----------------------------------- Searcher ----------------------------- */
 
 class LIB_AEGIS_API Searcher : public QObject {
   Q_OBJECT
 
- public:
+public:
   explicit Searcher();
   ~Searcher() override;
 
-  [[nodiscard]] QObject* getObject(const ObjectQuery& query) const;
-  [[nodiscard]] QList<QObject*> getObjects(const ObjectQuery& query) const;
+  [[nodiscard]] QObject *getObject(const ObjectQuery &query) const;
+  [[nodiscard]] QList<QObject *> getObjects(const ObjectQuery &query) const;
 
-  [[nodiscard]] ObjectQuery getQuery(const QObject* object) const;
+  [[nodiscard]] ObjectQuery getQuery(const QObject *object) const;
 
-  void addStrategy(std::unique_ptr<SearchStrategy>&& strategy);
+  void addStrategy(std::unique_ptr<SearchStrategy> &&strategy);
 
- private:
-  [[nodiscard]] QList<QObject*> findObjects(
-      const ObjectQuery& query,
-      qsizetype limit = std::numeric_limits<qsizetype>::max()) const;
+Q_SIGNALS:
+  void objectRemoved(const ObjectQuery &parent, const ObjectQuery &object);
+  void objectAdded(const ObjectQuery &parent, const ObjectQuery &object);
+  void objectReplaced(const ObjectQuery &from, const ObjectQuery &to);
 
- private:
+private:
+  [[nodiscard]] QList<QObject *> findObjects(
+    const ObjectQuery &query,
+    qsizetype limit = std::numeric_limits<qsizetype>::max()) const;
+
+private:
   std::list<std::unique_ptr<SearchStrategy>> m_strategies;
 };
 
-}  // namespace aegis
+}// namespace aegis
 
-#endif  // AEGIS_SEARCH_Searcher_H
+#endif// AEGIS_SEARCH_SEARCHER_H

@@ -2,7 +2,6 @@
 #include "aegis/record/recorder.h"
 
 #include "aegis/module.h"
-#include "aegis/record/action.h"
 #include "aegis/record/strategy.h"
 /* ------------------------------------ Qt ---------------------------------- */
 #include <QAbstractButton>
@@ -19,7 +18,7 @@ namespace aegis {
 
 [[nodiscard]] QWidget *findScrollAreaException(QWidget *widget) {
   const auto is_scrollarea_viewport =
-      widget->objectName() == QLatin1String("qt_scrollarea_viewport");
+    widget->objectName() == QLatin1String("qt_scrollarea_viewport");
   if (is_scrollarea_viewport) widget = widget->parentWidget();
 
   return widget;
@@ -28,8 +27,8 @@ namespace aegis {
 [[nodiscard]] QWidget *findComboBoxException(QWidget *widget) {
   const auto class_name = widget->metaObject()->className();
   const auto is_combobox_internal =
-      class_name == QLatin1String("QComboBoxPrivateContainer") ||
-      class_name == QLatin1String("QComboBoxListView");
+    class_name == QLatin1String("QComboBoxPrivateContainer") ||
+    class_name == QLatin1String("QComboBoxListView");
 
   while (is_combobox_internal) {
     if (auto combobox = qobject_cast<QComboBox *>(widget); combobox) break;
@@ -43,7 +42,7 @@ namespace aegis {
 
 [[nodiscard]] QWidget *findTabBarException(QWidget *widget) {
   const auto is_close_button =
-      widget->metaObject()->className() == QLatin1String("CloseButton");
+    widget->metaObject()->className() == QLatin1String("CloseButton");
 
   if (is_close_button) {
     auto tabbar = qobject_cast<QTabBar *>(widget->parentWidget());
@@ -53,14 +52,14 @@ namespace aegis {
   return widget;
 }
 
-/* --------------------------- RecorderWidgetListener ----------------------- */
+/* ------------------------ ActionRecorderWidgetListener -------------------- */
 
-RecorderWidgetListener::RecorderWidgetListener(QObject *parent)
+ActionRecorderWidgetListener::ActionRecorderWidgetListener(QObject *parent)
     : QObject(parent), m_current_widget(nullptr) {}
 
-RecorderWidgetListener::~RecorderWidgetListener() = default;
+ActionRecorderWidgetListener::~ActionRecorderWidgetListener() = default;
 
-bool RecorderWidgetListener::eventFilter(QObject *obj, QEvent *event) {
+bool ActionRecorderWidgetListener::eventFilter(QObject *obj, QEvent *event) {
   switch (event->type()) {
     case QEvent::KeyPress:
     case QEvent::KeyRelease: {
@@ -80,16 +79,16 @@ bool RecorderWidgetListener::eventFilter(QObject *obj, QEvent *event) {
   return QObject::eventFilter(obj, event);
 }
 
-void RecorderWidgetListener::setWidget(QWidget *widget) {
+void ActionRecorderWidgetListener::setWidget(QWidget *widget) {
   if (m_current_widget != widget) {
     m_current_widget = widget;
     Q_EMIT currentWidgetChanged(widget);
   }
 }
 
-QWidget *RecorderWidgetListener::findWidget(QWidget *widget) const {
+QWidget *ActionRecorderWidgetListener::findWidget(QWidget *widget) const {
   static const auto find_exceptions = {
-      &findScrollAreaException, &findComboBoxException, &findTabBarException};
+    &findScrollAreaException, &findComboBoxException, &findTabBarException};
 
   if (widget) {
     for (const auto find_exception : find_exceptions) {
@@ -100,21 +99,20 @@ QWidget *RecorderWidgetListener::findWidget(QWidget *widget) const {
   return widget;
 }
 
-/* ---------------------------------- Recorder ------------------------------ */
+/* ------------------------------- ActionRecorder --------------------------- */
 
-Recorder::Recorder(QObject *parent)
-    : QObject(parent),
-      m_current_strategy(nullptr),
-      m_widget_listener(new RecorderWidgetListener),
-      m_running(false) {
-  connect(m_widget_listener.get(),
-          &RecorderWidgetListener::currentWidgetChanged, this,
-          &Recorder::onCurrentWidgetChanged);
+ActionRecorder::ActionRecorder(QObject *parent)
+    : QObject(parent), m_current_strategy(nullptr),
+      m_widget_listener(new ActionRecorderWidgetListener), m_running(false) {
+  connect(
+    m_widget_listener.get(),
+    &ActionRecorderWidgetListener::currentWidgetChanged, this,
+    &ActionRecorder::onCurrentWidgetChanged);
 }
 
-Recorder::~Recorder() = default;
+ActionRecorder::~ActionRecorder() = default;
 
-void Recorder::start() {
+void ActionRecorder::start() {
   Q_ASSERT(!m_running);
 
   qApp->installEventFilter(m_widget_listener.get());
@@ -122,7 +120,7 @@ void Recorder::start() {
   m_running = true;
 }
 
-void Recorder::stop() {
+void ActionRecorder::stop() {
   Q_ASSERT(m_running);
 
   qApp->removeEventFilter(m_widget_listener.get());
@@ -131,42 +129,37 @@ void Recorder::stop() {
   m_running = false;
 }
 
-bool Recorder::isRecording() const { return m_running; }
+bool ActionRecorder::isRecording() const { return m_running; }
 
-bool Recorder::isEmpty() const { return m_recorded_actions.empty(); }
-
-RecordedAction Recorder::popAction() { return m_recorded_actions.takeFirst(); }
-
-bool Recorder::addStrategy(std::unique_ptr<RecordStrategy> &&strategy) {
+bool ActionRecorder::addStrategy(
+  std::unique_ptr<ActionRecordStrategy> &&strategy) {
   if (m_strategies.contains(strategy->getType())) return false;
 
   m_strategies.insert(std::make_pair(strategy->getType(), std::move(strategy)));
   return true;
 }
 
-void Recorder::onCurrentWidgetChanged(QWidget *widget) {
+void ActionRecorder::onCurrentWidgetChanged(QWidget *widget) {
   auto strategy = findStrategy(widget);
 
   if (m_current_strategy) {
     m_current_strategy->setWidget(nullptr);
-    disconnect(m_current_strategy, &RecordStrategy::actionRecorded, this,
-               &Recorder::onActionReported);
+    disconnect(
+      m_current_strategy, &ActionRecordStrategy::actionRecorded, this,
+      &ActionRecorder::actionReported);
   }
 
   m_current_strategy = strategy;
 
   if (m_current_strategy) {
     m_current_strategy->setWidget(widget);
-    connect(m_current_strategy, &RecordStrategy::actionRecorded, this,
-            &Recorder::onActionReported);
+    connect(
+      m_current_strategy, &ActionRecordStrategy::actionRecorded, this,
+      &ActionRecorder::actionReported);
   }
 }
 
-void Recorder::onActionReported(const RecordedAction &action) {
-  m_recorded_actions.push_back(action);
-}
-
-RecordStrategy *Recorder::findStrategy(QWidget *widget) const {
+ActionRecordStrategy *ActionRecorder::findStrategy(QWidget *widget) const {
   auto meta_object = widget ? widget->metaObject() : nullptr;
   while (meta_object) {
     const auto type_id = meta_object->metaType().id();
@@ -181,4 +174,33 @@ RecordStrategy *Recorder::findStrategy(QWidget *widget) const {
   return nullptr;
 }
 
-}  // namespace aegis
+/* ----------------------------- ActionRecorderQueue ------------------------ */
+
+ActionRecorderQueue::ActionRecorderQueue() = default;
+
+ActionRecorderQueue::~ActionRecorderQueue() = default;
+
+void ActionRecorderQueue::setRecorder(ActionRecorder *recorder) {
+  if (m_recorder) {
+    m_recorder->disconnect(m_on_action_reported);
+    m_recorded_actions.clear();
+  }
+
+  m_recorder = recorder;
+
+  if (m_recorder) {
+    m_on_action_reported = QObject::connect(
+      m_recorder, &ActionRecorder::actionReported,
+      [this](const auto recorder_action) {
+        m_recorded_actions.push_back(recorder_action);
+      });
+  }
+}
+
+bool ActionRecorderQueue::isEmpty() const { return m_recorded_actions.empty(); }
+
+RecordedAction ActionRecorderQueue::popAction() {
+  return m_recorded_actions.takeFirst();
+}
+
+}// namespace aegis

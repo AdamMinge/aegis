@@ -47,7 +47,7 @@ message TreeChangeResponse {
     oneof change_type {
         ObjectAdded added = 1;
         ObjectRemoved removed = 2;
-        ObjectReplaced replaced = 3;
+        ObjectReparented reparented = 3;
     }
 }
 
@@ -61,9 +61,9 @@ message ObjectRemoved {
     string object = 2;
 }
 
-message ObjectReplaced {
-    string from = 1;
-    string to = 2;
+message ObjectReparented {
+    string parent = 1;
+    string object = 2;
 }
 
 message FindRequest {

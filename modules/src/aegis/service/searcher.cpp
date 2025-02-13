@@ -2,6 +2,7 @@
 #include "aegis/service/searcher.h"
 
 #include "aegis/module.h"
+#include "aegis/observe/observer.h"
 #include "aegis/search/utils.h"
 #include "aegis/service/utils.h"
 /* ------------------------------------ Qt ---------------------------------- */
@@ -11,6 +12,38 @@
 /* -------------------------------------------------------------------------- */
 
 namespace aegis {
+
+/* --------------------------- ObservedActionsMapper ------------------------ */
+
+class ObservedActionsMapper {
+public:
+  aegis_proto::TreeChangeResponse
+  operator()(const ObservedAction::ObjectCreated &action) const {
+    aegis_proto::TreeChangeResponse response;
+    auto added = response.mutable_added();
+    added->set_parent(action.parent.toString().toStdString());
+    added->set_object(action.object.toString().toStdString());
+    return response;
+  }
+
+  aegis_proto::TreeChangeResponse
+  operator()(const ObservedAction::ObjectDestroyed &action) const {
+    aegis_proto::TreeChangeResponse response;
+    auto added = response.mutable_removed();
+    added->set_parent(action.parent.toString().toStdString());
+    added->set_object(action.object.toString().toStdString());
+    return response;
+  }
+
+  aegis_proto::TreeChangeResponse
+  operator()(const ObservedAction::ObjectReparented &action) const {
+    aegis_proto::TreeChangeResponse response;
+    auto added = response.mutable_reparented();
+    added->set_parent(action.parent.toString().toStdString());
+    added->set_object(action.object.toString().toStdString());
+    return response;
+  }
+};
 
 /* ------------------------------ SearcherTreeCall -------------------------- */
 
@@ -80,13 +113,21 @@ SearcherListenChangesCall::SearcherListenChangesCall(
   grpc::ServerCompletionQueue *queue)
     : StreamCallData(
         service, queue, CallTag{this},
-        &aegis_proto::Searcher::AsyncService::RequestListenTreeChanges) {}
+        &aegis_proto::Searcher::AsyncService::RequestListenTreeChanges),
+      m_observer(std::make_unique<ObjectObserver>()),
+      m_observer_queue(std::make_unique<ObjectObserverQueue>()),
+      m_mapper(std::make_unique<ObservedActionsMapper>()) {}
 
 SearcherListenChangesCall::~SearcherListenChangesCall() = default;
 
 SearcherListenChangesCall::ProcessResult
 SearcherListenChangesCall::process(const Request &request) const {
-  return {};
+  if (m_observer_queue->isEmpty()) return {};
+
+  const auto observer_action = m_observer_queue->popAction();
+  const auto response = observer_action.visit(*m_mapper);
+
+  return response;
 }
 
 std::unique_ptr<SearcherListenChangesCallData>

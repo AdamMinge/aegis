@@ -7,7 +7,7 @@
 
 namespace aegis {
 
-QList<QObject *> getTopLevelObjects();
+QObjectList getTopLevelObjects();
 
 }// namespace aegis
 

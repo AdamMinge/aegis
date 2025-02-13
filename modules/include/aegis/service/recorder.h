@@ -12,27 +12,30 @@
 
 namespace aegis {
 
-class Recorder;
+class ActionRecorder;
+class ActionRecorderQueue;
 class RecordedActionsMapper;
 
 /* ----------------------------- RecorderListenCall ------------------------ */
 
-using RecorderListenCallData =
-    StreamCallData<aegis_proto::Recorder::AsyncService, google::protobuf::Empty,
-                   aegis_proto::RecorderListenResponse>;
+using RecorderListenCallData = StreamCallData<
+  aegis_proto::Recorder::AsyncService, google::protobuf::Empty,
+  aegis_proto::RecorderListenResponse>;
 
 class LIB_AEGIS_API RecorderListenCall : public RecorderListenCallData {
- public:
-  explicit RecorderListenCall(aegis_proto::Recorder::AsyncService* service,
-                              grpc::ServerCompletionQueue* queue);
+public:
+  explicit RecorderListenCall(
+    aegis_proto::Recorder::AsyncService *service,
+    grpc::ServerCompletionQueue *queue);
   ~RecorderListenCall() override;
 
-  ProcessResult process(const Request& request) const override;
+  ProcessResult process(const Request &request) const override;
 
   std::unique_ptr<RecorderListenCallData> clone() const override;
 
- private:
-  std::unique_ptr<Recorder> m_recorder;
+private:
+  std::unique_ptr<ActionRecorder> m_recorder;
+  std::unique_ptr<ActionRecorderQueue> m_recorder_queue;
   std::unique_ptr<RecordedActionsMapper> m_mapper;
 };
 
@@ -40,13 +43,13 @@ class LIB_AEGIS_API RecorderListenCall : public RecorderListenCallData {
 
 class RecorderService
     : public ServiceWrapper<aegis_proto::Recorder::AsyncService> {
- public:
+public:
   explicit RecorderService();
   ~RecorderService() override;
 
-  void start(grpc::ServerCompletionQueue* queue) override;
+  void start(grpc::ServerCompletionQueue *queue) override;
 };
 
-}  // namespace aegis
+}// namespace aegis
 
-#endif  // AEGIS_SERVICE_RECORDER_H
+#endif// AEGIS_SERVICE_RECORDER_H

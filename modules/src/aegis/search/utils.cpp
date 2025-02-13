@@ -7,8 +7,8 @@
 
 namespace aegis {
 
-QList<QObject *> getTopLevelObjects() {
-  auto topLevelObjects = QList<QObject *>{};
+QObjectList getTopLevelObjects() {
+  auto topLevelObjects = QObjectList{};
   for (const auto object : qApp->topLevelWidgets()) {
     if (!object->parent()) { topLevelObjects.append(object); }
   }

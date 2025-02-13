@@ -10,70 +10,86 @@
 #include <QWidget>
 /* ----------------------------------- Local -------------------------------- */
 #include "aegis/export.h"
+#include "aegis/record/action.h"
 /* -------------------------------------------------------------------------- */
 
 namespace aegis {
 
-class RecordStrategy;
-class RecordedAction;
+class ActionRecordStrategy;
 
-/* --------------------------- RecorderWidgetListener ----------------------- */
+/* ------------------------ ActionRecorderWidgetListener -------------------- */
 
-class LIB_AEGIS_API RecorderWidgetListener : public QObject {
+class LIB_AEGIS_API ActionRecorderWidgetListener : public QObject {
   Q_OBJECT
 
- public:
-  explicit RecorderWidgetListener(QObject *parent = nullptr);
-  ~RecorderWidgetListener() override;
+public:
+  explicit ActionRecorderWidgetListener(QObject *parent = nullptr);
+  ~ActionRecorderWidgetListener() override;
 
- Q_SIGNALS:
+Q_SIGNALS:
   void currentWidgetChanged(QWidget *widget);
 
- protected Q_SLOTS:
+protected Q_SLOTS:
   bool eventFilter(QObject *obj, QEvent *event) override;
 
- private:
+private:
   void setWidget(QWidget *widget);
   [[nodiscard]] QWidget *findWidget(QWidget *widget) const;
 
- private:
+private:
   QWidget *m_current_widget;
 };
 
-/* ---------------------------------- Recorder ------------------------------ */
+/* ------------------------------- ActionRecorder --------------------------- */
 
-class LIB_AEGIS_API Recorder : public QObject {
+class LIB_AEGIS_API ActionRecorder : public QObject {
   Q_OBJECT
 
- public:
-  explicit Recorder(QObject *parent = nullptr);
-  ~Recorder();
+public:
+  explicit ActionRecorder(QObject *parent = nullptr);
+  ~ActionRecorder();
 
   void start();
   void stop();
 
   [[nodiscard]] bool isRecording() const;
 
-  [[nodiscard]] bool isEmpty() const;
-  [[nodiscard]] RecordedAction popAction();
+  bool addStrategy(std::unique_ptr<ActionRecordStrategy> &&strategy);
 
-  bool addStrategy(std::unique_ptr<RecordStrategy> &&strategy);
+Q_SIGNALS:
+  void actionReported(const RecordedAction &action);
 
- protected Q_SLOTS:
+protected Q_SLOTS:
   void onCurrentWidgetChanged(QWidget *widget);
-  void onActionReported(const RecordedAction &action);
 
- private:
-  [[nodiscard]] RecordStrategy *findStrategy(QWidget *widget) const;
+private:
+  [[nodiscard]] ActionRecordStrategy *findStrategy(QWidget *widget) const;
 
- private:
-  std::unordered_map<int, std::unique_ptr<RecordStrategy>> m_strategies;
-  QQueue<RecordedAction> m_recorded_actions;
-  RecordStrategy *m_current_strategy;
-  QScopedPointer<RecorderWidgetListener> m_widget_listener;
+private:
+  std::unordered_map<int, std::unique_ptr<ActionRecordStrategy>> m_strategies;
+  ActionRecordStrategy *m_current_strategy;
+  QScopedPointer<ActionRecorderWidgetListener> m_widget_listener;
   bool m_running;
 };
 
-}  // namespace aegis
+/* ----------------------------- ActionRecorderQueue ------------------------ */
 
-#endif  // AEGIS_RECORD_RECORDER_H
+class LIB_AEGIS_API ActionRecorderQueue {
+public:
+  explicit ActionRecorderQueue();
+  ~ActionRecorderQueue();
+
+  void setRecorder(ActionRecorder *recorder);
+
+  [[nodiscard]] bool isEmpty() const;
+  [[nodiscard]] RecordedAction popAction();
+
+private:
+  ActionRecorder *m_recorder;
+  QMetaObject::Connection m_on_action_reported;
+  QQueue<RecordedAction> m_recorded_actions;
+};
+
+}// namespace aegis
+
+#endif// AEGIS_RECORD_RECORDER_H

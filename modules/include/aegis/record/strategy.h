@@ -14,41 +14,41 @@ namespace aegis {
 
 class RecordedAction;
 
-/* ------------------------------- RecordStrategy --------------------------- */
+/* ---------------------------- ActionRecordStrategy ------------------------ */
 
-class LIB_AEGIS_API RecordStrategy : public QObject {
+class LIB_AEGIS_API ActionRecordStrategy : public QObject {
   Q_OBJECT
 
- public:
-  explicit RecordStrategy(int type, QObject *parent = nullptr);
-  ~RecordStrategy() override;
+public:
+  explicit ActionRecordStrategy(int type, QObject *parent = nullptr);
+  ~ActionRecordStrategy() override;
 
   void setWidget(QWidget *widget);
   [[nodiscard]] QWidget *getWidget() const;
 
-  template <typename TYPE>
+  template<typename TYPE>
   [[nodiscard]] TYPE *getWidgetAs() const;
   [[nodiscard]] ObjectQuery getWidgetAsQuery() const;
 
   [[nodiscard]] int getType() const;
 
- Q_SIGNALS:
+Q_SIGNALS:
   void actionRecorded(const RecordedAction &action);
 
- protected:
+protected:
   virtual void installConnections(QWidget *widget);
   virtual void removeConnections(QWidget *widget);
 
-  template <typename TYPE, typename... ARGS>
+  template<typename TYPE, typename... ARGS>
   void recordAction(ARGS &&...args);
 
- private:
+private:
   int m_type;
   QPointer<QWidget> m_widget;
 };
 
-template <typename TYPE>
-TYPE *RecordStrategy::getWidgetAs() const {
+template<typename TYPE>
+TYPE *ActionRecordStrategy::getWidgetAs() const {
   const auto widget = getWidget();
   const auto specific_widget = qobject_cast<TYPE *>(widget);
   Q_ASSERT(widget == specific_widget);
@@ -56,202 +56,212 @@ TYPE *RecordStrategy::getWidgetAs() const {
   return specific_widget;
 }
 
-template <typename TYPE, typename... ARGS>
-void RecordStrategy::recordAction(ARGS &&...args) {
+template<typename TYPE, typename... ARGS>
+void ActionRecordStrategy::recordAction(ARGS &&...args) {
   Q_EMIT actionRecorded(TYPE{getWidgetAsQuery(), std::forward<ARGS>(args)...});
 }
 
-/* ---------------------------- RecordWidgetStrategy ------------------------ */
+/* ------------------------- ActionRecordWidgetStrategy --------------------- */
 
-class LIB_AEGIS_API RecordWidgetStrategy : public RecordStrategy {
+class LIB_AEGIS_API ActionRecordWidgetStrategy : public ActionRecordStrategy {
   Q_OBJECT
 
- public:
-  explicit RecordWidgetStrategy(QObject *parent = nullptr);
-  ~RecordWidgetStrategy() override;
+public:
+  explicit ActionRecordWidgetStrategy(QObject *parent = nullptr);
+  ~ActionRecordWidgetStrategy() override;
 
- protected:
-  explicit RecordWidgetStrategy(int type, QObject *parent = nullptr);
+protected:
+  explicit ActionRecordWidgetStrategy(int type, QObject *parent = nullptr);
 
   bool eventFilter(QObject *obj, QEvent *event) override;
 
- private Q_SLOTS:
+private Q_SLOTS:
   void onOpenContextMenu();
 };
 
-/* ---------------------------- RecordButtonStrategy ------------------------ */
+/* ------------------------- ActionRecordButtonStrategy --------------------- */
 
-class LIB_AEGIS_API RecordButtonStrategy : public RecordWidgetStrategy {
+class LIB_AEGIS_API ActionRecordButtonStrategy
+    : public ActionRecordWidgetStrategy {
   Q_OBJECT
 
- public:
-  explicit RecordButtonStrategy(QObject *parent = nullptr);
-  ~RecordButtonStrategy() override;
+public:
+  explicit ActionRecordButtonStrategy(QObject *parent = nullptr);
+  ~ActionRecordButtonStrategy() override;
 
- protected:
+protected:
   bool eventFilter(QObject *obj, QEvent *event) override;
 
- private Q_SLOTS:
+private Q_SLOTS:
   void onPressed();
   void onClicked();
   void onToggled(bool checked);
 };
 
-/* --------------------------- RecordComboBoxStrategy ----------------------- */
+/* ------------------------ ActionRecordComboBoxStrategy -------------------- */
 
-class LIB_AEGIS_API RecordComboBoxStrategy : public RecordWidgetStrategy {
+class LIB_AEGIS_API ActionRecordComboBoxStrategy
+    : public ActionRecordWidgetStrategy {
   Q_OBJECT
 
- public:
-  explicit RecordComboBoxStrategy(QObject *parent = nullptr);
-  ~RecordComboBoxStrategy() override;
+public:
+  explicit ActionRecordComboBoxStrategy(QObject *parent = nullptr);
+  ~ActionRecordComboBoxStrategy() override;
 
- protected:
+protected:
   void installConnections(QWidget *widget) override;
 
- private Q_SLOTS:
+private Q_SLOTS:
   void onCurrentIndexChanged(int index);
 };
 
-/* --------------------------- RecordSpinBoxStrategy ------------------------ */
+/* ------------------------ ActionRecordSpinBoxStrategy --------------------- */
 
-class LIB_AEGIS_API RecordSpinBoxStrategy : public RecordWidgetStrategy {
+class LIB_AEGIS_API ActionRecordSpinBoxStrategy
+    : public ActionRecordWidgetStrategy {
   Q_OBJECT
 
- public:
-  explicit RecordSpinBoxStrategy(QObject *parent = nullptr);
-  ~RecordSpinBoxStrategy() override;
+public:
+  explicit ActionRecordSpinBoxStrategy(QObject *parent = nullptr);
+  ~ActionRecordSpinBoxStrategy() override;
 
- protected:
+protected:
   void installConnections(QWidget *widget) override;
 
- private Q_SLOTS:
+private Q_SLOTS:
   void onValueChanged(double value);
   void onValueChanged(int value);
 };
 
-/* ---------------------------- RecordSliderStrategy ------------------------ */
+/* ------------------------- ActionRecordSliderStrategy --------------------- */
 
-class LIB_AEGIS_API RecordSliderStrategy : public RecordWidgetStrategy {
+class LIB_AEGIS_API ActionRecordSliderStrategy
+    : public ActionRecordWidgetStrategy {
   Q_OBJECT
 
- public:
-  explicit RecordSliderStrategy(QObject *parent = nullptr);
-  ~RecordSliderStrategy() override;
+public:
+  explicit ActionRecordSliderStrategy(QObject *parent = nullptr);
+  ~ActionRecordSliderStrategy() override;
 
- protected:
+protected:
   void installConnections(QWidget *widget) override;
 
- private Q_SLOTS:
+private Q_SLOTS:
   void onValueChanged(int value);
 };
 
-/* ---------------------------- RecordTabBarStrategy ------------------------ */
+/* ------------------------- ActionRecordTabBarStrategy --------------------- */
 
-class LIB_AEGIS_API RecordTabBarStrategy : public RecordWidgetStrategy {
+class LIB_AEGIS_API ActionRecordTabBarStrategy
+    : public ActionRecordWidgetStrategy {
   Q_OBJECT
 
- public:
-  explicit RecordTabBarStrategy(QObject *parent = nullptr);
-  ~RecordTabBarStrategy() override;
+public:
+  explicit ActionRecordTabBarStrategy(QObject *parent = nullptr);
+  ~ActionRecordTabBarStrategy() override;
 
- protected:
+protected:
   void installConnections(QWidget *widget) override;
   void removeConnections(QWidget *widget) override;
 
- private Q_SLOTS:
+private Q_SLOTS:
   void onCurrentChanged(int index);
   void onTabClosed(int index);
   void onTabMoved(int from, int to);
 
- private:
+private:
   bool m_closing;
 };
 
-/* ---------------------------- RecordToolBoxStrategy ----------------------- */
+/* ------------------------- ActionRecordToolBoxStrategy -------------------- */
 
-class LIB_AEGIS_API RecordToolBoxStrategy : public RecordWidgetStrategy {
+class LIB_AEGIS_API ActionRecordToolBoxStrategy
+    : public ActionRecordWidgetStrategy {
   Q_OBJECT
 
- public:
-  explicit RecordToolBoxStrategy(QObject *parent = nullptr);
-  ~RecordToolBoxStrategy() override;
+public:
+  explicit ActionRecordToolBoxStrategy(QObject *parent = nullptr);
+  ~ActionRecordToolBoxStrategy() override;
 
- protected:
+protected:
   void installConnections(QWidget *widget) override;
 
- private Q_SLOTS:
+private Q_SLOTS:
   void onCurrentChanged(int index);
 };
 
-/* ----------------------------- RecordMenuStrategy ------------------------- */
+/* -------------------------- ActionRecordMenuStrategy ---------------------- */
 
-class LIB_AEGIS_API RecordMenuStrategy : public RecordStrategy {
+class LIB_AEGIS_API ActionRecordMenuStrategy : public ActionRecordStrategy {
   Q_OBJECT
 
- public:
-  explicit RecordMenuStrategy(QObject *parent = nullptr);
-  ~RecordMenuStrategy() override;
+public:
+  explicit ActionRecordMenuStrategy(QObject *parent = nullptr);
+  ~ActionRecordMenuStrategy() override;
 
- protected:
+protected:
   bool eventFilter(QObject *obj, QEvent *event) override;
 
- private Q_SLOTS:
+private Q_SLOTS:
   void onTriggered(QAction *action);
 };
 
-/* --------------------------- RecordTextEditStrategy ----------------------- */
+/* ------------------------ ActionRecordTextEditStrategy -------------------- */
 
-class LIB_AEGIS_API RecordTextEditStrategy : public RecordWidgetStrategy {
+class LIB_AEGIS_API ActionRecordTextEditStrategy
+    : public ActionRecordWidgetStrategy {
   Q_OBJECT
 
- public:
-  explicit RecordTextEditStrategy(QObject *parent = nullptr);
-  ~RecordTextEditStrategy() override;
+public:
+  explicit ActionRecordTextEditStrategy(QObject *parent = nullptr);
+  ~ActionRecordTextEditStrategy() override;
 
- protected:
+protected:
   void installConnections(QWidget *widget) override;
 
- private Q_SLOTS:
+private Q_SLOTS:
   void onTextChanged(const QString &text);
 };
 
-/* --------------------------- RecordLineEditStrategy ----------------------- */
+/* ------------------------ ActionRecordLineEditStrategy -------------------- */
 
-class LIB_AEGIS_API RecordLineEditStrategy : public RecordWidgetStrategy {
+class LIB_AEGIS_API ActionRecordLineEditStrategy
+    : public ActionRecordWidgetStrategy {
   Q_OBJECT
 
- public:
-  explicit RecordLineEditStrategy(QObject *parent = nullptr);
-  ~RecordLineEditStrategy() override;
+public:
+  explicit ActionRecordLineEditStrategy(QObject *parent = nullptr);
+  ~ActionRecordLineEditStrategy() override;
 
- protected:
+protected:
   void installConnections(QWidget *widget) override;
   bool eventFilter(QObject *obj, QEvent *event) override;
 
- private Q_SLOTS:
+private Q_SLOTS:
   void onTextChanged(const QString &text);
   void onReturnPressed();
 };
 
-/* --------------------------- RecordItemViewStrategy ----------------------- */
+/* ------------------------ ActionRecordItemViewStrategy -------------------- */
 
-class LIB_AEGIS_API RecordItemViewStrategy : public RecordWidgetStrategy {
+class LIB_AEGIS_API ActionRecordItemViewStrategy
+    : public ActionRecordWidgetStrategy {
   Q_OBJECT
 
- public:
-  explicit RecordItemViewStrategy(QObject *parent = nullptr);
-  ~RecordItemViewStrategy() override;
+public:
+  explicit ActionRecordItemViewStrategy(QObject *parent = nullptr);
+  ~ActionRecordItemViewStrategy() override;
 
- protected:
+protected:
   void installConnections(QWidget *widget) override;
   void removeConnections(QWidget *widget) override;
 
- private Q_SLOTS:
-  void onDataChanged(const QModelIndex &topLeft, const QModelIndex &bottomRight,
-                     const QList<int> &roles);
+private Q_SLOTS:
+  void onDataChanged(
+    const QModelIndex &topLeft, const QModelIndex &bottomRight,
+    const QList<int> &roles);
 };
 
-}  // namespace aegis
+}// namespace aegis
 
-#endif  // AEGIS_RECORD_STRATEGY_H
+#endif// AEGIS_RECORD_STRATEGY_H

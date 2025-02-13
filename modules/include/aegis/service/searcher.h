@@ -15,6 +15,9 @@
 namespace aegis {
 
 class ObjectQuery;
+class ObjectObserver;
+class ObjectObserverQueue;
+class ObservedActionsMapper;
 
 /* ------------------------------- SearcherTreeCall ------------------------- */
 
@@ -55,6 +58,11 @@ public:
   ProcessResult process(const Request &request) const override;
 
   std::unique_ptr<SearcherListenChangesCallData> clone() const override;
+
+private:
+  std::unique_ptr<ObjectObserver> m_observer;
+  std::unique_ptr<ObjectObserverQueue> m_observer_queue;
+  std::unique_ptr<ObservedActionsMapper> m_mapper;
 };
 
 /* ------------------------------- SearcherFindCall ------------------------- */

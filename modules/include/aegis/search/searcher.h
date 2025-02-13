@@ -32,11 +32,6 @@ public:
 
   void addStrategy(std::unique_ptr<SearchStrategy> &&strategy);
 
-Q_SIGNALS:
-  void objectRemoved(const ObjectQuery &parent, const ObjectQuery &object);
-  void objectAdded(const ObjectQuery &parent, const ObjectQuery &object);
-  void objectReplaced(const ObjectQuery &from, const ObjectQuery &to);
-
 private:
   [[nodiscard]] QList<QObject *> findObjects(
     const ObjectQuery &query,

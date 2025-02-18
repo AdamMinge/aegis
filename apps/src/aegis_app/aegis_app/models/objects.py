@@ -16,12 +16,14 @@ class ObjectNode:
         name: str,
         type: str,
         path: str,
+        address: str,
         parent: typing.Optional["ObjectNode"] = None,
     ):
         self._query = query
         self._name = name
         self._type = type
         self._path = path
+        self._address = address
         self._parent = parent
         self._children = []
 
@@ -51,6 +53,9 @@ class ObjectNode:
     def type(self) -> typing.Any:
         return self._type
 
+    def address(self) -> typing.Any:
+        return self._address
+
 
 def create_object_node(
     query: str, parent: typing.Optional["ObjectNode"] = None
@@ -61,6 +66,7 @@ def create_object_node(
         name=query_data["path"].split(".")[-1],
         type=query_data["type"],
         path=query_data["path"],
+        address=query_data["memory_address"],
         parent=parent,
     )
 
@@ -70,6 +76,7 @@ class ObjectsModel(QAbstractItemModel):
         Name = 0
         Path = 1
         Type = 2
+        Address = 3
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -98,6 +105,8 @@ class ObjectsModel(QAbstractItemModel):
                     return node.type()
                 case ObjectsModel.Columns.Path:
                     return node.path()
+                case ObjectsModel.Columns.Address:
+                    return node.address()
 
     def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
         if (
@@ -111,6 +120,8 @@ class ObjectsModel(QAbstractItemModel):
                     return "Type"
                 case ObjectsModel.Columns.Path:
                     return "Path"
+                case ObjectsModel.Columns.Address:
+                    return "Address"
 
     def index(self, row, column, parent=QModelIndex()):
         if not self.hasIndex(row, column, parent):
@@ -166,16 +177,12 @@ class GRPCObjectsModel(ObjectsModel):
         super().__init__(parent)
         self._client = client
 
-        self._timer = QTimer()
-        self._timer.setSingleShot(True)
-        self._timer.timeout.connect(self.fetch_initial_state)
-        self._timer.start(100)
-
+        self.fetch_initial_state()
         self._watch_thread = threading.Thread(target=self.tree_changed, daemon=True)
         self._watch_thread.start()
 
     def fetch_initial_state(self):
-        response = self._client.searcher_stub.Tree(OptionalObjectRequest())
+        response = self._client.object_stub.Tree(OptionalObjectRequest())
 
         self.beginResetModel()
         self._objects = self.build_tree(response.nodes, None)
@@ -194,6 +201,5 @@ class GRPCObjectsModel(ObjectsModel):
         return nodes
 
     def tree_changed(self):
-        pass
-        for change in self._client.searcher_stub.ListenTreeChanges(empty_pb2.Empty()):
+        for change in self._client.object_stub.ListenObjectChanges(empty_pb2.Empty()):
             print(f"tree_changed {change}")

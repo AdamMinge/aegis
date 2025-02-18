@@ -5,7 +5,7 @@ import time
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtNetwork import QHostAddress
 
-from aegis.aegis_pb2_grpc import RecorderStub, MarkerStub, SearcherStub, ObjectStub
+from aegis.aegis_pb2_grpc import RecorderStub, MarkerStub, ObjectStub
 
 
 class ClientException(Exception):
@@ -30,7 +30,6 @@ class Client(QObject):
 
         self.recorder_stub = RecorderStub(self._channel)
         self.marker_stub = MarkerStub(self._channel)
-        self.searcher_stub = SearcherStub(self._channel)
         self.object_stub = ObjectStub(self._channel)
 
     def close(self):

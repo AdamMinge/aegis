@@ -54,7 +54,7 @@ public:
 
   [[nodiscard]] bool isRecording() const;
 
-  bool addStrategy(std::unique_ptr<ActionRecordStrategy> &&strategy);
+  bool addStrategy(ActionRecordStrategy *strategy);
 
 Q_SIGNALS:
   void actionReported(const RecordedAction &action);
@@ -66,10 +66,10 @@ private:
   [[nodiscard]] ActionRecordStrategy *findStrategy(QWidget *widget) const;
 
 private:
-  std::unordered_map<int, std::unique_ptr<ActionRecordStrategy>> m_strategies;
+  std::unordered_map<int, ActionRecordStrategy *> m_strategies;
   ActionRecordStrategy *m_current_strategy;
-  QScopedPointer<ActionRecorderWidgetListener> m_widget_listener;
-  bool m_running;
+  ActionRecorderWidgetListener *m_widget_listener;
+  bool m_recording;
 };
 
 /* ----------------------------- ActionRecorderQueue ------------------------ */

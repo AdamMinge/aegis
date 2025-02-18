@@ -24,6 +24,8 @@ public:
   void start();
   void stop();
 
+  [[nodiscard]] bool isObserving() const;
+
   void setRoot(QObject *root);
 
 Q_SIGNALS:
@@ -34,10 +36,11 @@ protected:
 
 private:
   void init();
-  [[nodiscard]] bool isObserved(const QObject *object) const;
   [[nodiscard]] QObjectList getRoots() const;
+  [[nodiscard]] bool isObserved(const QObject *object) const;
 
 private:
+  bool m_observing;
   QObject *m_root;
   QHash<QObject *, ObjectQuery> m_observed;
 };

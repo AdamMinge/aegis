@@ -16,12 +16,12 @@ namespace aegis {
 
 class LIB_AEGIS_API ObservedAction {
 public:
-  struct ObjectCreated {
+  struct ObjectAdded {
     ObjectQuery object;
     ObjectQuery parent;
   };
 
-  struct ObjectDestroyed {
+  struct ObjectRemoved {
     ObjectQuery object;
     ObjectQuery parent;
   };
@@ -29,6 +29,11 @@ public:
   struct ObjectReparented {
     ObjectQuery object;
     ObjectQuery parent;
+  };
+
+  struct ObjectRenamed {
+    ObjectQuery from;
+    ObjectQuery to;
   };
 
 public:
@@ -47,7 +52,8 @@ public:
   decltype(auto) visit(TYPE &&visitor) const;
 
 private:
-  std::variant<ObjectCreated, ObjectDestroyed, ObjectReparented> m_data;
+  std::variant<ObjectAdded, ObjectRemoved, ObjectReparented, ObjectRenamed>
+    m_data;
 };
 
 template<typename ACTION_SUBTYPE>

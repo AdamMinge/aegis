@@ -178,13 +178,13 @@ QString PathSearch::getPath(const QObject *object) const {
   return objects_path.join(".");
 }
 
-/* -------------------------------- OrderIndex ------------------------------ */
+/* ----------------------------- OrderIndexSearch --------------------------- */
 
-OrderIndex::OrderIndex() = default;
+OrderIndexSearch::OrderIndexSearch() = default;
 
-OrderIndex::~OrderIndex() = default;
+OrderIndexSearch::~OrderIndexSearch() = default;
 
-bool OrderIndex::matchesObjectQuery(
+bool OrderIndexSearch::matchesObjectQuery(
   const QObject *object, const QVariantMap &query) const {
   if (query.contains(order_index_query)) {
     return getOrderIndex(object) == query[order_index_query];
@@ -193,20 +193,47 @@ bool OrderIndex::matchesObjectQuery(
   return true;
 }
 
-QVariantMap OrderIndex::createObjectQuery(const QObject *object) const {
+QVariantMap OrderIndexSearch::createObjectQuery(const QObject *object) const {
   auto query = QVariantMap{};
   query[order_index_query] = getOrderIndex(object);
 
   return query;
 }
 
-uint OrderIndex::getOrderIndex(const QObject *object) const {
+uint OrderIndexSearch::getOrderIndex(const QObject *object) const {
   if (auto parent = object->parent(); parent) {
     return parent->children().indexOf(object);
   }
 
   auto topObjects = getTopLevelObjects();
   return topObjects.indexOf(object);
+}
+
+/* ---------------------------- MemoryAddressSearch ------------------------- */
+
+MemoryAddressSearch::MemoryAddressSearch() = default;
+
+MemoryAddressSearch::~MemoryAddressSearch() = default;
+
+bool MemoryAddressSearch::matchesObjectQuery(
+  const QObject *object, const QVariantMap &query) const {
+  if (query.contains(memory_address_query)) {
+    return getMemoryAddress(object) == query[memory_address_query];
+  }
+
+  return true;
+}
+
+QVariantMap
+MemoryAddressSearch::createObjectQuery(const QObject *object) const {
+  auto query = QVariantMap{};
+  query[memory_address_query] = getMemoryAddress(object);
+
+  return query;
+}
+
+QString MemoryAddressSearch::getMemoryAddress(const QObject *object) const {
+  return std::to_string(reinterpret_cast<size_t>(object)).c_str();
 }
 
 }// namespace aegis

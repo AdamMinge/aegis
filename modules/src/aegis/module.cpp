@@ -5,7 +5,6 @@
 #include "aegis/service/marker.h"
 #include "aegis/service/object.h"
 #include "aegis/service/recorder.h"
-#include "aegis/service/searcher.h"
 /* -------------------------------------------------------------------------- */
 
 namespace aegis {
@@ -25,7 +24,6 @@ AegisModule::AegisModule()
     : m_server(std::make_unique<Server>()),
       m_marker(std::make_unique<Marker>()),
       m_searcher(std::make_unique<Searcher>()) {
-  m_server->registerService<SearcherService>();
   m_server->registerService<RecorderService>();
   m_server->registerService<MarkerService>();
   m_server->registerService<ObjectService>();
@@ -33,7 +31,8 @@ AegisModule::AegisModule()
   m_searcher->addStrategy(std::make_unique<TypeSearch>());
   m_searcher->addStrategy(std::make_unique<PropertiesSearch>());
   m_searcher->addStrategy(std::make_unique<PathSearch>());
-  m_searcher->addStrategy(std::make_unique<OrderIndex>());
+  m_searcher->addStrategy(std::make_unique<OrderIndexSearch>());
+  m_searcher->addStrategy(std::make_unique<MemoryAddressSearch>());
 }
 
 AegisModule::~AegisModule() = default;

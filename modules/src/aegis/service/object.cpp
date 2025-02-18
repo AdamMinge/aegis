@@ -2,15 +2,157 @@
 #include "aegis/service/object.h"
 
 #include "aegis/module.h"
+#include "aegis/observe/action.h"
+#include "aegis/observe/observer.h"
 #include "aegis/search/utils.h"
 #include "aegis/service/utils.h"
 /* ------------------------------------ Qt ---------------------------------- */
+#include <QApplication>
 #include <QWidget>
 /* --------------------------------- Standard ------------------------------- */
 #include <queue>
 /* -------------------------------------------------------------------------- */
 
 namespace aegis {
+
+/* --------------------------- ObservedActionsMapper ------------------------ */
+
+class ObservedActionsMapper {
+public:
+  aegis_proto::ObjectChangeResponse
+  operator()(const ObservedAction::ObjectAdded &action) const {
+    aegis_proto::ObjectChangeResponse response;
+    auto added = response.mutable_added();
+    added->set_object(action.object.toString().toStdString());
+    added->set_parent(action.parent.toString().toStdString());
+    return response;
+  }
+
+  aegis_proto::ObjectChangeResponse
+  operator()(const ObservedAction::ObjectRemoved &action) const {
+    aegis_proto::ObjectChangeResponse response;
+    auto removed = response.mutable_removed();
+    removed->set_object(action.object.toString().toStdString());
+    removed->set_parent(action.parent.toString().toStdString());
+    return response;
+  }
+
+  aegis_proto::ObjectChangeResponse
+  operator()(const ObservedAction::ObjectReparented &action) const {
+    aegis_proto::ObjectChangeResponse response;
+    auto reparented = response.mutable_reparented();
+    reparented->set_object(action.object.toString().toStdString());
+    reparented->set_parent(action.parent.toString().toStdString());
+    return response;
+  }
+
+  aegis_proto::ObjectChangeResponse
+  operator()(const ObservedAction::ObjectRenamed &action) const {
+    aegis_proto::ObjectChangeResponse response;
+    auto renamed = response.mutable_renamed();
+    renamed->set_from(action.from.toString().toStdString());
+    renamed->set_to(action.to.toString().toStdString());
+    return response;
+  }
+};
+
+/* ------------------------------ ObjectTreeCall -------------------------- */
+
+ObjectTreeCall::ObjectTreeCall(
+  aegis_proto::Object::AsyncService *service,
+  grpc::ServerCompletionQueue *queue)
+    : CallData(
+        service, queue, CallTag{this},
+        &aegis_proto::Object::AsyncService::RequestTree) {}
+
+ObjectTreeCall::~ObjectTreeCall() = default;
+
+std::unique_ptr<ObjectTreeCallData> ObjectTreeCall::clone() const {
+  return std::make_unique<ObjectTreeCall>(getService(), getQueue());
+}
+
+ObjectTreeCall::ProcessResult
+ObjectTreeCall::process(const Request &request) const {
+  const auto opt_query = std::optional<ObjectQuery>{};
+  auto objects = QObjectList{};
+
+  if (request.has_object()) {
+    auto [status, object] = tryGetSingleObject(*opt_query);
+    if (!status.ok()) return {status, {}};
+    objects.append(object);
+  } else {
+    objects.append(getTopLevelObjects());
+  }
+
+  const auto response = tree(objects);
+  return {grpc::Status::OK, response};
+}
+
+ObjectTreeCall::Response
+ObjectTreeCall::tree(const QObjectList &objects) const {
+  auto response = ObjectTreeCall::Response{};
+
+  auto objectsToProcess =
+    std::queue<std::pair<QObject *, aegis_proto::TreeNode *>>{};
+  for (const auto object : objects) {
+    objectsToProcess.push(std::make_pair(object, response.add_nodes()));
+  }
+
+  while (!objectsToProcess.empty()) {
+    auto objectToProcess = objectsToProcess.front();
+    auto object = objectToProcess.first;
+    auto object_children = objectToProcess.second;
+    objectsToProcess.pop();
+
+    const auto object_query = searcher().getQuery(object);
+    object_children->set_object(object_query.toString().toStdString());
+
+    for (const auto child : object->children()) {
+      objectsToProcess.push(
+        std::make_pair(child, object_children->add_nodes()));
+    }
+  }
+
+
+  return response;
+}
+
+/* ------------------------------ ObjectFindCall -------------------------- */
+
+ObjectFindCall::ObjectFindCall(
+  aegis_proto::Object::AsyncService *service,
+  grpc::ServerCompletionQueue *queue)
+    : CallData(
+        service, queue, CallTag{this},
+        &aegis_proto::Object::AsyncService::RequestFind) {}
+
+ObjectFindCall::~ObjectFindCall() = default;
+
+std::unique_ptr<ObjectFindCallData> ObjectFindCall::clone() const {
+  return std::make_unique<ObjectFindCall>(getService(), getQueue());
+}
+
+ObjectFindCall::ProcessResult
+ObjectFindCall::process(const Request &request) const {
+  const auto query =
+    ObjectQuery::fromString(QString::fromStdString(request.object()));
+
+  auto [status, objects] = tryGetObjects(query);
+  if (!status.ok()) return {status, {}};
+
+  const auto response = find(objects);
+  return {grpc::Status::OK, response};
+}
+
+ObjectFindCall::Response
+ObjectFindCall::find(const QObjectList &objects) const {
+  auto response = ObjectFindCall::Response{};
+  for (const auto object : objects) {
+    response.add_objects(searcher().getQuery(object).toString().toStdString());
+  }
+
+  return response;
+}
 
 /* ----------------------------- ObjectParentCall ------------------------- */
 
@@ -346,6 +488,40 @@ ObjectDumpPropertiesCall::properties(const QObject *object) const {
   return response;
 }
 
+/* --------------------------- ObjectListenChangesCall -------------------- */
+
+ObjectListenChangesCall::ObjectListenChangesCall(
+  aegis_proto::Object::AsyncService *service,
+  grpc::ServerCompletionQueue *queue)
+    : StreamCallData(
+        service, queue, CallTag{this},
+        &aegis_proto::Object::AsyncService::RequestListenObjectChanges),
+      m_observer(std::make_unique<ObjectObserver>()),
+      m_observer_queue(std::make_unique<ObjectObserverQueue>()),
+      m_mapper(std::make_unique<ObservedActionsMapper>()) {
+
+  m_observer_queue->setObserver(m_observer.get());
+  m_observer->moveToThread(qApp->thread());
+  m_observer->start();
+}
+
+ObjectListenChangesCall::~ObjectListenChangesCall() = default;
+
+ObjectListenChangesCall::ProcessResult
+ObjectListenChangesCall::process(const Request &request) const {
+  if (m_observer_queue->isEmpty()) return {};
+
+  const auto observer_action = m_observer_queue->popAction();
+  const auto response = observer_action.visit(*m_mapper);
+
+  return response;
+}
+
+std::unique_ptr<ObjectListenChangesCallData>
+ObjectListenChangesCall::clone() const {
+  return std::make_unique<ObjectListenChangesCall>(getService(), getQueue());
+}
+
 /* ------------------------------ ObjectService --------------------------- */
 
 ObjectService::ObjectService() = default;
@@ -353,19 +529,25 @@ ObjectService::ObjectService() = default;
 ObjectService::~ObjectService() = default;
 
 void ObjectService::start(grpc::ServerCompletionQueue *queue) {
+  auto tree_call = new ObjectTreeCall(this, queue);
+  auto find_call = new ObjectFindCall(this, queue);
   auto parent_call = new ObjectParentCall(this, queue);
   auto children_call = new ObjectChildrenCall(this, queue);
   auto invoke_method_call = new ObjectInvokeMethodCall(this, queue);
   auto set_property_call = new ObjectSetPropertyCall(this, queue);
   auto dump_methods_call = new ObjectDumpMethodsCall(this, queue);
   auto dump_properties_call = new ObjectDumpPropertiesCall(this, queue);
+  auto tree_listen_changes = new ObjectListenChangesCall(this, queue);
 
+  tree_call->proceed();
+  find_call->proceed();
   parent_call->proceed();
   children_call->proceed();
   invoke_method_call->proceed();
   set_property_call->proceed();
   dump_methods_call->proceed();
   dump_properties_call->proceed();
+  tree_listen_changes->proceed();
 }
 
 }// namespace aegis

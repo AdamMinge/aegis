@@ -5,6 +5,8 @@
 #include "aegis/record/action.h"
 #include "aegis/record/recorder.h"
 #include "aegis/record/strategy.h"
+/* ------------------------------------ Qt ---------------------------------- */
+#include <QApplication>
 /* -------------------------------------------------------------------------- */
 
 namespace aegis {
@@ -159,20 +161,22 @@ RecorderListenCall::RecorderListenCall(
       m_recorder(std::make_unique<ActionRecorder>()),
       m_recorder_queue(std::make_unique<ActionRecorderQueue>()),
       m_mapper(std::make_unique<RecordedActionsMapper>()) {
-  m_recorder->addStrategy(std::make_unique<ActionRecordWidgetStrategy>());
-  m_recorder->addStrategy(std::make_unique<ActionRecordButtonStrategy>());
-  m_recorder->addStrategy(std::make_unique<ActionRecordComboBoxStrategy>());
-  m_recorder->addStrategy(std::make_unique<ActionRecordSpinBoxStrategy>());
-  m_recorder->addStrategy(std::make_unique<ActionRecordSliderStrategy>());
-  m_recorder->addStrategy(std::make_unique<ActionRecordTabBarStrategy>());
-  m_recorder->addStrategy(std::make_unique<ActionRecordToolBoxStrategy>());
-  m_recorder->addStrategy(std::make_unique<ActionRecordMenuStrategy>());
-  m_recorder->addStrategy(std::make_unique<ActionRecordTextEditStrategy>());
-  m_recorder->addStrategy(std::make_unique<ActionRecordLineEditStrategy>());
-  m_recorder->addStrategy(std::make_unique<ActionRecordItemViewStrategy>());
-  m_recorder->addStrategy(std::make_unique<ActionRecordButtonStrategy>());
+  m_recorder->addStrategy(new ActionRecordWidgetStrategy());
+  m_recorder->addStrategy(new ActionRecordButtonStrategy());
+  m_recorder->addStrategy(new ActionRecordComboBoxStrategy());
+  m_recorder->addStrategy(new ActionRecordSpinBoxStrategy());
+  m_recorder->addStrategy(new ActionRecordSliderStrategy());
+  m_recorder->addStrategy(new ActionRecordTabBarStrategy());
+  m_recorder->addStrategy(new ActionRecordToolBoxStrategy());
+  m_recorder->addStrategy(new ActionRecordMenuStrategy());
+  m_recorder->addStrategy(new ActionRecordTextEditStrategy());
+  m_recorder->addStrategy(new ActionRecordLineEditStrategy());
+  m_recorder->addStrategy(new ActionRecordItemViewStrategy());
+  m_recorder->addStrategy(new ActionRecordButtonStrategy());
 
   m_recorder_queue->setRecorder(m_recorder.get());
+  m_recorder->moveToThread(qApp->thread());
+  m_recorder->start();
 }
 
 RecorderListenCall::~RecorderListenCall() = default;

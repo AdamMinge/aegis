@@ -205,170 +205,6 @@ class Recorder(object):
             _registered_method=True)
 
 
-class SearcherStub(object):
-    """-------------------------------- Searcher --------------------------------- //
-
-    """
-
-    def __init__(self, channel):
-        """Constructor.
-
-        Args:
-            channel: A grpc.Channel.
-        """
-        self.Tree = channel.unary_unary(
-                '/aegis_proto.Searcher/Tree',
-                request_serializer=aegis_dot_aegis__pb2.OptionalObjectRequest.SerializeToString,
-                response_deserializer=aegis_dot_aegis__pb2.TreeResponse.FromString,
-                _registered_method=True)
-        self.ListenTreeChanges = channel.unary_stream(
-                '/aegis_proto.Searcher/ListenTreeChanges',
-                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-                response_deserializer=aegis_dot_aegis__pb2.TreeChangeResponse.FromString,
-                _registered_method=True)
-        self.Find = channel.unary_unary(
-                '/aegis_proto.Searcher/Find',
-                request_serializer=aegis_dot_aegis__pb2.FindRequest.SerializeToString,
-                response_deserializer=aegis_dot_aegis__pb2.FindResponse.FromString,
-                _registered_method=True)
-
-
-class SearcherServicer(object):
-    """-------------------------------- Searcher --------------------------------- //
-
-    """
-
-    def Tree(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def ListenTreeChanges(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-    def Find(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
-
-def add_SearcherServicer_to_server(servicer, server):
-    rpc_method_handlers = {
-            'Tree': grpc.unary_unary_rpc_method_handler(
-                    servicer.Tree,
-                    request_deserializer=aegis_dot_aegis__pb2.OptionalObjectRequest.FromString,
-                    response_serializer=aegis_dot_aegis__pb2.TreeResponse.SerializeToString,
-            ),
-            'ListenTreeChanges': grpc.unary_stream_rpc_method_handler(
-                    servicer.ListenTreeChanges,
-                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
-                    response_serializer=aegis_dot_aegis__pb2.TreeChangeResponse.SerializeToString,
-            ),
-            'Find': grpc.unary_unary_rpc_method_handler(
-                    servicer.Find,
-                    request_deserializer=aegis_dot_aegis__pb2.FindRequest.FromString,
-                    response_serializer=aegis_dot_aegis__pb2.FindResponse.SerializeToString,
-            ),
-    }
-    generic_handler = grpc.method_handlers_generic_handler(
-            'aegis_proto.Searcher', rpc_method_handlers)
-    server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('aegis_proto.Searcher', rpc_method_handlers)
-
-
- # This class is part of an EXPERIMENTAL API.
-class Searcher(object):
-    """-------------------------------- Searcher --------------------------------- //
-
-    """
-
-    @staticmethod
-    def Tree(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/aegis_proto.Searcher/Tree',
-            aegis_dot_aegis__pb2.OptionalObjectRequest.SerializeToString,
-            aegis_dot_aegis__pb2.TreeResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def ListenTreeChanges(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_stream(
-            request,
-            target,
-            '/aegis_proto.Searcher/ListenTreeChanges',
-            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-            aegis_dot_aegis__pb2.TreeChangeResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
-    def Find(request,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.unary_unary(
-            request,
-            target,
-            '/aegis_proto.Searcher/Find',
-            aegis_dot_aegis__pb2.FindRequest.SerializeToString,
-            aegis_dot_aegis__pb2.FindResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-
 class ObjectStub(object):
     """--------------------------------- Object ---------------------------------- //
 
@@ -380,6 +216,16 @@ class ObjectStub(object):
         Args:
             channel: A grpc.Channel.
         """
+        self.Tree = channel.unary_unary(
+                '/aegis_proto.Object/Tree',
+                request_serializer=aegis_dot_aegis__pb2.OptionalObjectRequest.SerializeToString,
+                response_deserializer=aegis_dot_aegis__pb2.TreeResponse.FromString,
+                _registered_method=True)
+        self.Find = channel.unary_unary(
+                '/aegis_proto.Object/Find',
+                request_serializer=aegis_dot_aegis__pb2.FindRequest.SerializeToString,
+                response_deserializer=aegis_dot_aegis__pb2.FindResponse.FromString,
+                _registered_method=True)
         self.Parent = channel.unary_unary(
                 '/aegis_proto.Object/Parent',
                 request_serializer=aegis_dot_aegis__pb2.ObjectRequest.SerializeToString,
@@ -410,12 +256,29 @@ class ObjectStub(object):
                 request_serializer=aegis_dot_aegis__pb2.ObjectRequest.SerializeToString,
                 response_deserializer=aegis_dot_aegis__pb2.DumpPropertiesResponse.FromString,
                 _registered_method=True)
+        self.ListenObjectChanges = channel.unary_stream(
+                '/aegis_proto.Object/ListenObjectChanges',
+                request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+                response_deserializer=aegis_dot_aegis__pb2.ObjectChangeResponse.FromString,
+                _registered_method=True)
 
 
 class ObjectServicer(object):
     """--------------------------------- Object ---------------------------------- //
 
     """
+
+    def Tree(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def Find(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def Parent(self, request, context):
         """Missing associated documentation comment in .proto file."""
@@ -453,9 +316,25 @@ class ObjectServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ListenObjectChanges(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_ObjectServicer_to_server(servicer, server):
     rpc_method_handlers = {
+            'Tree': grpc.unary_unary_rpc_method_handler(
+                    servicer.Tree,
+                    request_deserializer=aegis_dot_aegis__pb2.OptionalObjectRequest.FromString,
+                    response_serializer=aegis_dot_aegis__pb2.TreeResponse.SerializeToString,
+            ),
+            'Find': grpc.unary_unary_rpc_method_handler(
+                    servicer.Find,
+                    request_deserializer=aegis_dot_aegis__pb2.FindRequest.FromString,
+                    response_serializer=aegis_dot_aegis__pb2.FindResponse.SerializeToString,
+            ),
             'Parent': grpc.unary_unary_rpc_method_handler(
                     servicer.Parent,
                     request_deserializer=aegis_dot_aegis__pb2.ObjectRequest.FromString,
@@ -486,6 +365,11 @@ def add_ObjectServicer_to_server(servicer, server):
                     request_deserializer=aegis_dot_aegis__pb2.ObjectRequest.FromString,
                     response_serializer=aegis_dot_aegis__pb2.DumpPropertiesResponse.SerializeToString,
             ),
+            'ListenObjectChanges': grpc.unary_stream_rpc_method_handler(
+                    servicer.ListenObjectChanges,
+                    request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                    response_serializer=aegis_dot_aegis__pb2.ObjectChangeResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
             'aegis_proto.Object', rpc_method_handlers)
@@ -498,6 +382,60 @@ class Object(object):
     """--------------------------------- Object ---------------------------------- //
 
     """
+
+    @staticmethod
+    def Tree(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/aegis_proto.Object/Tree',
+            aegis_dot_aegis__pb2.OptionalObjectRequest.SerializeToString,
+            aegis_dot_aegis__pb2.TreeResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def Find(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/aegis_proto.Object/Find',
+            aegis_dot_aegis__pb2.FindRequest.SerializeToString,
+            aegis_dot_aegis__pb2.FindResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
 
     @staticmethod
     def Parent(request,
@@ -651,6 +589,33 @@ class Object(object):
             '/aegis_proto.Object/DumpProperties',
             aegis_dot_aegis__pb2.ObjectRequest.SerializeToString,
             aegis_dot_aegis__pb2.DumpPropertiesResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ListenObjectChanges(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/aegis_proto.Object/ListenObjectChanges',
+            google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            aegis_dot_aegis__pb2.ObjectChangeResponse.FromString,
             options,
             channel_credentials,
             insecure,

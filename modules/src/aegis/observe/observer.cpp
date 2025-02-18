@@ -13,42 +13,84 @@ namespace aegis {
 
 /* ------------------------------- ObjectObserver --------------------------- */
 
-ObjectObserver::ObjectObserver() = default;
+ObjectObserver::ObjectObserver() : m_observing(false), m_root(nullptr) {}
 
-ObjectObserver::~ObjectObserver() = default;
+ObjectObserver::~ObjectObserver() { stop(); }
 
 void ObjectObserver::start() {
-  qApp->installEventFilter(this);
-  init();
+  if (m_observing) return;
+
+  QMetaObject::invokeMethod(
+    qApp,
+    [this]() {
+      m_observing = true;
+
+      init();
+      qApp->installEventFilter(this);
+    },
+    Qt::QueuedConnection);
 }
 
-void ObjectObserver::stop() { qApp->removeEventFilter(this); }
+void ObjectObserver::stop() {
+  if (!m_observing) return;
+
+  QMetaObject::invokeMethod(
+    qApp,
+    [this]() {
+      m_observing = false;
+
+      qApp->removeEventFilter(this);
+    },
+    Qt::QueuedConnection);
+}
+
+bool ObjectObserver::isObserving() const { return m_observing; }
 
 void ObjectObserver::setRoot(QObject *root) { m_root = root; }
 
 bool ObjectObserver::eventFilter(QObject *object, QEvent *event) {
-  if (isObserved(object)) {
-    const auto object_query = m_observed[object];
-    const auto parent_query = m_observed.value(object->parent(), ObjectQuery{});
+  if (!isObserved(object)) return QObject::eventFilter(object, event);
 
-    switch (event->type()) {
-      case QEvent::Destroy:
-        Q_EMIT actionReported(
-          ObservedAction::ObjectDestroyed(object_query, parent_query));
-        break;
-      case QEvent::Create:
-        Q_EMIT actionReported(
-          ObservedAction::ObjectCreated(object_query, parent_query));
-        break;
-      case QEvent::ParentChange:
-        Q_EMIT actionReported(
-          ObservedAction::ObjectReparented(object_query, parent_query));
-        break;
+  switch (event->type()) {
+    case QEvent::Create: {
+      Q_ASSERT(!m_observed.contains(object));
+      m_observed[object] = searcher().getQuery(object);
+
+      const auto &object_query = m_observed[object];
+      const auto parent_query =
+        m_observed.value(object->parent(), ObjectQuery{});
+
+      Q_EMIT actionReported(
+        ObservedAction::ObjectAdded(object_query, parent_query));
+      break;
+    }
+
+    case QEvent::Destroy: {
+      const auto &object_query = m_observed[object];
+      const auto parent_query =
+        m_observed.value(object->parent(), ObjectQuery{});
+
+      Q_EMIT actionReported(
+        ObservedAction::ObjectRemoved(object_query, parent_query));
+
+      Q_ASSERT(m_observed.contains(object));
+      m_observed.remove(object);
+
+      break;
+    }
+
+    case QEvent::ParentChange: {
+      if (!m_observed.contains(object)) break;
+
+      const auto &object_query = m_observed[object];
+      const auto parent_query =
+        m_observed.value(object->parent(), ObjectQuery{});
+
+      Q_EMIT actionReported(
+        ObservedAction::ObjectReparented(object_query, parent_query));
+      break;
     }
   }
-
-  // connect inside of strategy and return connection object to disconnect after all
-  // move lambda into installed event filter and emit in inside of it
 
   return QObject::eventFilter(object, event);
 }
@@ -71,6 +113,16 @@ void ObjectObserver::init() {
   }
 }
 
+QObjectList ObjectObserver::getRoots() const {
+  if (m_root) {
+    auto roots = QObjectList{};
+    roots.append(const_cast<QObject *>(m_root));
+    return roots;
+  }
+
+  return getTopLevelObjects();
+}
+
 bool ObjectObserver::isObserved(const QObject *object) const {
   if (!m_root) return true;
 
@@ -82,19 +134,9 @@ bool ObjectObserver::isObserved(const QObject *object) const {
   return false;
 }
 
-QObjectList ObjectObserver::getRoots() const {
-  if (m_root) {
-    auto roots = QObjectList{};
-    roots.append(const_cast<QObject *>(m_root));
-    return roots;
-  }
-
-  return getTopLevelObjects();
-}
-
 /* ----------------------------- ObjectObserverQueue ------------------------ */
 
-ObjectObserverQueue::ObjectObserverQueue() = default;
+ObjectObserverQueue::ObjectObserverQueue() : m_observer(nullptr) {}
 
 ObjectObserverQueue::~ObjectObserverQueue() = default;
 

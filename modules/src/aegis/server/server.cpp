@@ -19,14 +19,14 @@ Server::~Server() {
   m_queue->Shutdown();
 }
 
-void Server::listen(const QHostAddress& host, quint16 port) {
+void Server::listen(const QHostAddress &host, quint16 port) {
   const auto address =
-      QLatin1String("%1:%2").arg(host.toString()).arg(port).toStdString();
+    QLatin1String("%1:%2").arg(host.toString()).arg(port).toStdString();
 
   grpc::ServerBuilder builder;
   builder.AddListeningPort(address, grpc::InsecureServerCredentials());
-  for (const auto& service : m_services) {
-    auto grpc_service = dynamic_cast<grpc::Service*>(service.get());
+  for (const auto &service : m_services) {
+    auto grpc_service = dynamic_cast<grpc::Service *>(service.get());
     Q_ASSERT(grpc_service);
 
     builder.RegisterService(grpc_service);
@@ -39,21 +39,18 @@ void Server::listen(const QHostAddress& host, quint16 port) {
 }
 
 void Server::startLoop() {
-  auto tag = (void*)nullptr;
+  auto tag = (void *) nullptr;
   auto ok = false;
 
-  for (const auto& service : m_services) service->start(m_queue.get());
-
+  for (const auto &service : m_services) service->start(m_queue.get());
   while (true) {
     if (m_queue->Next(&tag, &ok) && ok) {
-      auto call_tag = static_cast<CallTag*>(tag);
-      auto callable = static_cast<Callable*>(call_tag->callable);
+      auto call_tag = static_cast<CallTag *>(tag);
+      auto callable = static_cast<Callable *>(call_tag->callable);
 
-      if (callable) {
-        callable->proceed();
-      }
+      if (callable) { callable->proceed(); }
     }
   }
 }
 
-}  // namespace aegis
+}// namespace aegis

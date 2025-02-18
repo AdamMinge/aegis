@@ -137,7 +137,7 @@ protected:
   using Response = RESPONSE;
   using Service = SERVICE;
 
-  using ProcessResult = std::variant<grpc::Status, Response>;
+  using ProcessResult = std::optional<std::variant<grpc::Status, Response>>;
   using RequestMethod = void (Service::*)(
     grpc::ServerContext *, Request *, grpc::ServerAsyncWriter<Response> *,
     grpc::CompletionQueue *, grpc::ServerCompletionQueue *, void *);
@@ -185,14 +185,16 @@ template<typename SERVICE, typename REQUEST, typename RESPONSE>
 void StreamCallData<SERVICE, REQUEST, RESPONSE>::proceed() {
   const auto _process = [this]() {
     const auto result = process(m_request);
-    if (const auto status = std::get_if<grpc::Status>(&result); status) {
-      m_responder.Finish(*status, static_cast<void *>(&m_tag));
-      m_status = CallStatus::Finish;
-      return;
-    }
+    if (result.has_value()) {
+      if (const auto status = std::get_if<grpc::Status>(&*result); status) {
+        m_responder.Finish(*status, static_cast<void *>(&m_tag));
+        m_status = CallStatus::Finish;
+        return;
+      }
 
-    if (const auto response = std::get_if<Response>(&result); response) {
-      m_responder.Write(*response, static_cast<void *>(&m_tag));
+      if (const auto response = std::get_if<Response>(&*result); response) {
+        m_responder.Write(*response, static_cast<void *>(&m_tag));
+      }
     }
 
     m_status = CallStatus::Processing;

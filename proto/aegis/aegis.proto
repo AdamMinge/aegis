@@ -22,12 +22,22 @@ message RecorderListenResponse {
     string command = 1;
 }
 
-// -------------------------------- Searcher --------------------------------- //
+// --------------------------------- Object ---------------------------------- //
 
-service Searcher {
+service Object {
     rpc Tree (OptionalObjectRequest) returns (TreeResponse) {}
-    rpc ListenTreeChanges (google.protobuf.Empty) returns (stream TreeChangeResponse) {}
     rpc Find (FindRequest) returns (FindResponse) {}
+
+    rpc Parent (ObjectRequest) returns (ParentResponse) {}
+    rpc Children (ObjectRequest) returns (ChildrenResponse) {}
+
+    rpc InvokeMethod (InvokeMethodRequest) returns (google.protobuf.Empty) {}
+    rpc SetProperty (SetPropertyRequest) returns (google.protobuf.Empty) {}
+
+    rpc DumpMethods (ObjectRequest) returns (DumpMethodsResponse) {}
+    rpc DumpProperties (ObjectRequest) returns (DumpPropertiesResponse) {}
+
+    rpc ListenObjectChanges (google.protobuf.Empty) returns (stream ObjectChangeResponse) {}
 }
 
 message OptionalObjectRequest {
@@ -43,48 +53,12 @@ message TreeNode {
     repeated TreeNode nodes = 2;
 }
 
-message TreeChangeResponse {
-    oneof change_type {
-        ObjectAdded added = 1;
-        ObjectRemoved removed = 2;
-        ObjectReparented reparented = 3;
-    }
-}
-
-message ObjectAdded {
-    string parent = 1;
-    string object = 2;
-}
-
-message ObjectRemoved {
-    string parent = 1;
-    string object = 2;
-}
-
-message ObjectReparented {
-    string parent = 1;
-    string object = 2;
-}
-
 message FindRequest {
     string object = 1;
 }
 
 message FindResponse {
     repeated string objects = 1;
-}
-
-// --------------------------------- Object ---------------------------------- //
-
-service Object {
-    rpc Parent (ObjectRequest) returns (ParentResponse) {}
-    rpc Children (ObjectRequest) returns (ChildrenResponse) {}
-
-    rpc InvokeMethod (InvokeMethodRequest) returns (google.protobuf.Empty) {}
-    rpc SetProperty (SetPropertyRequest) returns (google.protobuf.Empty) {}
-
-    rpc DumpMethods (ObjectRequest) returns (DumpMethodsResponse) {}
-    rpc DumpProperties (ObjectRequest) returns (DumpPropertiesResponse) {}
 }
 
 message ObjectRequest {
@@ -123,3 +97,33 @@ message PropertyValue {
     string property = 1;
     google.protobuf.Value value = 2;
 }
+
+message ObjectChangeResponse {
+    oneof change_type {
+        ObjectAdded added = 1;
+        ObjectRemoved removed = 2;
+        ObjectReparented reparented = 3;
+        ObjectRenamed renamed = 4;
+    }
+}
+
+message ObjectAdded {
+    string object = 1;
+    string parent = 2;
+}
+
+message ObjectRemoved {
+    string object = 1;
+    string parent = 2;
+}
+
+message ObjectReparented {
+    string object = 1;
+    string parent = 2;
+}
+
+message ObjectRenamed {
+    string from = 1;
+    string to = 2;
+}
+

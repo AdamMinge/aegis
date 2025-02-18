@@ -74,6 +74,11 @@ bool ActionRecorderWidgetListener::eventFilter(QObject *obj, QEvent *event) {
       setWidget(widget);
       break;
     }
+    case QEvent::Destroy: {
+      auto widget = findWidget(qobject_cast<QWidget *>(obj));
+      if (widget == m_current_widget) setWidget(nullptr);
+      break;
+    }
   }
 
   return QObject::eventFilter(obj, event);
@@ -103,39 +108,49 @@ QWidget *ActionRecorderWidgetListener::findWidget(QWidget *widget) const {
 
 ActionRecorder::ActionRecorder(QObject *parent)
     : QObject(parent), m_current_strategy(nullptr),
-      m_widget_listener(new ActionRecorderWidgetListener), m_running(false) {
+      m_widget_listener(new ActionRecorderWidgetListener(this)),
+      m_recording(false) {
   connect(
-    m_widget_listener.get(),
-    &ActionRecorderWidgetListener::currentWidgetChanged, this,
-    &ActionRecorder::onCurrentWidgetChanged);
+    m_widget_listener, &ActionRecorderWidgetListener::currentWidgetChanged,
+    this, &ActionRecorder::onCurrentWidgetChanged);
 }
 
-ActionRecorder::~ActionRecorder() = default;
+ActionRecorder::~ActionRecorder() { stop(); }
 
 void ActionRecorder::start() {
-  Q_ASSERT(!m_running);
+  if (m_recording) return;
 
-  qApp->installEventFilter(m_widget_listener.get());
+  QMetaObject::invokeMethod(
+    qApp,
+    [this]() {
+      m_recording = true;
 
-  m_running = true;
+      qApp->installEventFilter(m_widget_listener);
+    },
+    Qt::QueuedConnection);
 }
 
 void ActionRecorder::stop() {
-  Q_ASSERT(m_running);
+  if (!m_recording) return;
 
-  qApp->removeEventFilter(m_widget_listener.get());
-  onCurrentWidgetChanged(nullptr);
+  QMetaObject::invokeMethod(
+    qApp,
+    [this]() {
+      m_recording = false;
 
-  m_running = false;
+      qApp->removeEventFilter(m_widget_listener);
+      onCurrentWidgetChanged(nullptr);
+    },
+    Qt::QueuedConnection);
 }
 
-bool ActionRecorder::isRecording() const { return m_running; }
+bool ActionRecorder::isRecording() const { return m_recording; }
 
-bool ActionRecorder::addStrategy(
-  std::unique_ptr<ActionRecordStrategy> &&strategy) {
+bool ActionRecorder::addStrategy(ActionRecordStrategy *strategy) {
   if (m_strategies.contains(strategy->getType())) return false;
 
-  m_strategies.insert(std::make_pair(strategy->getType(), std::move(strategy)));
+  strategy->setParent(this);
+  m_strategies.insert(std::make_pair(strategy->getType(), strategy));
   return true;
 }
 
@@ -164,9 +179,7 @@ ActionRecordStrategy *ActionRecorder::findStrategy(QWidget *widget) const {
   while (meta_object) {
     const auto type_id = meta_object->metaType().id();
     auto found_strategy = m_strategies.find(type_id);
-    if (found_strategy != m_strategies.end()) {
-      return found_strategy->second.get();
-    }
+    if (found_strategy != m_strategies.end()) { return found_strategy->second; }
 
     meta_object = meta_object->superClass();
   }
@@ -176,7 +189,7 @@ ActionRecordStrategy *ActionRecorder::findStrategy(QWidget *widget) const {
 
 /* ----------------------------- ActionRecorderQueue ------------------------ */
 
-ActionRecorderQueue::ActionRecorderQueue() = default;
+ActionRecorderQueue::ActionRecorderQueue() : m_recorder(nullptr) {}
 
 ActionRecorderQueue::~ActionRecorderQueue() = default;
 

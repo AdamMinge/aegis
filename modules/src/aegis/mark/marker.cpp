@@ -38,49 +38,47 @@ bool MarkerListener::eventFilter(QObject *obj, QEvent *event) {
 /* ---------------------------------- Marker ------------------------------- */
 
 Marker::Marker(QObject *parent)
-    : QObject(parent),
-      m_marking(false),
-      m_tooltip(new MarkerWidgetTooltip),
-      m_marker(new MarkerWidgetMarker),
-      m_listener(new MarkerListener) {
-  connect(m_listener.get(), &MarkerListener::currentWidgetChanged, this,
-          &Marker::onCurrentWidgetChanged);
-  connect(m_listener.get(), &MarkerListener::mouseMoved, this,
-          &Marker::onMouseMoved);
+    : QObject(parent), m_marking(false), m_tooltip(new MarkerWidgetTooltip),
+      m_marker(new MarkerWidgetMarker), m_listener(new MarkerListener) {
+  connect(
+    m_listener.get(), &MarkerListener::currentWidgetChanged, this,
+    &Marker::onCurrentWidgetChanged);
+  connect(
+    m_listener.get(), &MarkerListener::mouseMoved, this, &Marker::onMouseMoved);
 }
 
 Marker::~Marker() = default;
 
 void Marker::start() {
-  if (!m_marking) {
-    QMetaObject::invokeMethod(
-        qApp,
-        [this]() {
-          m_marking = true;
+  if (m_marking) return;
 
-          qApp->installEventFilter(m_listener.get());
+  QMetaObject::invokeMethod(
+    qApp,
+    [this]() {
+      m_marking = true;
 
-          m_tooltip->show();
-          m_marker->show();
-        },
-        Qt::QueuedConnection);
-  }
+      qApp->installEventFilter(m_listener.get());
+
+      m_tooltip->show();
+      m_marker->show();
+    },
+    Qt::QueuedConnection);
 }
 
 void Marker::stop() {
-  if (m_marking) {
-    QMetaObject::invokeMethod(
-        qApp,
-        [this]() {
-          m_marking = false;
+  if (!m_marking) return;
 
-          qApp->removeEventFilter(m_listener.get());
+  QMetaObject::invokeMethod(
+    qApp,
+    [this]() {
+      m_marking = false;
 
-          m_tooltip->hide();
-          m_marker->hide();
-        },
-        Qt::QueuedConnection);
-  }
+      qApp->removeEventFilter(m_listener.get());
+
+      m_tooltip->hide();
+      m_marker->hide();
+    },
+    Qt::QueuedConnection);
 }
 
 bool Marker::isMarking() { return m_marking; }
@@ -98,4 +96,4 @@ void Marker::onMouseMoved(const QPoint &position) {
   m_tooltip->move(position + QPoint(10, 10));
 }
 
-}  // namespace aegis
+}// namespace aegis

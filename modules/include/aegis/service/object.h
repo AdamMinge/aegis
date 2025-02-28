@@ -19,22 +19,22 @@ class ObjectObserver;
 class ObjectObserverQueue;
 class ObservedActionsMapper;
 
-/* -------------------------------- ObjectTreeCall -------------------------- */
+/* ------------------------------- ObjectGetTreeCall ------------------------ */
 
-using ObjectTreeCallData = CallData<
-  aegis_proto::Object::AsyncService, aegis_proto::OptionalObjectRequest,
-  aegis_proto::TreeResponse>;
+using ObjectGetTreeCallData = CallData<
+  aegis_proto::ObjectService::AsyncService, aegis_proto::OptionalObject,
+  aegis_proto::ObjectTree>;
 
-class LIB_AEGIS_API ObjectTreeCall : public ObjectTreeCallData {
+class LIB_AEGIS_API ObjectGetTreeCall : public ObjectGetTreeCallData {
 public:
-  explicit ObjectTreeCall(
-    aegis_proto::Object::AsyncService *service,
+  explicit ObjectGetTreeCall(
+    aegis_proto::ObjectService::AsyncService *service,
     grpc::ServerCompletionQueue *queue);
-  ~ObjectTreeCall() override;
+  ~ObjectGetTreeCall() override;
 
   ProcessResult process(const Request &request) const override;
 
-  std::unique_ptr<ObjectTreeCallData> clone() const override;
+  std::unique_ptr<ObjectGetTreeCallData> clone() const override;
 
 private:
   [[nodiscard]] Response tree(const QObjectList &objects) const;
@@ -43,13 +43,13 @@ private:
 /* -------------------------------- ObjectFindCall -------------------------- */
 
 using ObjectFindCallData = CallData<
-  aegis_proto::Object::AsyncService, aegis_proto::FindRequest,
-  aegis_proto::FindResponse>;
+  aegis_proto::ObjectService::AsyncService, aegis_proto::Object,
+  aegis_proto::Objects>;
 
 class LIB_AEGIS_API ObjectFindCall : public ObjectFindCallData {
 public:
   explicit ObjectFindCall(
-    aegis_proto::Object::AsyncService *service,
+    aegis_proto::ObjectService::AsyncService *service,
     grpc::ServerCompletionQueue *queue);
   ~ObjectFindCall() override;
 
@@ -64,13 +64,13 @@ private:
 /* ------------------------------ ObjectParentCall ------------------------ */
 
 using ObjectParentCallData = CallData<
-  aegis_proto::Object::AsyncService, aegis_proto::ObjectRequest,
-  aegis_proto::ParentResponse>;
+  aegis_proto::ObjectService::AsyncService, aegis_proto::Object,
+  aegis_proto::Object>;
 
 class LIB_AEGIS_API ObjectParentCall : public ObjectParentCallData {
 public:
   explicit ObjectParentCall(
-    aegis_proto::Object::AsyncService *service,
+    aegis_proto::ObjectService::AsyncService *service,
     grpc::ServerCompletionQueue *queue);
   ~ObjectParentCall() override;
 
@@ -85,13 +85,13 @@ private:
 /* ----------------------------- ObjectChildrenCall ----------------------- */
 
 using ObjectChildrenCallData = CallData<
-  aegis_proto::Object::AsyncService, aegis_proto::ObjectRequest,
-  aegis_proto::ChildrenResponse>;
+  aegis_proto::ObjectService::AsyncService, aegis_proto::Object,
+  aegis_proto::Objects>;
 
 class LIB_AEGIS_API ObjectChildrenCall : public ObjectChildrenCallData {
 public:
   explicit ObjectChildrenCall(
-    aegis_proto::Object::AsyncService *service,
+    aegis_proto::ObjectService::AsyncService *service,
     grpc::ServerCompletionQueue *queue);
   ~ObjectChildrenCall() override;
 
@@ -103,22 +103,22 @@ private:
   [[nodiscard]] Response children(const QObject *object) const;
 };
 
-/* --------------------------- ObjectInvokeMethodCall --------------------- */
+/* ---------------------------- ObjectCallMethodCall ---------------------- */
 
-using ObjectInvokeMethodCallData = CallData<
-  aegis_proto::Object::AsyncService, aegis_proto::InvokeMethodRequest,
+using ObjectCallMethodCallData = CallData<
+  aegis_proto::ObjectService::AsyncService, aegis_proto::MethodCall,
   google::protobuf::Empty>;
 
-class LIB_AEGIS_API ObjectInvokeMethodCall : public ObjectInvokeMethodCallData {
+class LIB_AEGIS_API ObjectCallMethodCall : public ObjectCallMethodCallData {
 public:
-  explicit ObjectInvokeMethodCall(
-    aegis_proto::Object::AsyncService *service,
+  explicit ObjectCallMethodCall(
+    aegis_proto::ObjectService::AsyncService *service,
     grpc::ServerCompletionQueue *queue);
-  ~ObjectInvokeMethodCall() override;
+  ~ObjectCallMethodCall() override;
 
   ProcessResult process(const Request &request) const override;
 
-  std::unique_ptr<ObjectInvokeMethodCallData> clone() const override;
+  std::unique_ptr<ObjectCallMethodCallData> clone() const override;
 
 private:
   [[nodiscard]] ProcessResult invoke(
@@ -129,22 +129,23 @@ private:
   metaMethod(const QObject *object, const std::string &name) const;
 };
 
-/* ---------------------------- ObjectSetPropertyCall --------------------- */
+/* -------------------------- ObjectUpdatePropertyCall -------------------- */
 
-using ObjectSetPropertyCallData = CallData<
-  aegis_proto::Object::AsyncService, aegis_proto::SetPropertyRequest,
+using ObjectUpdatePropertyCallData = CallData<
+  aegis_proto::ObjectService::AsyncService, aegis_proto::PropertyUpdate,
   google::protobuf::Empty>;
 
-class LIB_AEGIS_API ObjectSetPropertyCall : public ObjectSetPropertyCallData {
+class LIB_AEGIS_API ObjectUpdatePropertyCall
+    : public ObjectUpdatePropertyCallData {
 public:
-  explicit ObjectSetPropertyCall(
-    aegis_proto::Object::AsyncService *service,
+  explicit ObjectUpdatePropertyCall(
+    aegis_proto::ObjectService::AsyncService *service,
     grpc::ServerCompletionQueue *queue);
-  ~ObjectSetPropertyCall() override;
+  ~ObjectUpdatePropertyCall() override;
 
   ProcessResult process(const Request &request) const override;
 
-  std::unique_ptr<ObjectSetPropertyCallData> clone() const override;
+  std::unique_ptr<ObjectUpdatePropertyCallData> clone() const override;
 
 private:
   [[nodiscard]] ProcessResult setProperty(
@@ -152,68 +153,66 @@ private:
     const google::protobuf::Value &value) const;
 };
 
-/* ---------------------------- ObjectDumpMethodsCall --------------------- */
+/* ---------------------------- ObjectGetMethodsCall ---------------------- */
 
-using ObjectDumpMethodsCallData = CallData<
-  aegis_proto::Object::AsyncService, aegis_proto::ObjectRequest,
-  aegis_proto::DumpMethodsResponse>;
+using ObjectGetMethodsCallData = CallData<
+  aegis_proto::ObjectService::AsyncService, aegis_proto::Object,
+  aegis_proto::Methods>;
 
-class LIB_AEGIS_API ObjectDumpMethodsCall : public ObjectDumpMethodsCallData {
+class LIB_AEGIS_API ObjectGetMethodsCall : public ObjectGetMethodsCallData {
 public:
-  explicit ObjectDumpMethodsCall(
-    aegis_proto::Object::AsyncService *service,
+  explicit ObjectGetMethodsCall(
+    aegis_proto::ObjectService::AsyncService *service,
     grpc::ServerCompletionQueue *queue);
-  ~ObjectDumpMethodsCall() override;
+  ~ObjectGetMethodsCall() override;
 
   ProcessResult process(const Request &request) const override;
 
-  std::unique_ptr<ObjectDumpMethodsCallData> clone() const override;
+  std::unique_ptr<ObjectGetMethodsCallData> clone() const override;
 
 private:
-  [[nodiscard]] aegis_proto::DumpMethodsResponse
-  methods(const QObject *object) const;
+  [[nodiscard]] Response methods(const QObject *object) const;
 };
 
-/* --------------------------- ObjectDumpPropertiesCall ------------------- */
+/* --------------------------- ObjectGetPropertiesCall -------------------- */
 
-using ObjectDumpPropertiesCallData = CallData<
-  aegis_proto::Object::AsyncService, aegis_proto::ObjectRequest,
-  aegis_proto::DumpPropertiesResponse>;
+using ObjectGetPropertiesCallData = CallData<
+  aegis_proto::ObjectService::AsyncService, aegis_proto::Object,
+  aegis_proto::Properties>;
 
-class LIB_AEGIS_API ObjectDumpPropertiesCall
-    : public ObjectDumpPropertiesCallData {
+class LIB_AEGIS_API ObjectGetPropertiesCall
+    : public ObjectGetPropertiesCallData {
 public:
-  explicit ObjectDumpPropertiesCall(
-    aegis_proto::Object::AsyncService *service,
+  explicit ObjectGetPropertiesCall(
+    aegis_proto::ObjectService::AsyncService *service,
     grpc::ServerCompletionQueue *queue);
-  ~ObjectDumpPropertiesCall() override;
+  ~ObjectGetPropertiesCall() override;
 
   ProcessResult process(const Request &request) const override;
 
-  std::unique_ptr<ObjectDumpPropertiesCallData> clone() const override;
+  std::unique_ptr<ObjectGetPropertiesCallData> clone() const override;
 
 private:
-  [[nodiscard]] aegis_proto::DumpPropertiesResponse
-  properties(const QObject *object) const;
+  [[nodiscard]] Response properties(const QObject *object) const;
 };
 
-/* ---------------------------- ObjectListenChangesCall --------------------- */
+/* ------------------------- ObjectListenObjectChangesCall ------------------ */
 
-using ObjectListenChangesCallData = StreamCallData<
-  aegis_proto::Object::AsyncService, google::protobuf::Empty,
-  aegis_proto::ObjectChangeResponse>;
+using ObjectListenObjectChangesCallData = StreamCallData<
+  aegis_proto::ObjectService::AsyncService, google::protobuf::Empty,
+  aegis_proto::ObjectChange>;
 
-class LIB_AEGIS_API ObjectListenChangesCall
-    : public ObjectListenChangesCallData {
+class LIB_AEGIS_API ObjectListenObjectChangesCall
+    : public ObjectListenObjectChangesCallData {
 public:
-  explicit ObjectListenChangesCall(
-    aegis_proto::Object::AsyncService *service,
+  explicit ObjectListenObjectChangesCall(
+    aegis_proto::ObjectService::AsyncService *service,
     grpc::ServerCompletionQueue *queue);
-  ~ObjectListenChangesCall() override;
+  ~ObjectListenObjectChangesCall() override;
 
   ProcessResult process(const Request &request) const override;
 
-  std::unique_ptr<ObjectListenChangesCallData> clone() const override;
+  std::unique_ptr<ObjectListenObjectChangesCallData> clone() const override;
 
 private:
   std::unique_ptr<ObjectObserver> m_observer;
@@ -223,7 +222,8 @@ private:
 
 /* ------------------------------- ObjectService -------------------------- */
 
-class ObjectService : public ServiceWrapper<aegis_proto::Object::AsyncService> {
+class ObjectService
+    : public ServiceWrapper<aegis_proto::ObjectService::AsyncService> {
 public:
   explicit ObjectService();
   ~ObjectService() override;

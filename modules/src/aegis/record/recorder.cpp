@@ -205,7 +205,12 @@ void ActionRecorderQueue::setRecorder(ActionRecorder *recorder) {
     m_on_action_reported = QObject::connect(
       m_recorder, &ActionRecorder::actionReported,
       [this](const auto recorder_action) {
-        m_recorded_actions.push_back(recorder_action);
+        {
+          std::lock_guard<std::mutex> lock(m_mutex);
+          m_recorded_actions.push_back(recorder_action);
+        }
+
+        m_cv.notify_one();
       });
   }
 }
@@ -213,6 +218,15 @@ void ActionRecorderQueue::setRecorder(ActionRecorder *recorder) {
 bool ActionRecorderQueue::isEmpty() const { return m_recorded_actions.empty(); }
 
 RecordedAction ActionRecorderQueue::popAction() {
+  std::lock_guard<std::mutex> lock(m_mutex);
+  Q_ASSERT(!m_recorded_actions.empty());
+  return m_recorded_actions.takeFirst();
+}
+
+RecordedAction ActionRecorderQueue::waitPopAction() {
+  std::unique_lock<std::mutex> lock(m_mutex);
+  m_cv.wait(lock, [this] { return !m_recorded_actions.empty(); });
+
   return m_recorded_actions.takeFirst();
 }
 

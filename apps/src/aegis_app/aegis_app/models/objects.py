@@ -2,73 +2,65 @@ import json
 import enum
 import typing
 import threading
-from PySide6.QtCore import Qt, QAbstractItemModel, QModelIndex, QTimer
+from PySide6.QtCore import (
+    Qt,
+    QAbstractItemModel,
+    QModelIndex,
+    QTimer,
+    QMetaObject,
+    Slot,
+    Q_ARG,
+)
 from google.protobuf import empty_pb2
-from aegis.aegis_pb2 import OptionalObjectRequest
+from aegis.aegis_pb2 import OptionalObject, Object
 
 from aegis_app.client import Client
 
 
 class ObjectNode:
+    @staticmethod
+    def create(
+        query: str, parent: typing.Optional["ObjectNode"] = None
+    ) -> "ObjectNode":
+        query_data = json.loads(query)
+        new_object_node = ObjectNode(
+            id=query_data["memory_address"],
+            name=query_data["path"].split(".")[-1],
+            type=query_data["type"],
+            path=query_data["path"],
+            parent=parent,
+        )
+        return new_object_node
+
     def __init__(
         self,
-        query: str,
+        id: str,
         name: str,
         type: str,
         path: str,
-        address: str,
         parent: typing.Optional["ObjectNode"] = None,
     ):
-        self._query = query
-        self._name = name
-        self._type = type
-        self._path = path
-        self._address = address
-        self._parent = parent
-        self._children = []
+        self.id = id
+        self.name = name
+        self.type = type
+        self.path = path
+        self.parent = parent
+        self.children = []
 
-    def append_child(self, child: "ObjectNode"):
-        self._children.append(child)
+    def __eq__(self, other):
+        if isinstance(other, ObjectNode):
+            return self.id == other.id
+        elif isinstance(other, str):
+            return self.id == json.loads(other).get("memory_address", "")
+        return NotImplemented
 
     def child(self, row: int) -> typing.Optional["ObjectNode"]:
-        return self._children[row] if row < len(self._children) else None
-
-    def child_count(self) -> int:
-        return len(self._children)
+        return self.children[row] if row < len(self.children) else None
 
     def row(self) -> int:
-        if self._parent:
-            return self._parent._children.index(self)
+        if self.parent:
+            return self.parent.children.index(self)
         return 0
-
-    def query(self) -> typing.Any:
-        return self._query
-
-    def name(self) -> typing.Any:
-        return self._name
-
-    def path(self) -> typing.Any:
-        return self._path
-
-    def type(self) -> typing.Any:
-        return self._type
-
-    def address(self) -> typing.Any:
-        return self._address
-
-
-def create_object_node(
-    query: str, parent: typing.Optional["ObjectNode"] = None
-) -> ObjectNode:
-    query_data = json.loads(query)
-    return ObjectNode(
-        query=query,
-        name=query_data["path"].split(".")[-1],
-        type=query_data["type"],
-        path=query_data["path"],
-        address=query_data["memory_address"],
-        parent=parent,
-    )
 
 
 class ObjectsModel(QAbstractItemModel):
@@ -76,23 +68,22 @@ class ObjectsModel(QAbstractItemModel):
         Name = 0
         Path = 1
         Type = 2
-        Address = 3
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self._objects = []
 
-    def rowCount(self, parent=QModelIndex()):
+    def rowCount(self, parent=QModelIndex()) -> int:
         if parent.isValid():
             parent_node = parent.internalPointer()
-            return parent_node.child_count()
+            return len(parent_node.children)
 
         return len(self._objects)
 
-    def columnCount(self, parent=QModelIndex()):
+    def columnCount(self, parent=QModelIndex()) -> int:
         return len(ObjectsModel.Columns)
 
-    def data(self, index, role=Qt.ItemDataRole.DisplayRole):
+    def data(self, index, role=Qt.ItemDataRole.DisplayRole) -> typing.Any:
         if not index.isValid():
             return None
 
@@ -100,15 +91,15 @@ class ObjectsModel(QAbstractItemModel):
         if role == Qt.ItemDataRole.DisplayRole:
             match index.column():
                 case ObjectsModel.Columns.Name:
-                    return node.name()
+                    return node.name
                 case ObjectsModel.Columns.Type:
-                    return node.type()
+                    return node.type
                 case ObjectsModel.Columns.Path:
-                    return node.path()
-                case ObjectsModel.Columns.Address:
-                    return node.address()
+                    return node.path
 
-    def headerData(self, section, orientation, role=Qt.ItemDataRole.DisplayRole):
+    def headerData(
+        self, section, orientation, role=Qt.ItemDataRole.DisplayRole
+    ) -> typing.Any:
         if (
             orientation == Qt.Orientation.Horizontal
             and role == Qt.ItemDataRole.DisplayRole
@@ -120,10 +111,8 @@ class ObjectsModel(QAbstractItemModel):
                     return "Type"
                 case ObjectsModel.Columns.Path:
                     return "Path"
-                case ObjectsModel.Columns.Address:
-                    return "Address"
 
-    def index(self, row, column, parent=QModelIndex()):
+    def index(self, row, column, parent=QModelIndex()) -> QModelIndex:
         if not self.hasIndex(row, column, parent):
             return QModelIndex()
 
@@ -138,38 +127,57 @@ class ObjectsModel(QAbstractItemModel):
 
         return QModelIndex()
 
-    def parent(self, index):
+    def parent(self, index) -> QModelIndex:
         if not index.isValid():
             return QModelIndex()
 
         child_node = index.internalPointer()
-        parent_node = child_node._parent
+        parent_node = child_node.parent
 
         if child_node in self._objects or parent_node is None:
             return QModelIndex()
 
         return self.createIndex(parent_node.row(), 0, parent_node)
 
-    def addItem(self, object_id: str, parent_index=QModelIndex()):
-        if parent_index.isValid():
-            parent_node = parent_index.internalPointer()
-        else:
-            parent_node = None
+    def findItem(self, query: str, index=QModelIndex()) -> QModelIndex:
+        node = index.internalPointer() if index.isValid() else None
+        if node == query:
+            return index
 
-        new_node = ObjectNode(object_id, parent_node)
+        for row in range(self.rowCount(index)):
+            child_index = self.findItem(query, self.index(row, 0, index))
+            if child_index.isValid():
+                return child_index
 
-        if parent_node:
-            self.beginInsertRows(
-                parent_index, parent_node.child_count(), parent_node.child_count()
-            )
-            parent_node.append_child(new_node)
-            self.endInsertRows()
-        else:
-            self.beginInsertRows(QModelIndex(), len(self.objects), len(self.objects))
-            self._objects.append(new_node)
-            self.endInsertRows()
+        return QModelIndex()
+
+    def createItem(self, query: str, parent_index=QModelIndex()) -> QModelIndex:
+        parent_node = parent_index.internalPointer() if parent_index.isValid() else None
+        node_container = parent_node.children if parent_node else self._objects
+        new_node = ObjectNode.create(query, parent_node)
+        row_count = self.rowCount(parent_index)
+
+        self.beginInsertRows(parent_index, row_count, row_count)
+        node_container.append(new_node)
+        self.endInsertRows()
 
         return self.createIndex(new_node.row(), 0, new_node)
+
+    def takeItem(
+        self, query: str, parent_index=QModelIndex()
+    ) -> typing.Optional["ObjectNode"]:
+        parent_node = parent_index.internalPointer() if parent_index.isValid() else None
+        node_container = parent_node.children if parent_node else self._objects
+        find_index = self.findItem(query, parent_index)
+
+        if not find_index.isValid() or self.parent(find_index) != parent_index:
+            return None
+
+        self.beginRemoveRows(parent_index, find_index.row(), find_index.row())
+        node = node_container.pop(find_index.row())
+        self.endRemoveRows()
+
+        return node
 
 
 class GRPCObjectsModel(ObjectsModel):
@@ -178,28 +186,77 @@ class GRPCObjectsModel(ObjectsModel):
         self._client = client
 
         self.fetch_initial_state()
-        self._watch_thread = threading.Thread(target=self.tree_changed, daemon=True)
+        self._watch_thread = threading.Thread(
+            target=self.handle_tree_changes, daemon=True
+        )
         self._watch_thread.start()
 
+        self._update_timer = QTimer()
+        self._update_timer.timeout.connect(self.handle_tree_update)
+        self._update_timer.start(1000)
+
     def fetch_initial_state(self):
-        response = self._client.object_stub.Tree(OptionalObjectRequest())
+        response = self._client.object_stub.GetTree(OptionalObject())
+        self.build_tree(response.nodes)
 
-        self.beginResetModel()
-        self._objects = self.build_tree(response.nodes, None)
-        self.endResetModel()
+    def build_tree(self, object_nodes, parent_index=QModelIndex()):
+        for object_node in object_nodes:
+            node_index = self.createItem(object_node.object.query, parent_index)
+            self.build_tree(object_node.nodes, node_index)
 
-    def build_tree(self, objects, parent):
-        nodes = []
-        for object in objects:
-            node = create_object_node(object.object, parent)
+    def handle_tree_update(self):
+        pass
 
-            children = self.build_tree(object.nodes, node)
-            for child in children:
-                node.append_child(child)
-
-            nodes.append(node)
-        return nodes
-
-    def tree_changed(self):
+    def handle_tree_changes(self):
         for change in self._client.object_stub.ListenObjectChanges(empty_pb2.Empty()):
-            print(f"tree_changed {change}")
+            if change.HasField("added"):
+                QMetaObject.invokeMethod(
+                    self,
+                    "handle_object_added",
+                    Qt.QueuedConnection,
+                    Q_ARG(str, change.added.object.query),
+                    Q_ARG(str, change.added.parent.query),
+                )
+            elif change.HasField("removed"):
+                QMetaObject.invokeMethod(
+                    self,
+                    "handle_object_removed",
+                    Qt.QueuedConnection,
+                    Q_ARG(str, change.removed.object.query),
+                )
+            elif change.HasField("reparented"):
+                QMetaObject.invokeMethod(
+                    self,
+                    "handle_object_reparented",
+                    Qt.QueuedConnection,
+                    Q_ARG(str, change.reparented.object.query),
+                    Q_ARG(str, change.reparented.parent.query),
+                )
+
+    @Slot(str, str)
+    def handle_object_added(self, object, parent):
+        parent_index = self.findItem(parent)
+        self.createItem(object, parent_index)
+
+    @Slot(str)
+    def handle_object_removed(self, object):
+        index = self.findItem(object)
+        assert index.isValid()
+
+        parent_index = self.parent(index)
+        self.takeItem(object, parent_index)
+
+    @Slot(str, str)
+    def handle_object_reparented(self, object, parent):
+        index = self.findItem(object)
+        if not index.isValid():
+            return
+
+        old_parent_index = self.parent(index)
+        assert old_parent_index.isValid()
+
+        new_parent_index = self.findItem(parent)
+        assert new_parent_index.isValid()
+
+        self.takeItem(object, old_parent_index)
+        self.createItem(object, new_parent_index)

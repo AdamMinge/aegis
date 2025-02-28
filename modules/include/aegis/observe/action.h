@@ -31,11 +31,6 @@ public:
     ObjectQuery parent;
   };
 
-  struct ObjectRenamed {
-    ObjectQuery from;
-    ObjectQuery to;
-  };
-
 public:
   template<typename ACTION_SUBTYPE>
   ObservedAction(const ACTION_SUBTYPE &action);
@@ -52,8 +47,7 @@ public:
   decltype(auto) visit(TYPE &&visitor) const;
 
 private:
-  std::variant<ObjectAdded, ObjectRemoved, ObjectReparented, ObjectRenamed>
-    m_data;
+  std::variant<ObjectAdded, ObjectRemoved, ObjectReparented> m_data;
 };
 
 template<typename ACTION_SUBTYPE>

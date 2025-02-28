@@ -6,7 +6,7 @@ from aegis import aegis_pb2 as aegis_dot_aegis__pb2
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
-class MarkerStub(object):
+class MarkerServiceStub(object):
     """--------------------------------- Marker --------------------------------- //
 
     """
@@ -18,18 +18,18 @@ class MarkerStub(object):
             channel: A grpc.Channel.
         """
         self.Start = channel.unary_unary(
-                '/aegis_proto.Marker/Start',
+                '/aegis_proto.MarkerService/Start',
                 request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 _registered_method=True)
         self.Stop = channel.unary_unary(
-                '/aegis_proto.Marker/Stop',
+                '/aegis_proto.MarkerService/Stop',
                 request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 _registered_method=True)
 
 
-class MarkerServicer(object):
+class MarkerServiceServicer(object):
     """--------------------------------- Marker --------------------------------- //
 
     """
@@ -47,7 +47,7 @@ class MarkerServicer(object):
         raise NotImplementedError('Method not implemented!')
 
 
-def add_MarkerServicer_to_server(servicer, server):
+def add_MarkerServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'Start': grpc.unary_unary_rpc_method_handler(
                     servicer.Start,
@@ -61,13 +61,13 @@ def add_MarkerServicer_to_server(servicer, server):
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'aegis_proto.Marker', rpc_method_handlers)
+            'aegis_proto.MarkerService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('aegis_proto.Marker', rpc_method_handlers)
+    server.add_registered_method_handlers('aegis_proto.MarkerService', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
-class Marker(object):
+class MarkerService(object):
     """--------------------------------- Marker --------------------------------- //
 
     """
@@ -86,7 +86,7 @@ class Marker(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/aegis_proto.Marker/Start',
+            '/aegis_proto.MarkerService/Start',
             google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options,
@@ -113,7 +113,7 @@ class Marker(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/aegis_proto.Marker/Stop',
+            '/aegis_proto.MarkerService/Stop',
             google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options,
@@ -127,7 +127,7 @@ class Marker(object):
             _registered_method=True)
 
 
-class RecorderStub(object):
+class RecorderServiceStub(object):
     """--------------------------------- Recorder -------------------------------- //
 
     """
@@ -138,47 +138,47 @@ class RecorderStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.Listen = channel.unary_stream(
-                '/aegis_proto.Recorder/Listen',
+        self.ListenCommands = channel.unary_stream(
+                '/aegis_proto.RecorderService/ListenCommands',
                 request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-                response_deserializer=aegis_dot_aegis__pb2.RecorderListenResponse.FromString,
+                response_deserializer=aegis_dot_aegis__pb2.RecorderCommand.FromString,
                 _registered_method=True)
 
 
-class RecorderServicer(object):
+class RecorderServiceServicer(object):
     """--------------------------------- Recorder -------------------------------- //
 
     """
 
-    def Listen(self, request, context):
+    def ListenCommands(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
 
-def add_RecorderServicer_to_server(servicer, server):
+def add_RecorderServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'Listen': grpc.unary_stream_rpc_method_handler(
-                    servicer.Listen,
+            'ListenCommands': grpc.unary_stream_rpc_method_handler(
+                    servicer.ListenCommands,
                     request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
-                    response_serializer=aegis_dot_aegis__pb2.RecorderListenResponse.SerializeToString,
+                    response_serializer=aegis_dot_aegis__pb2.RecorderCommand.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'aegis_proto.Recorder', rpc_method_handlers)
+            'aegis_proto.RecorderService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('aegis_proto.Recorder', rpc_method_handlers)
+    server.add_registered_method_handlers('aegis_proto.RecorderService', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
-class Recorder(object):
+class RecorderService(object):
     """--------------------------------- Recorder -------------------------------- //
 
     """
 
     @staticmethod
-    def Listen(request,
+    def ListenCommands(request,
             target,
             options=(),
             channel_credentials=None,
@@ -191,9 +191,9 @@ class Recorder(object):
         return grpc.experimental.unary_stream(
             request,
             target,
-            '/aegis_proto.Recorder/Listen',
+            '/aegis_proto.RecorderService/ListenCommands',
             google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-            aegis_dot_aegis__pb2.RecorderListenResponse.FromString,
+            aegis_dot_aegis__pb2.RecorderCommand.FromString,
             options,
             channel_credentials,
             insecure,
@@ -205,7 +205,7 @@ class Recorder(object):
             _registered_method=True)
 
 
-class ObjectStub(object):
+class ObjectServiceStub(object):
     """--------------------------------- Object ---------------------------------- //
 
     """
@@ -216,59 +216,59 @@ class ObjectStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.Tree = channel.unary_unary(
-                '/aegis_proto.Object/Tree',
-                request_serializer=aegis_dot_aegis__pb2.OptionalObjectRequest.SerializeToString,
-                response_deserializer=aegis_dot_aegis__pb2.TreeResponse.FromString,
+        self.GetTree = channel.unary_unary(
+                '/aegis_proto.ObjectService/GetTree',
+                request_serializer=aegis_dot_aegis__pb2.OptionalObject.SerializeToString,
+                response_deserializer=aegis_dot_aegis__pb2.ObjectTree.FromString,
                 _registered_method=True)
         self.Find = channel.unary_unary(
-                '/aegis_proto.Object/Find',
-                request_serializer=aegis_dot_aegis__pb2.FindRequest.SerializeToString,
-                response_deserializer=aegis_dot_aegis__pb2.FindResponse.FromString,
+                '/aegis_proto.ObjectService/Find',
+                request_serializer=aegis_dot_aegis__pb2.Object.SerializeToString,
+                response_deserializer=aegis_dot_aegis__pb2.Objects.FromString,
                 _registered_method=True)
-        self.Parent = channel.unary_unary(
-                '/aegis_proto.Object/Parent',
-                request_serializer=aegis_dot_aegis__pb2.ObjectRequest.SerializeToString,
-                response_deserializer=aegis_dot_aegis__pb2.ParentResponse.FromString,
+        self.GetParent = channel.unary_unary(
+                '/aegis_proto.ObjectService/GetParent',
+                request_serializer=aegis_dot_aegis__pb2.Object.SerializeToString,
+                response_deserializer=aegis_dot_aegis__pb2.Object.FromString,
                 _registered_method=True)
-        self.Children = channel.unary_unary(
-                '/aegis_proto.Object/Children',
-                request_serializer=aegis_dot_aegis__pb2.ObjectRequest.SerializeToString,
-                response_deserializer=aegis_dot_aegis__pb2.ChildrenResponse.FromString,
+        self.GetChildren = channel.unary_unary(
+                '/aegis_proto.ObjectService/GetChildren',
+                request_serializer=aegis_dot_aegis__pb2.Object.SerializeToString,
+                response_deserializer=aegis_dot_aegis__pb2.Objects.FromString,
                 _registered_method=True)
-        self.InvokeMethod = channel.unary_unary(
-                '/aegis_proto.Object/InvokeMethod',
-                request_serializer=aegis_dot_aegis__pb2.InvokeMethodRequest.SerializeToString,
+        self.CallMethod = channel.unary_unary(
+                '/aegis_proto.ObjectService/CallMethod',
+                request_serializer=aegis_dot_aegis__pb2.MethodCall.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 _registered_method=True)
-        self.SetProperty = channel.unary_unary(
-                '/aegis_proto.Object/SetProperty',
-                request_serializer=aegis_dot_aegis__pb2.SetPropertyRequest.SerializeToString,
+        self.UpdateProperty = channel.unary_unary(
+                '/aegis_proto.ObjectService/UpdateProperty',
+                request_serializer=aegis_dot_aegis__pb2.PropertyUpdate.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
                 _registered_method=True)
-        self.DumpMethods = channel.unary_unary(
-                '/aegis_proto.Object/DumpMethods',
-                request_serializer=aegis_dot_aegis__pb2.ObjectRequest.SerializeToString,
-                response_deserializer=aegis_dot_aegis__pb2.DumpMethodsResponse.FromString,
+        self.GetMethods = channel.unary_unary(
+                '/aegis_proto.ObjectService/GetMethods',
+                request_serializer=aegis_dot_aegis__pb2.Object.SerializeToString,
+                response_deserializer=aegis_dot_aegis__pb2.Methods.FromString,
                 _registered_method=True)
-        self.DumpProperties = channel.unary_unary(
-                '/aegis_proto.Object/DumpProperties',
-                request_serializer=aegis_dot_aegis__pb2.ObjectRequest.SerializeToString,
-                response_deserializer=aegis_dot_aegis__pb2.DumpPropertiesResponse.FromString,
+        self.GetProperties = channel.unary_unary(
+                '/aegis_proto.ObjectService/GetProperties',
+                request_serializer=aegis_dot_aegis__pb2.Object.SerializeToString,
+                response_deserializer=aegis_dot_aegis__pb2.Properties.FromString,
                 _registered_method=True)
         self.ListenObjectChanges = channel.unary_stream(
-                '/aegis_proto.Object/ListenObjectChanges',
+                '/aegis_proto.ObjectService/ListenObjectChanges',
                 request_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-                response_deserializer=aegis_dot_aegis__pb2.ObjectChangeResponse.FromString,
+                response_deserializer=aegis_dot_aegis__pb2.ObjectChange.FromString,
                 _registered_method=True)
 
 
-class ObjectServicer(object):
+class ObjectServiceServicer(object):
     """--------------------------------- Object ---------------------------------- //
 
     """
 
-    def Tree(self, request, context):
+    def GetTree(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -280,37 +280,37 @@ class ObjectServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def Parent(self, request, context):
+    def GetParent(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def Children(self, request, context):
+    def GetChildren(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def InvokeMethod(self, request, context):
+    def CallMethod(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def SetProperty(self, request, context):
+    def UpdateProperty(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def DumpMethods(self, request, context):
+    def GetMethods(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def DumpProperties(self, request, context):
+    def GetProperties(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -323,68 +323,68 @@ class ObjectServicer(object):
         raise NotImplementedError('Method not implemented!')
 
 
-def add_ObjectServicer_to_server(servicer, server):
+def add_ObjectServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'Tree': grpc.unary_unary_rpc_method_handler(
-                    servicer.Tree,
-                    request_deserializer=aegis_dot_aegis__pb2.OptionalObjectRequest.FromString,
-                    response_serializer=aegis_dot_aegis__pb2.TreeResponse.SerializeToString,
+            'GetTree': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetTree,
+                    request_deserializer=aegis_dot_aegis__pb2.OptionalObject.FromString,
+                    response_serializer=aegis_dot_aegis__pb2.ObjectTree.SerializeToString,
             ),
             'Find': grpc.unary_unary_rpc_method_handler(
                     servicer.Find,
-                    request_deserializer=aegis_dot_aegis__pb2.FindRequest.FromString,
-                    response_serializer=aegis_dot_aegis__pb2.FindResponse.SerializeToString,
+                    request_deserializer=aegis_dot_aegis__pb2.Object.FromString,
+                    response_serializer=aegis_dot_aegis__pb2.Objects.SerializeToString,
             ),
-            'Parent': grpc.unary_unary_rpc_method_handler(
-                    servicer.Parent,
-                    request_deserializer=aegis_dot_aegis__pb2.ObjectRequest.FromString,
-                    response_serializer=aegis_dot_aegis__pb2.ParentResponse.SerializeToString,
+            'GetParent': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetParent,
+                    request_deserializer=aegis_dot_aegis__pb2.Object.FromString,
+                    response_serializer=aegis_dot_aegis__pb2.Object.SerializeToString,
             ),
-            'Children': grpc.unary_unary_rpc_method_handler(
-                    servicer.Children,
-                    request_deserializer=aegis_dot_aegis__pb2.ObjectRequest.FromString,
-                    response_serializer=aegis_dot_aegis__pb2.ChildrenResponse.SerializeToString,
+            'GetChildren': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetChildren,
+                    request_deserializer=aegis_dot_aegis__pb2.Object.FromString,
+                    response_serializer=aegis_dot_aegis__pb2.Objects.SerializeToString,
             ),
-            'InvokeMethod': grpc.unary_unary_rpc_method_handler(
-                    servicer.InvokeMethod,
-                    request_deserializer=aegis_dot_aegis__pb2.InvokeMethodRequest.FromString,
+            'CallMethod': grpc.unary_unary_rpc_method_handler(
+                    servicer.CallMethod,
+                    request_deserializer=aegis_dot_aegis__pb2.MethodCall.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
-            'SetProperty': grpc.unary_unary_rpc_method_handler(
-                    servicer.SetProperty,
-                    request_deserializer=aegis_dot_aegis__pb2.SetPropertyRequest.FromString,
+            'UpdateProperty': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateProperty,
+                    request_deserializer=aegis_dot_aegis__pb2.PropertyUpdate.FromString,
                     response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
-            'DumpMethods': grpc.unary_unary_rpc_method_handler(
-                    servicer.DumpMethods,
-                    request_deserializer=aegis_dot_aegis__pb2.ObjectRequest.FromString,
-                    response_serializer=aegis_dot_aegis__pb2.DumpMethodsResponse.SerializeToString,
+            'GetMethods': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetMethods,
+                    request_deserializer=aegis_dot_aegis__pb2.Object.FromString,
+                    response_serializer=aegis_dot_aegis__pb2.Methods.SerializeToString,
             ),
-            'DumpProperties': grpc.unary_unary_rpc_method_handler(
-                    servicer.DumpProperties,
-                    request_deserializer=aegis_dot_aegis__pb2.ObjectRequest.FromString,
-                    response_serializer=aegis_dot_aegis__pb2.DumpPropertiesResponse.SerializeToString,
+            'GetProperties': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetProperties,
+                    request_deserializer=aegis_dot_aegis__pb2.Object.FromString,
+                    response_serializer=aegis_dot_aegis__pb2.Properties.SerializeToString,
             ),
             'ListenObjectChanges': grpc.unary_stream_rpc_method_handler(
                     servicer.ListenObjectChanges,
                     request_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
-                    response_serializer=aegis_dot_aegis__pb2.ObjectChangeResponse.SerializeToString,
+                    response_serializer=aegis_dot_aegis__pb2.ObjectChange.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'aegis_proto.Object', rpc_method_handlers)
+            'aegis_proto.ObjectService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('aegis_proto.Object', rpc_method_handlers)
+    server.add_registered_method_handlers('aegis_proto.ObjectService', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
-class Object(object):
+class ObjectService(object):
     """--------------------------------- Object ---------------------------------- //
 
     """
 
     @staticmethod
-    def Tree(request,
+    def GetTree(request,
             target,
             options=(),
             channel_credentials=None,
@@ -397,9 +397,9 @@ class Object(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/aegis_proto.Object/Tree',
-            aegis_dot_aegis__pb2.OptionalObjectRequest.SerializeToString,
-            aegis_dot_aegis__pb2.TreeResponse.FromString,
+            '/aegis_proto.ObjectService/GetTree',
+            aegis_dot_aegis__pb2.OptionalObject.SerializeToString,
+            aegis_dot_aegis__pb2.ObjectTree.FromString,
             options,
             channel_credentials,
             insecure,
@@ -424,9 +424,9 @@ class Object(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/aegis_proto.Object/Find',
-            aegis_dot_aegis__pb2.FindRequest.SerializeToString,
-            aegis_dot_aegis__pb2.FindResponse.FromString,
+            '/aegis_proto.ObjectService/Find',
+            aegis_dot_aegis__pb2.Object.SerializeToString,
+            aegis_dot_aegis__pb2.Objects.FromString,
             options,
             channel_credentials,
             insecure,
@@ -438,7 +438,7 @@ class Object(object):
             _registered_method=True)
 
     @staticmethod
-    def Parent(request,
+    def GetParent(request,
             target,
             options=(),
             channel_credentials=None,
@@ -451,9 +451,9 @@ class Object(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/aegis_proto.Object/Parent',
-            aegis_dot_aegis__pb2.ObjectRequest.SerializeToString,
-            aegis_dot_aegis__pb2.ParentResponse.FromString,
+            '/aegis_proto.ObjectService/GetParent',
+            aegis_dot_aegis__pb2.Object.SerializeToString,
+            aegis_dot_aegis__pb2.Object.FromString,
             options,
             channel_credentials,
             insecure,
@@ -465,7 +465,7 @@ class Object(object):
             _registered_method=True)
 
     @staticmethod
-    def Children(request,
+    def GetChildren(request,
             target,
             options=(),
             channel_credentials=None,
@@ -478,9 +478,9 @@ class Object(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/aegis_proto.Object/Children',
-            aegis_dot_aegis__pb2.ObjectRequest.SerializeToString,
-            aegis_dot_aegis__pb2.ChildrenResponse.FromString,
+            '/aegis_proto.ObjectService/GetChildren',
+            aegis_dot_aegis__pb2.Object.SerializeToString,
+            aegis_dot_aegis__pb2.Objects.FromString,
             options,
             channel_credentials,
             insecure,
@@ -492,7 +492,7 @@ class Object(object):
             _registered_method=True)
 
     @staticmethod
-    def InvokeMethod(request,
+    def CallMethod(request,
             target,
             options=(),
             channel_credentials=None,
@@ -505,8 +505,8 @@ class Object(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/aegis_proto.Object/InvokeMethod',
-            aegis_dot_aegis__pb2.InvokeMethodRequest.SerializeToString,
+            '/aegis_proto.ObjectService/CallMethod',
+            aegis_dot_aegis__pb2.MethodCall.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options,
             channel_credentials,
@@ -519,7 +519,7 @@ class Object(object):
             _registered_method=True)
 
     @staticmethod
-    def SetProperty(request,
+    def UpdateProperty(request,
             target,
             options=(),
             channel_credentials=None,
@@ -532,8 +532,8 @@ class Object(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/aegis_proto.Object/SetProperty',
-            aegis_dot_aegis__pb2.SetPropertyRequest.SerializeToString,
+            '/aegis_proto.ObjectService/UpdateProperty',
+            aegis_dot_aegis__pb2.PropertyUpdate.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options,
             channel_credentials,
@@ -546,7 +546,7 @@ class Object(object):
             _registered_method=True)
 
     @staticmethod
-    def DumpMethods(request,
+    def GetMethods(request,
             target,
             options=(),
             channel_credentials=None,
@@ -559,9 +559,9 @@ class Object(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/aegis_proto.Object/DumpMethods',
-            aegis_dot_aegis__pb2.ObjectRequest.SerializeToString,
-            aegis_dot_aegis__pb2.DumpMethodsResponse.FromString,
+            '/aegis_proto.ObjectService/GetMethods',
+            aegis_dot_aegis__pb2.Object.SerializeToString,
+            aegis_dot_aegis__pb2.Methods.FromString,
             options,
             channel_credentials,
             insecure,
@@ -573,7 +573,7 @@ class Object(object):
             _registered_method=True)
 
     @staticmethod
-    def DumpProperties(request,
+    def GetProperties(request,
             target,
             options=(),
             channel_credentials=None,
@@ -586,9 +586,9 @@ class Object(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/aegis_proto.Object/DumpProperties',
-            aegis_dot_aegis__pb2.ObjectRequest.SerializeToString,
-            aegis_dot_aegis__pb2.DumpPropertiesResponse.FromString,
+            '/aegis_proto.ObjectService/GetProperties',
+            aegis_dot_aegis__pb2.Object.SerializeToString,
+            aegis_dot_aegis__pb2.Properties.FromString,
             options,
             channel_credentials,
             insecure,
@@ -613,9 +613,9 @@ class Object(object):
         return grpc.experimental.unary_stream(
             request,
             target,
-            '/aegis_proto.Object/ListenObjectChanges',
+            '/aegis_proto.ObjectService/ListenObjectChanges',
             google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-            aegis_dot_aegis__pb2.ObjectChangeResponse.FromString,
+            aegis_dot_aegis__pb2.ObjectChange.FromString,
             options,
             channel_credentials,
             insecure,

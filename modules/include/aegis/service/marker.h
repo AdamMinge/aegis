@@ -15,13 +15,13 @@ namespace aegis {
 /* ------------------------------ MarkerStartCall -------------------------- */
 
 using MarkerStartCallData = CallData<
-  aegis_proto::Marker::AsyncService, google::protobuf::Empty,
+  aegis_proto::MarkerService::AsyncService, google::protobuf::Empty,
   google::protobuf::Empty>;
 
 class LIB_AEGIS_API MarkerStartCall : public MarkerStartCallData {
 public:
   explicit MarkerStartCall(
-    aegis_proto::Marker::AsyncService *service,
+    aegis_proto::MarkerService::AsyncService *service,
     grpc::ServerCompletionQueue *queue);
   ~MarkerStartCall() override;
 
@@ -33,13 +33,13 @@ public:
 /* ------------------------------ MarkerStartCall -------------------------- */
 
 using MarkerStartCallData = CallData<
-  aegis_proto::Marker::AsyncService, google::protobuf::Empty,
+  aegis_proto::MarkerService::AsyncService, google::protobuf::Empty,
   google::protobuf::Empty>;
 
 class LIB_AEGIS_API MarkerStopCall : public MarkerStartCallData {
 public:
   explicit MarkerStopCall(
-    aegis_proto::Marker::AsyncService *service,
+    aegis_proto::MarkerService::AsyncService *service,
     grpc::ServerCompletionQueue *queue);
   ~MarkerStopCall() override;
 
@@ -50,7 +50,8 @@ public:
 
 /* ------------------------------- MarkerService --------------------------- */
 
-class MarkerService : public ServiceWrapper<aegis_proto::Marker::AsyncService> {
+class MarkerService
+    : public ServiceWrapper<aegis_proto::MarkerService::AsyncService> {
 public:
   explicit MarkerService();
   ~MarkerService() override;

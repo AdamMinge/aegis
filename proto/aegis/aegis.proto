@@ -7,89 +7,77 @@ package aegis_proto;
 
 // --------------------------------- Marker --------------------------------- //
 
-service Marker {
+service MarkerService {
     rpc Start (google.protobuf.Empty) returns (google.protobuf.Empty) {}
     rpc Stop (google.protobuf.Empty) returns (google.protobuf.Empty) {}
 }
 
 // --------------------------------- Recorder -------------------------------- //
 
-service Recorder {
-    rpc Listen (google.protobuf.Empty) returns (stream RecorderListenResponse) {}
+service RecorderService {
+    rpc ListenCommands (google.protobuf.Empty) returns (stream RecorderCommand) {}
 }
 
-message RecorderListenResponse {
+message RecorderCommand {
     string command = 1;
 }
 
 // --------------------------------- Object ---------------------------------- //
 
-service Object {
-    rpc Tree (OptionalObjectRequest) returns (TreeResponse) {}
-    rpc Find (FindRequest) returns (FindResponse) {}
+service ObjectService {
+    rpc GetTree (OptionalObject) returns (ObjectTree) {}
+    rpc Find (Object) returns (Objects) {}
 
-    rpc Parent (ObjectRequest) returns (ParentResponse) {}
-    rpc Children (ObjectRequest) returns (ChildrenResponse) {}
+    rpc GetParent (Object) returns (Object) {}
+    rpc GetChildren (Object) returns (Objects) {}
 
-    rpc InvokeMethod (InvokeMethodRequest) returns (google.protobuf.Empty) {}
-    rpc SetProperty (SetPropertyRequest) returns (google.protobuf.Empty) {}
+    rpc CallMethod (MethodCall) returns (google.protobuf.Empty) {}
+    rpc UpdateProperty (PropertyUpdate) returns (google.protobuf.Empty) {}
 
-    rpc DumpMethods (ObjectRequest) returns (DumpMethodsResponse) {}
-    rpc DumpProperties (ObjectRequest) returns (DumpPropertiesResponse) {}
+    rpc GetMethods (Object) returns (Methods) {}
+    rpc GetProperties (Object) returns (Properties) {}
 
-    rpc ListenObjectChanges (google.protobuf.Empty) returns (stream ObjectChangeResponse) {}
+    rpc ListenObjectChanges (google.protobuf.Empty) returns (stream ObjectChange) {}
 }
 
-message OptionalObjectRequest {
-    optional string object = 1;
+message OptionalObject {
+    optional string query = 1;
 }
 
-message TreeResponse {
-    repeated TreeNode nodes = 1;
+message Object {
+    string query = 1;
 }
 
-message TreeNode {
-    string object = 1;
-    repeated TreeNode nodes = 2;
+message Objects {
+    repeated Object objects = 1;
 }
 
-message FindRequest {
-    string object = 1;
+message ObjectTree {
+    repeated ObjectNode nodes = 1;
 }
 
-message FindResponse {
-    repeated string objects = 1;
+message ObjectNode {
+    Object object = 1;
+    repeated ObjectNode nodes = 2;
 }
 
-message ObjectRequest {
-    string object = 1;
-}
-
-message ParentResponse {
-    optional string parent = 1;
-}
-
-message ChildrenResponse {
-    repeated string children = 1;
-}
-
-message InvokeMethodRequest {
-    string object = 1;
+message MethodCall {
+    Object object = 1;
     string method = 2;
     repeated google.protobuf.Value arguments = 3;
 }
 
-message SetPropertyRequest {
-    string object = 1;
+message PropertyUpdate {
+    Object object = 1;
     string property = 2;
     google.protobuf.Value value = 3;
 }
 
-message DumpMethodsResponse {
+message Methods {
     repeated string methods = 1;
 }
 
-message DumpPropertiesResponse {
+message Properties {
     repeated PropertyValue properties = 1;
 }
 
@@ -98,32 +86,25 @@ message PropertyValue {
     google.protobuf.Value value = 2;
 }
 
-message ObjectChangeResponse {
+message ObjectChange {
     oneof change_type {
         ObjectAdded added = 1;
         ObjectRemoved removed = 2;
         ObjectReparented reparented = 3;
-        ObjectRenamed renamed = 4;
     }
 }
 
 message ObjectAdded {
-    string object = 1;
-    string parent = 2;
+    Object object = 1;
+    Object parent = 2;
 }
 
 message ObjectRemoved {
-    string object = 1;
-    string parent = 2;
+    Object object = 1;
+    Object parent = 2;
 }
 
 message ObjectReparented {
-    string object = 1;
-    string parent = 2;
+    Object object = 1;
+    Object parent = 2;
 }
-
-message ObjectRenamed {
-    string from = 1;
-    string to = 2;
-}
-

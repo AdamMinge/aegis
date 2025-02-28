@@ -29,6 +29,8 @@ QList<QObject *> Searcher::getObjects(const ObjectQuery &query) const {
 }
 
 ObjectQuery Searcher::getQuery(const QObject *object) const {
+  if (!object) return ObjectQuery{};
+
   auto query = QVariantMap{};
   for (const auto &search_strategy : m_strategies) {
     const auto sub_query = search_strategy->createObjectQuery(object);

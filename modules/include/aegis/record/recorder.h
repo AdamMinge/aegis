@@ -83,11 +83,15 @@ public:
 
   [[nodiscard]] bool isEmpty() const;
   [[nodiscard]] RecordedAction popAction();
+  [[nodiscard]] RecordedAction waitPopAction();
 
 private:
   ActionRecorder *m_recorder;
   QMetaObject::Connection m_on_action_reported;
   QQueue<RecordedAction> m_recorded_actions;
+
+  mutable std::mutex m_mutex;
+  std::condition_variable m_cv;
 };
 
 }// namespace aegis

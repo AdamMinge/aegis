@@ -9,11 +9,11 @@ namespace aegis {
 /* ------------------------------ MarkerStartCall -------------------------- */
 
 MarkerStartCall::MarkerStartCall(
-  aegis_proto::Marker::AsyncService *service,
+  aegis_proto::MarkerService::AsyncService *service,
   grpc::ServerCompletionQueue *queue)
     : CallData(
         service, queue, CallTag{this},
-        &aegis_proto::Marker::AsyncService::RequestStart) {}
+        &aegis_proto::MarkerService::AsyncService::RequestStart) {}
 
 MarkerStartCall::~MarkerStartCall() = default;
 
@@ -38,11 +38,11 @@ MarkerStartCall::process(const Request &request) const {
 /* ------------------------------ MarkerStopCall --------------------------- */
 
 MarkerStopCall::MarkerStopCall(
-  aegis_proto::Marker::AsyncService *service,
+  aegis_proto::MarkerService::AsyncService *service,
   grpc::ServerCompletionQueue *queue)
     : CallData(
         service, queue, CallTag{this},
-        &aegis_proto::Marker::AsyncService::RequestStop) {}
+        &aegis_proto::MarkerService::AsyncService::RequestStop) {}
 
 MarkerStopCall::~MarkerStopCall() = default;
 

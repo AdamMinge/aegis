@@ -4,6 +4,9 @@
 /* ------------------------------------ Qt ---------------------------------- */
 #include <QHash>
 #include <QObject>
+/* ---------------------------------- Standard ------------------------------ */
+#include <condition_variable>
+#include <mutex>
 /* ----------------------------------- Local -------------------------------- */
 #include "aegis/export.h"
 #include "aegis/observe/action.h"
@@ -35,14 +38,12 @@ protected:
   [[nodiscard]] bool eventFilter(QObject *object, QEvent *event) override;
 
 private:
-  void init();
   [[nodiscard]] QObjectList getRoots() const;
   [[nodiscard]] bool isObserved(const QObject *object) const;
 
 private:
   bool m_observing;
   QObject *m_root;
-  QHash<QObject *, ObjectQuery> m_observed;
 };
 
 /* ----------------------------- ObjectObserverQueue ------------------------ */
@@ -56,11 +57,15 @@ public:
 
   [[nodiscard]] bool isEmpty() const;
   [[nodiscard]] ObservedAction popAction();
+  [[nodiscard]] ObservedAction waitPopAction();
 
 private:
   ObjectObserver *m_observer;
   QMetaObject::Connection m_on_action_reported;
   QQueue<ObservedAction> m_observed_actions;
+
+  mutable std::mutex m_mutex;
+  std::condition_variable m_cv;
 };
 
 }// namespace aegis

@@ -19,65 +19,61 @@ namespace aegis {
 
 class ObservedActionsMapper {
 public:
-  aegis_proto::ObjectChangeResponse
+  aegis_proto::ObjectChange
   operator()(const ObservedAction::ObjectAdded &action) const {
-    aegis_proto::ObjectChangeResponse response;
+    aegis_proto::ObjectChange response;
     auto added = response.mutable_added();
-    added->set_object(action.object.toString().toStdString());
-    added->set_parent(action.parent.toString().toStdString());
+    added->mutable_object()->set_query(action.object.toString().toStdString());
+    added->mutable_parent()->set_query(action.parent.toString().toStdString());
     return response;
   }
 
-  aegis_proto::ObjectChangeResponse
+  aegis_proto::ObjectChange
   operator()(const ObservedAction::ObjectRemoved &action) const {
-    aegis_proto::ObjectChangeResponse response;
+    aegis_proto::ObjectChange response;
     auto removed = response.mutable_removed();
-    removed->set_object(action.object.toString().toStdString());
-    removed->set_parent(action.parent.toString().toStdString());
+    removed->mutable_object()->set_query(
+      action.object.toString().toStdString());
+    removed->mutable_parent()->set_query(
+      action.parent.toString().toStdString());
     return response;
   }
 
-  aegis_proto::ObjectChangeResponse
+  aegis_proto::ObjectChange
   operator()(const ObservedAction::ObjectReparented &action) const {
-    aegis_proto::ObjectChangeResponse response;
+    aegis_proto::ObjectChange response;
     auto reparented = response.mutable_reparented();
-    reparented->set_object(action.object.toString().toStdString());
-    reparented->set_parent(action.parent.toString().toStdString());
-    return response;
-  }
-
-  aegis_proto::ObjectChangeResponse
-  operator()(const ObservedAction::ObjectRenamed &action) const {
-    aegis_proto::ObjectChangeResponse response;
-    auto renamed = response.mutable_renamed();
-    renamed->set_from(action.from.toString().toStdString());
-    renamed->set_to(action.to.toString().toStdString());
+    reparented->mutable_object()->set_query(
+      action.object.toString().toStdString());
+    reparented->mutable_parent()->set_query(
+      action.parent.toString().toStdString());
     return response;
   }
 };
 
-/* ------------------------------ ObjectTreeCall -------------------------- */
+/* ------------------------------ ObjectGetTreeCall -------------------------- */
 
-ObjectTreeCall::ObjectTreeCall(
-  aegis_proto::Object::AsyncService *service,
+ObjectGetTreeCall::ObjectGetTreeCall(
+  aegis_proto::ObjectService::AsyncService *service,
   grpc::ServerCompletionQueue *queue)
     : CallData(
         service, queue, CallTag{this},
-        &aegis_proto::Object::AsyncService::RequestTree) {}
+        &aegis_proto::ObjectService::AsyncService::RequestGetTree) {}
 
-ObjectTreeCall::~ObjectTreeCall() = default;
+ObjectGetTreeCall::~ObjectGetTreeCall() = default;
 
-std::unique_ptr<ObjectTreeCallData> ObjectTreeCall::clone() const {
-  return std::make_unique<ObjectTreeCall>(getService(), getQueue());
+std::unique_ptr<ObjectGetTreeCallData> ObjectGetTreeCall::clone() const {
+  return std::make_unique<ObjectGetTreeCall>(getService(), getQueue());
 }
 
-ObjectTreeCall::ProcessResult
-ObjectTreeCall::process(const Request &request) const {
-  const auto opt_query = std::optional<ObjectQuery>{};
+ObjectGetTreeCall::ProcessResult
+ObjectGetTreeCall::process(const Request &request) const {
   auto objects = QObjectList{};
 
-  if (request.has_object()) {
-    auto [status, object] = tryGetSingleObject(*opt_query);
+  if (request.has_query()) {
+    auto query =
+      ObjectQuery::fromString(QString::fromStdString(request.query()));
+    auto [status, object] = tryGetSingleObject(query);
     if (!status.ok()) return {status, {}};
     objects.append(object);
   } else {
@@ -88,12 +84,12 @@ ObjectTreeCall::process(const Request &request) const {
   return {grpc::Status::OK, response};
 }
 
-ObjectTreeCall::Response
-ObjectTreeCall::tree(const QObjectList &objects) const {
-  auto response = ObjectTreeCall::Response{};
+ObjectGetTreeCall::Response
+ObjectGetTreeCall::tree(const QObjectList &objects) const {
+  auto response = ObjectGetTreeCall::Response{};
 
   auto objectsToProcess =
-    std::queue<std::pair<QObject *, aegis_proto::TreeNode *>>{};
+    std::queue<std::pair<QObject *, aegis_proto::ObjectNode *>>{};
   for (const auto object : objects) {
     objectsToProcess.push(std::make_pair(object, response.add_nodes()));
   }
@@ -105,7 +101,8 @@ ObjectTreeCall::tree(const QObjectList &objects) const {
     objectsToProcess.pop();
 
     const auto object_query = searcher().getQuery(object);
-    object_children->set_object(object_query.toString().toStdString());
+    object_children->mutable_object()->set_query(
+      object_query.toString().toStdString());
 
     for (const auto child : object->children()) {
       objectsToProcess.push(
@@ -120,11 +117,11 @@ ObjectTreeCall::tree(const QObjectList &objects) const {
 /* ------------------------------ ObjectFindCall -------------------------- */
 
 ObjectFindCall::ObjectFindCall(
-  aegis_proto::Object::AsyncService *service,
+  aegis_proto::ObjectService::AsyncService *service,
   grpc::ServerCompletionQueue *queue)
     : CallData(
         service, queue, CallTag{this},
-        &aegis_proto::Object::AsyncService::RequestFind) {}
+        &aegis_proto::ObjectService::AsyncService::RequestFind) {}
 
 ObjectFindCall::~ObjectFindCall() = default;
 
@@ -135,7 +132,7 @@ std::unique_ptr<ObjectFindCallData> ObjectFindCall::clone() const {
 ObjectFindCall::ProcessResult
 ObjectFindCall::process(const Request &request) const {
   const auto query =
-    ObjectQuery::fromString(QString::fromStdString(request.object()));
+    ObjectQuery::fromString(QString::fromStdString(request.query()));
 
   auto [status, objects] = tryGetObjects(query);
   if (!status.ok()) return {status, {}};
@@ -148,7 +145,8 @@ ObjectFindCall::Response
 ObjectFindCall::find(const QObjectList &objects) const {
   auto response = ObjectFindCall::Response{};
   for (const auto object : objects) {
-    response.add_objects(searcher().getQuery(object).toString().toStdString());
+    const auto query = searcher().getQuery(object);
+    response.add_objects()->set_query(query.toString().toStdString());
   }
 
   return response;
@@ -157,11 +155,11 @@ ObjectFindCall::find(const QObjectList &objects) const {
 /* ----------------------------- ObjectParentCall ------------------------- */
 
 ObjectParentCall::ObjectParentCall(
-  aegis_proto::Object::AsyncService *service,
+  aegis_proto::ObjectService::AsyncService *service,
   grpc::ServerCompletionQueue *queue)
     : CallData(
         service, queue, CallTag{this},
-        &aegis_proto::Object::AsyncService::RequestParent) {}
+        &aegis_proto::ObjectService::AsyncService::RequestGetParent) {}
 
 ObjectParentCall::~ObjectParentCall() = default;
 
@@ -172,7 +170,7 @@ std::unique_ptr<ObjectParentCallData> ObjectParentCall::clone() const {
 ObjectParentCall::ProcessResult
 ObjectParentCall::process(const Request &request) const {
   const auto query =
-    ObjectQuery::fromString(QString::fromStdString(request.object()));
+    ObjectQuery::fromString(QString::fromStdString(request.query()));
 
   auto [status, object] = tryGetSingleObject(query);
   if (!status.ok()) return {status, {}};
@@ -187,7 +185,7 @@ ObjectParentCall::parent(const QObject *object) const {
 
   const auto parent_query =
     object->parent() ? searcher().getQuery(object->parent()) : ObjectQuery{};
-  response.set_parent(parent_query.toString().toStdString());
+  response.set_query(parent_query.toString().toStdString());
 
 
   return response;
@@ -196,11 +194,11 @@ ObjectParentCall::parent(const QObject *object) const {
 /* ---------------------------- ObjectChildrenCall ------------------------ */
 
 ObjectChildrenCall::ObjectChildrenCall(
-  aegis_proto::Object::AsyncService *service,
+  aegis_proto::ObjectService::AsyncService *service,
   grpc::ServerCompletionQueue *queue)
     : CallData(
         service, queue, CallTag{this},
-        &aegis_proto::Object::AsyncService::RequestChildren) {}
+        &aegis_proto::ObjectService::AsyncService::RequestGetChildren) {}
 
 ObjectChildrenCall::~ObjectChildrenCall() = default;
 
@@ -211,7 +209,7 @@ std::unique_ptr<ObjectChildrenCallData> ObjectChildrenCall::clone() const {
 ObjectChildrenCall::ProcessResult
 ObjectChildrenCall::process(const Request &request) const {
   const auto query =
-    ObjectQuery::fromString(QString::fromStdString(request.object()));
+    ObjectQuery::fromString(QString::fromStdString(request.query()));
 
   auto [status, object] = tryGetSingleObject(query);
   if (!status.ok()) return {status, {}};
@@ -226,32 +224,31 @@ ObjectChildrenCall::children(const QObject *object) const {
 
   for (const auto child : object->children()) {
     const auto child_query = searcher().getQuery(child);
-    response.add_children(child_query.toString().toStdString());
+    response.add_objects()->set_query(child_query.toString().toStdString());
   }
 
   return response;
 }
 
-/* --------------------------- ObjectInvokeMethodCall ----------------------- */
+/* --------------------------- ObjectCallMethodCall ----------------------- */
 
-ObjectInvokeMethodCall::ObjectInvokeMethodCall(
-  aegis_proto::Object::AsyncService *service,
+ObjectCallMethodCall::ObjectCallMethodCall(
+  aegis_proto::ObjectService::AsyncService *service,
   grpc::ServerCompletionQueue *queue)
     : CallData(
         service, queue, CallTag{this},
-        &aegis_proto::Object::AsyncService::RequestInvokeMethod) {}
+        &aegis_proto::ObjectService::AsyncService::RequestCallMethod) {}
 
-ObjectInvokeMethodCall::~ObjectInvokeMethodCall() = default;
+ObjectCallMethodCall::~ObjectCallMethodCall() = default;
 
-std::unique_ptr<ObjectInvokeMethodCallData>
-ObjectInvokeMethodCall::clone() const {
-  return std::make_unique<ObjectInvokeMethodCall>(getService(), getQueue());
+std::unique_ptr<ObjectCallMethodCallData> ObjectCallMethodCall::clone() const {
+  return std::make_unique<ObjectCallMethodCall>(getService(), getQueue());
 }
 
-ObjectInvokeMethodCall::ProcessResult
-ObjectInvokeMethodCall::process(const Request &request) const {
+ObjectCallMethodCall::ProcessResult
+ObjectCallMethodCall::process(const Request &request) const {
   const auto query =
-    ObjectQuery::fromString(QString::fromStdString(request.object()));
+    ObjectQuery::fromString(QString::fromStdString(request.object().query()));
 
   auto [status, object] = tryGetSingleObject(query);
   if (!status.ok()) return {status, {}};
@@ -259,7 +256,7 @@ ObjectInvokeMethodCall::process(const Request &request) const {
   return invoke(object, request.method(), request.arguments());
 }
 
-ObjectInvokeMethodCall::ProcessResult ObjectInvokeMethodCall::invoke(
+ObjectCallMethodCall::ProcessResult ObjectCallMethodCall::invoke(
   QObject *object, const std::string &method,
   const google::protobuf::RepeatedPtrField<google::protobuf::Value> &arguments)
   const {
@@ -320,7 +317,7 @@ ObjectInvokeMethodCall::ProcessResult ObjectInvokeMethodCall::invoke(
   return {grpc::Status::OK, {}};
 }
 
-QMetaMethod ObjectInvokeMethodCall::metaMethod(
+QMetaMethod ObjectCallMethodCall::metaMethod(
   const QObject *object, const std::string &name) const {
   const auto meta_object = object->metaObject();
 
@@ -332,26 +329,26 @@ QMetaMethod ObjectInvokeMethodCall::metaMethod(
   return QMetaMethod{};
 }
 
-/* --------------------------- ObjectSetPropertyCall ---------------------- */
+/* ------------------------- ObjectUpdatePropertyCall --------------------- */
 
-ObjectSetPropertyCall::ObjectSetPropertyCall(
-  aegis_proto::Object::AsyncService *service,
+ObjectUpdatePropertyCall::ObjectUpdatePropertyCall(
+  aegis_proto::ObjectService::AsyncService *service,
   grpc::ServerCompletionQueue *queue)
     : CallData(
         service, queue, CallTag{this},
-        &aegis_proto::Object::AsyncService::RequestSetProperty) {}
+        &aegis_proto::ObjectService::AsyncService::RequestUpdateProperty) {}
 
-ObjectSetPropertyCall::~ObjectSetPropertyCall() = default;
+ObjectUpdatePropertyCall::~ObjectUpdatePropertyCall() = default;
 
-std::unique_ptr<ObjectSetPropertyCallData>
-ObjectSetPropertyCall::clone() const {
-  return std::make_unique<ObjectSetPropertyCall>(getService(), getQueue());
+std::unique_ptr<ObjectUpdatePropertyCallData>
+ObjectUpdatePropertyCall::clone() const {
+  return std::make_unique<ObjectUpdatePropertyCall>(getService(), getQueue());
 }
 
-ObjectSetPropertyCall::ProcessResult
-ObjectSetPropertyCall::process(const Request &request) const {
+ObjectUpdatePropertyCall::ProcessResult
+ObjectUpdatePropertyCall::process(const Request &request) const {
   const auto query =
-    ObjectQuery::fromString(QString::fromStdString(request.object()));
+    ObjectQuery::fromString(QString::fromStdString(request.object().query()));
 
   auto [status, object] = tryGetSingleObject(query);
   if (!status.ok()) return {status, {}};
@@ -359,7 +356,7 @@ ObjectSetPropertyCall::process(const Request &request) const {
   return setProperty(object, request.property(), request.value());
 }
 
-ObjectSetPropertyCall::ProcessResult ObjectSetPropertyCall::setProperty(
+ObjectUpdatePropertyCall::ProcessResult ObjectUpdatePropertyCall::setProperty(
   QObject *object, const std::string &property,
   const google::protobuf::Value &value) const {
 
@@ -392,26 +389,25 @@ ObjectSetPropertyCall::ProcessResult ObjectSetPropertyCall::setProperty(
   return {grpc::Status::OK, {}};
 }
 
-/* --------------------------- ObjectDumpMethodsCall ---------------------- */
+/* --------------------------- ObjectGetMethodsCall ---------------------- */
 
-ObjectDumpMethodsCall::ObjectDumpMethodsCall(
-  aegis_proto::Object::AsyncService *service,
+ObjectGetMethodsCall::ObjectGetMethodsCall(
+  aegis_proto::ObjectService::AsyncService *service,
   grpc::ServerCompletionQueue *queue)
     : CallData(
         service, queue, CallTag{this},
-        &aegis_proto::Object::AsyncService::RequestDumpMethods) {}
+        &aegis_proto::ObjectService::AsyncService::RequestGetMethods) {}
 
-ObjectDumpMethodsCall::~ObjectDumpMethodsCall() = default;
+ObjectGetMethodsCall::~ObjectGetMethodsCall() = default;
 
-std::unique_ptr<ObjectDumpMethodsCallData>
-ObjectDumpMethodsCall::clone() const {
-  return std::make_unique<ObjectDumpMethodsCall>(getService(), getQueue());
+std::unique_ptr<ObjectGetMethodsCallData> ObjectGetMethodsCall::clone() const {
+  return std::make_unique<ObjectGetMethodsCall>(getService(), getQueue());
 }
 
-ObjectDumpMethodsCall::ProcessResult
-ObjectDumpMethodsCall::process(const Request &request) const {
+ObjectGetMethodsCall::ProcessResult
+ObjectGetMethodsCall::process(const Request &request) const {
   const auto query =
-    ObjectQuery::fromString(QString::fromStdString(request.object()));
+    ObjectQuery::fromString(QString::fromStdString(request.query()));
 
   auto [status, object] = tryGetSingleObject(query);
   if (!status.ok()) return {status, {}};
@@ -419,9 +415,9 @@ ObjectDumpMethodsCall::process(const Request &request) const {
   return {grpc::Status::OK, methods(object)};
 }
 
-aegis_proto::DumpMethodsResponse
-ObjectDumpMethodsCall::methods(const QObject *object) const {
-  auto response = ObjectDumpMethodsCall::Response{};
+ObjectGetMethodsCall::Response
+ObjectGetMethodsCall::methods(const QObject *object) const {
+  auto response = ObjectGetMethodsCall::Response{};
 
   auto meta_object = object->metaObject();
   for (auto i = 0; i < meta_object->methodCount(); ++i) {
@@ -444,26 +440,26 @@ ObjectDumpMethodsCall::methods(const QObject *object) const {
   return response;
 }
 
-/* -------------------------- ObjectDumpPropertiesCall ---------------------- */
+/* -------------------------- ObjectGetPropertiesCall ---------------------- */
 
-ObjectDumpPropertiesCall::ObjectDumpPropertiesCall(
-  aegis_proto::Object::AsyncService *service,
+ObjectGetPropertiesCall::ObjectGetPropertiesCall(
+  aegis_proto::ObjectService::AsyncService *service,
   grpc::ServerCompletionQueue *queue)
     : CallData(
         service, queue, CallTag{this},
-        &aegis_proto::Object::AsyncService::RequestDumpProperties) {}
+        &aegis_proto::ObjectService::AsyncService::RequestGetProperties) {}
 
-ObjectDumpPropertiesCall::~ObjectDumpPropertiesCall() = default;
+ObjectGetPropertiesCall::~ObjectGetPropertiesCall() = default;
 
-std::unique_ptr<ObjectDumpPropertiesCallData>
-ObjectDumpPropertiesCall::clone() const {
-  return std::make_unique<ObjectDumpPropertiesCall>(getService(), getQueue());
+std::unique_ptr<ObjectGetPropertiesCallData>
+ObjectGetPropertiesCall::clone() const {
+  return std::make_unique<ObjectGetPropertiesCall>(getService(), getQueue());
 }
 
-ObjectDumpPropertiesCall::ProcessResult
-ObjectDumpPropertiesCall::process(const Request &request) const {
+ObjectGetPropertiesCall::ProcessResult
+ObjectGetPropertiesCall::process(const Request &request) const {
   const auto query =
-    ObjectQuery::fromString(QString::fromStdString(request.object()));
+    ObjectQuery::fromString(QString::fromStdString(request.query()));
 
   auto [status, object] = tryGetSingleObject(query);
   if (!status.ok()) return {status, {}};
@@ -471,9 +467,9 @@ ObjectDumpPropertiesCall::process(const Request &request) const {
   return {grpc::Status::OK, properties(object)};
 }
 
-aegis_proto::DumpPropertiesResponse
-ObjectDumpPropertiesCall::properties(const QObject *object) const {
-  auto response = ObjectDumpPropertiesCall::Response{};
+ObjectGetPropertiesCall::Response
+ObjectGetPropertiesCall::properties(const QObject *object) const {
+  auto response = ObjectGetPropertiesCall::Response{};
 
   auto meta_object = object->metaObject();
   for (auto i = 0; i < meta_object->propertyCount(); ++i) {
@@ -488,14 +484,14 @@ ObjectDumpPropertiesCall::properties(const QObject *object) const {
   return response;
 }
 
-/* --------------------------- ObjectListenChangesCall -------------------- */
+/* ------------------------ ObjectListenObjectChangesCall ----------------- */
 
-ObjectListenChangesCall::ObjectListenChangesCall(
-  aegis_proto::Object::AsyncService *service,
+ObjectListenObjectChangesCall::ObjectListenObjectChangesCall(
+  aegis_proto::ObjectService::AsyncService *service,
   grpc::ServerCompletionQueue *queue)
     : StreamCallData(
         service, queue, CallTag{this},
-        &aegis_proto::Object::AsyncService::RequestListenObjectChanges),
+        &aegis_proto::ObjectService::AsyncService::RequestListenObjectChanges),
       m_observer(std::make_unique<ObjectObserver>()),
       m_observer_queue(std::make_unique<ObjectObserverQueue>()),
       m_mapper(std::make_unique<ObservedActionsMapper>()) {
@@ -505,21 +501,20 @@ ObjectListenChangesCall::ObjectListenChangesCall(
   m_observer->start();
 }
 
-ObjectListenChangesCall::~ObjectListenChangesCall() = default;
+ObjectListenObjectChangesCall::~ObjectListenObjectChangesCall() = default;
 
-ObjectListenChangesCall::ProcessResult
-ObjectListenChangesCall::process(const Request &request) const {
-  if (m_observer_queue->isEmpty()) return {};
-
-  const auto observer_action = m_observer_queue->popAction();
+ObjectListenObjectChangesCall::ProcessResult
+ObjectListenObjectChangesCall::process(const Request &request) const {
+  const auto observer_action = m_observer_queue->waitPopAction();
   const auto response = observer_action.visit(*m_mapper);
 
   return response;
 }
 
-std::unique_ptr<ObjectListenChangesCallData>
-ObjectListenChangesCall::clone() const {
-  return std::make_unique<ObjectListenChangesCall>(getService(), getQueue());
+std::unique_ptr<ObjectListenObjectChangesCallData>
+ObjectListenObjectChangesCall::clone() const {
+  return std::make_unique<ObjectListenObjectChangesCall>(
+    getService(), getQueue());
 }
 
 /* ------------------------------ ObjectService --------------------------- */
@@ -529,25 +524,25 @@ ObjectService::ObjectService() = default;
 ObjectService::~ObjectService() = default;
 
 void ObjectService::start(grpc::ServerCompletionQueue *queue) {
-  auto tree_call = new ObjectTreeCall(this, queue);
+  auto get_tree_call = new ObjectGetTreeCall(this, queue);
   auto find_call = new ObjectFindCall(this, queue);
   auto parent_call = new ObjectParentCall(this, queue);
   auto children_call = new ObjectChildrenCall(this, queue);
-  auto invoke_method_call = new ObjectInvokeMethodCall(this, queue);
-  auto set_property_call = new ObjectSetPropertyCall(this, queue);
-  auto dump_methods_call = new ObjectDumpMethodsCall(this, queue);
-  auto dump_properties_call = new ObjectDumpPropertiesCall(this, queue);
-  auto tree_listen_changes = new ObjectListenChangesCall(this, queue);
+  auto call_method_call = new ObjectCallMethodCall(this, queue);
+  auto update_property_call = new ObjectUpdatePropertyCall(this, queue);
+  auto get_methods_call = new ObjectGetMethodsCall(this, queue);
+  auto get_properties_call = new ObjectGetPropertiesCall(this, queue);
+  auto listen_object_changes = new ObjectListenObjectChangesCall(this, queue);
 
-  tree_call->proceed();
+  get_tree_call->proceed();
   find_call->proceed();
   parent_call->proceed();
   children_call->proceed();
-  invoke_method_call->proceed();
-  set_property_call->proceed();
-  dump_methods_call->proceed();
-  dump_properties_call->proceed();
-  tree_listen_changes->proceed();
+  call_method_call->proceed();
+  update_property_call->proceed();
+  get_methods_call->proceed();
+  get_properties_call->proceed();
+  listen_object_changes->proceed();
 }
 
 }// namespace aegis

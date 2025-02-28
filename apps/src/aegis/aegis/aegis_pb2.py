@@ -26,55 +26,47 @@ from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from google.protobuf import struct_pb2 as google_dot_protobuf_dot_struct__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11\x61\x65gis/aegis.proto\x12\x0b\x61\x65gis_proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/protobuf/struct.proto\")\n\x16RecorderListenResponse\x12\x0f\n\x07\x63ommand\x18\x01 \x01(\t\"7\n\x15OptionalObjectRequest\x12\x13\n\x06object\x18\x01 \x01(\tH\x00\x88\x01\x01\x42\t\n\x07_object\"4\n\x0cTreeResponse\x12$\n\x05nodes\x18\x01 \x03(\x0b\x32\x15.aegis_proto.TreeNode\"@\n\x08TreeNode\x12\x0e\n\x06object\x18\x01 \x01(\t\x12$\n\x05nodes\x18\x02 \x03(\x0b\x32\x15.aegis_proto.TreeNode\"\x1d\n\x0b\x46indRequest\x12\x0e\n\x06object\x18\x01 \x01(\t\"\x1f\n\x0c\x46indResponse\x12\x0f\n\x07objects\x18\x01 \x03(\t\"\x1f\n\rObjectRequest\x12\x0e\n\x06object\x18\x01 \x01(\t\"0\n\x0eParentResponse\x12\x13\n\x06parent\x18\x01 \x01(\tH\x00\x88\x01\x01\x42\t\n\x07_parent\"$\n\x10\x43hildrenResponse\x12\x10\n\x08\x63hildren\x18\x01 \x03(\t\"`\n\x13InvokeMethodRequest\x12\x0e\n\x06object\x18\x01 \x01(\t\x12\x0e\n\x06method\x18\x02 \x01(\t\x12)\n\targuments\x18\x03 \x03(\x0b\x32\x16.google.protobuf.Value\"]\n\x12SetPropertyRequest\x12\x0e\n\x06object\x18\x01 \x01(\t\x12\x10\n\x08property\x18\x02 \x01(\t\x12%\n\x05value\x18\x03 \x01(\x0b\x32\x16.google.protobuf.Value\"&\n\x13\x44umpMethodsResponse\x12\x0f\n\x07methods\x18\x01 \x03(\t\"H\n\x16\x44umpPropertiesResponse\x12.\n\nproperties\x18\x01 \x03(\x0b\x32\x1a.aegis_proto.PropertyValue\"H\n\rPropertyValue\x12\x10\n\x08property\x18\x01 \x01(\t\x12%\n\x05value\x18\x02 \x01(\x0b\x32\x16.google.protobuf.Value\"\xe3\x01\n\x14ObjectChangeResponse\x12)\n\x05\x61\x64\x64\x65\x64\x18\x01 \x01(\x0b\x32\x18.aegis_proto.ObjectAddedH\x00\x12-\n\x07removed\x18\x02 \x01(\x0b\x32\x1a.aegis_proto.ObjectRemovedH\x00\x12\x33\n\nreparented\x18\x03 \x01(\x0b\x32\x1d.aegis_proto.ObjectReparentedH\x00\x12-\n\x07renamed\x18\x04 \x01(\x0b\x32\x1a.aegis_proto.ObjectRenamedH\x00\x42\r\n\x0b\x63hange_type\"-\n\x0bObjectAdded\x12\x0e\n\x06object\x18\x01 \x01(\t\x12\x0e\n\x06parent\x18\x02 \x01(\t\"/\n\rObjectRemoved\x12\x0e\n\x06object\x18\x01 \x01(\t\x12\x0e\n\x06parent\x18\x02 \x01(\t\"2\n\x10ObjectReparented\x12\x0e\n\x06object\x18\x01 \x01(\t\x12\x0e\n\x06parent\x18\x02 \x01(\t\")\n\rObjectRenamed\x12\x0c\n\x04\x66rom\x18\x01 \x01(\t\x12\n\n\x02to\x18\x02 \x01(\t2}\n\x06Marker\x12\x39\n\x05Start\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\"\x00\x12\x38\n\x04Stop\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\"\x00\x32U\n\x08Recorder\x12I\n\x06Listen\x12\x16.google.protobuf.Empty\x1a#.aegis_proto.RecorderListenResponse\"\x00\x30\x01\x32\xae\x05\n\x06Object\x12G\n\x04Tree\x12\".aegis_proto.OptionalObjectRequest\x1a\x19.aegis_proto.TreeResponse\"\x00\x12=\n\x04\x46ind\x12\x18.aegis_proto.FindRequest\x1a\x19.aegis_proto.FindResponse\"\x00\x12\x43\n\x06Parent\x12\x1a.aegis_proto.ObjectRequest\x1a\x1b.aegis_proto.ParentResponse\"\x00\x12G\n\x08\x43hildren\x12\x1a.aegis_proto.ObjectRequest\x1a\x1d.aegis_proto.ChildrenResponse\"\x00\x12J\n\x0cInvokeMethod\x12 .aegis_proto.InvokeMethodRequest\x1a\x16.google.protobuf.Empty\"\x00\x12H\n\x0bSetProperty\x12\x1f.aegis_proto.SetPropertyRequest\x1a\x16.google.protobuf.Empty\"\x00\x12M\n\x0b\x44umpMethods\x12\x1a.aegis_proto.ObjectRequest\x1a .aegis_proto.DumpMethodsResponse\"\x00\x12S\n\x0e\x44umpProperties\x12\x1a.aegis_proto.ObjectRequest\x1a#.aegis_proto.DumpPropertiesResponse\"\x00\x12T\n\x13ListenObjectChanges\x12\x16.google.protobuf.Empty\x1a!.aegis_proto.ObjectChangeResponse\"\x00\x30\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11\x61\x65gis/aegis.proto\x12\x0b\x61\x65gis_proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1cgoogle/protobuf/struct.proto\"\"\n\x0fRecorderCommand\x12\x0f\n\x07\x63ommand\x18\x01 \x01(\t\".\n\x0eOptionalObject\x12\x12\n\x05query\x18\x01 \x01(\tH\x00\x88\x01\x01\x42\x08\n\x06_query\"\x17\n\x06Object\x12\r\n\x05query\x18\x01 \x01(\t\"/\n\x07Objects\x12$\n\x07objects\x18\x01 \x03(\x0b\x32\x13.aegis_proto.Object\"4\n\nObjectTree\x12&\n\x05nodes\x18\x01 \x03(\x0b\x32\x17.aegis_proto.ObjectNode\"Y\n\nObjectNode\x12#\n\x06object\x18\x01 \x01(\x0b\x32\x13.aegis_proto.Object\x12&\n\x05nodes\x18\x02 \x03(\x0b\x32\x17.aegis_proto.ObjectNode\"l\n\nMethodCall\x12#\n\x06object\x18\x01 \x01(\x0b\x32\x13.aegis_proto.Object\x12\x0e\n\x06method\x18\x02 \x01(\t\x12)\n\targuments\x18\x03 \x03(\x0b\x32\x16.google.protobuf.Value\"n\n\x0ePropertyUpdate\x12#\n\x06object\x18\x01 \x01(\x0b\x32\x13.aegis_proto.Object\x12\x10\n\x08property\x18\x02 \x01(\t\x12%\n\x05value\x18\x03 \x01(\x0b\x32\x16.google.protobuf.Value\"\x1a\n\x07Methods\x12\x0f\n\x07methods\x18\x01 \x03(\t\"<\n\nProperties\x12.\n\nproperties\x18\x01 \x03(\x0b\x32\x1a.aegis_proto.PropertyValue\"H\n\rPropertyValue\x12\x10\n\x08property\x18\x01 \x01(\t\x12%\n\x05value\x18\x02 \x01(\x0b\x32\x16.google.protobuf.Value\"\xac\x01\n\x0cObjectChange\x12)\n\x05\x61\x64\x64\x65\x64\x18\x01 \x01(\x0b\x32\x18.aegis_proto.ObjectAddedH\x00\x12-\n\x07removed\x18\x02 \x01(\x0b\x32\x1a.aegis_proto.ObjectRemovedH\x00\x12\x33\n\nreparented\x18\x03 \x01(\x0b\x32\x1d.aegis_proto.ObjectReparentedH\x00\x42\r\n\x0b\x63hange_type\"W\n\x0bObjectAdded\x12#\n\x06object\x18\x01 \x01(\x0b\x32\x13.aegis_proto.Object\x12#\n\x06parent\x18\x02 \x01(\x0b\x32\x13.aegis_proto.Object\"Y\n\rObjectRemoved\x12#\n\x06object\x18\x01 \x01(\x0b\x32\x13.aegis_proto.Object\x12#\n\x06parent\x18\x02 \x01(\x0b\x32\x13.aegis_proto.Object\"\\\n\x10ObjectReparented\x12#\n\x06object\x18\x01 \x01(\x0b\x32\x13.aegis_proto.Object\x12#\n\x06parent\x18\x02 \x01(\x0b\x32\x13.aegis_proto.Object2\x84\x01\n\rMarkerService\x12\x39\n\x05Start\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\"\x00\x12\x38\n\x04Stop\x12\x16.google.protobuf.Empty\x1a\x16.google.protobuf.Empty\"\x00\x32]\n\x0fRecorderService\x12J\n\x0eListenCommands\x12\x16.google.protobuf.Empty\x1a\x1c.aegis_proto.RecorderCommand\"\x00\x30\x01\x32\xd0\x04\n\rObjectService\x12\x41\n\x07GetTree\x12\x1b.aegis_proto.OptionalObject\x1a\x17.aegis_proto.ObjectTree\"\x00\x12\x33\n\x04\x46ind\x12\x13.aegis_proto.Object\x1a\x14.aegis_proto.Objects\"\x00\x12\x37\n\tGetParent\x12\x13.aegis_proto.Object\x1a\x13.aegis_proto.Object\"\x00\x12:\n\x0bGetChildren\x12\x13.aegis_proto.Object\x1a\x14.aegis_proto.Objects\"\x00\x12?\n\nCallMethod\x12\x17.aegis_proto.MethodCall\x1a\x16.google.protobuf.Empty\"\x00\x12G\n\x0eUpdateProperty\x12\x1b.aegis_proto.PropertyUpdate\x1a\x16.google.protobuf.Empty\"\x00\x12\x39\n\nGetMethods\x12\x13.aegis_proto.Object\x1a\x14.aegis_proto.Methods\"\x00\x12?\n\rGetProperties\x12\x13.aegis_proto.Object\x1a\x17.aegis_proto.Properties\"\x00\x12L\n\x13ListenObjectChanges\x12\x16.google.protobuf.Empty\x1a\x19.aegis_proto.ObjectChange\"\x00\x30\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'aegis.aegis_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_RECORDERLISTENRESPONSE']._serialized_start=93
-  _globals['_RECORDERLISTENRESPONSE']._serialized_end=134
-  _globals['_OPTIONALOBJECTREQUEST']._serialized_start=136
-  _globals['_OPTIONALOBJECTREQUEST']._serialized_end=191
-  _globals['_TREERESPONSE']._serialized_start=193
-  _globals['_TREERESPONSE']._serialized_end=245
-  _globals['_TREENODE']._serialized_start=247
-  _globals['_TREENODE']._serialized_end=311
-  _globals['_FINDREQUEST']._serialized_start=313
-  _globals['_FINDREQUEST']._serialized_end=342
-  _globals['_FINDRESPONSE']._serialized_start=344
-  _globals['_FINDRESPONSE']._serialized_end=375
-  _globals['_OBJECTREQUEST']._serialized_start=377
-  _globals['_OBJECTREQUEST']._serialized_end=408
-  _globals['_PARENTRESPONSE']._serialized_start=410
-  _globals['_PARENTRESPONSE']._serialized_end=458
-  _globals['_CHILDRENRESPONSE']._serialized_start=460
-  _globals['_CHILDRENRESPONSE']._serialized_end=496
-  _globals['_INVOKEMETHODREQUEST']._serialized_start=498
-  _globals['_INVOKEMETHODREQUEST']._serialized_end=594
-  _globals['_SETPROPERTYREQUEST']._serialized_start=596
-  _globals['_SETPROPERTYREQUEST']._serialized_end=689
-  _globals['_DUMPMETHODSRESPONSE']._serialized_start=691
-  _globals['_DUMPMETHODSRESPONSE']._serialized_end=729
-  _globals['_DUMPPROPERTIESRESPONSE']._serialized_start=731
-  _globals['_DUMPPROPERTIESRESPONSE']._serialized_end=803
-  _globals['_PROPERTYVALUE']._serialized_start=805
-  _globals['_PROPERTYVALUE']._serialized_end=877
-  _globals['_OBJECTCHANGERESPONSE']._serialized_start=880
-  _globals['_OBJECTCHANGERESPONSE']._serialized_end=1107
-  _globals['_OBJECTADDED']._serialized_start=1109
-  _globals['_OBJECTADDED']._serialized_end=1154
-  _globals['_OBJECTREMOVED']._serialized_start=1156
-  _globals['_OBJECTREMOVED']._serialized_end=1203
-  _globals['_OBJECTREPARENTED']._serialized_start=1205
-  _globals['_OBJECTREPARENTED']._serialized_end=1255
-  _globals['_OBJECTRENAMED']._serialized_start=1257
-  _globals['_OBJECTRENAMED']._serialized_end=1298
-  _globals['_MARKER']._serialized_start=1300
-  _globals['_MARKER']._serialized_end=1425
-  _globals['_RECORDER']._serialized_start=1427
-  _globals['_RECORDER']._serialized_end=1512
-  _globals['_OBJECT']._serialized_start=1515
-  _globals['_OBJECT']._serialized_end=2201
+  _globals['_RECORDERCOMMAND']._serialized_start=93
+  _globals['_RECORDERCOMMAND']._serialized_end=127
+  _globals['_OPTIONALOBJECT']._serialized_start=129
+  _globals['_OPTIONALOBJECT']._serialized_end=175
+  _globals['_OBJECT']._serialized_start=177
+  _globals['_OBJECT']._serialized_end=200
+  _globals['_OBJECTS']._serialized_start=202
+  _globals['_OBJECTS']._serialized_end=249
+  _globals['_OBJECTTREE']._serialized_start=251
+  _globals['_OBJECTTREE']._serialized_end=303
+  _globals['_OBJECTNODE']._serialized_start=305
+  _globals['_OBJECTNODE']._serialized_end=394
+  _globals['_METHODCALL']._serialized_start=396
+  _globals['_METHODCALL']._serialized_end=504
+  _globals['_PROPERTYUPDATE']._serialized_start=506
+  _globals['_PROPERTYUPDATE']._serialized_end=616
+  _globals['_METHODS']._serialized_start=618
+  _globals['_METHODS']._serialized_end=644
+  _globals['_PROPERTIES']._serialized_start=646
+  _globals['_PROPERTIES']._serialized_end=706
+  _globals['_PROPERTYVALUE']._serialized_start=708
+  _globals['_PROPERTYVALUE']._serialized_end=780
+  _globals['_OBJECTCHANGE']._serialized_start=783
+  _globals['_OBJECTCHANGE']._serialized_end=955
+  _globals['_OBJECTADDED']._serialized_start=957
+  _globals['_OBJECTADDED']._serialized_end=1044
+  _globals['_OBJECTREMOVED']._serialized_start=1046
+  _globals['_OBJECTREMOVED']._serialized_end=1135
+  _globals['_OBJECTREPARENTED']._serialized_start=1137
+  _globals['_OBJECTREPARENTED']._serialized_end=1229
+  _globals['_MARKERSERVICE']._serialized_start=1232
+  _globals['_MARKERSERVICE']._serialized_end=1364
+  _globals['_RECORDERSERVICE']._serialized_start=1366
+  _globals['_RECORDERSERVICE']._serialized_end=1459
+  _globals['_OBJECTSERVICE']._serialized_start=1462
+  _globals['_OBJECTSERVICE']._serialized_end=2054
 # @@protoc_insertion_point(module_scope)

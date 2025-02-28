@@ -5,7 +5,11 @@ import time
 from PySide6.QtCore import QObject, Signal
 from PySide6.QtNetwork import QHostAddress
 
-from aegis.aegis_pb2_grpc import RecorderStub, MarkerStub, ObjectStub
+from aegis.aegis_pb2_grpc import (
+    RecorderServiceStub,
+    MarkerServiceStub,
+    ObjectServiceStub,
+)
 
 
 class ClientException(Exception):
@@ -28,9 +32,9 @@ class Client(QObject):
         self._channel = grpc.insecure_channel(f"{host.toString()}:{port}")
         self._channel.subscribe(self._on_channel_state_change, try_to_connect=True)
 
-        self.recorder_stub = RecorderStub(self._channel)
-        self.marker_stub = MarkerStub(self._channel)
-        self.object_stub = ObjectStub(self._channel)
+        self.recorder_stub = RecorderServiceStub(self._channel)
+        self.marker_stub = MarkerServiceStub(self._channel)
+        self.object_stub = ObjectServiceStub(self._channel)
 
     def close(self):
         self._channel.close()

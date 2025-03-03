@@ -47,14 +47,6 @@ google::protobuf::Value convertIntoValue(const QVariant &variant) {
 }
 
 std::pair<grpc::Status, QObjectList> tryGetObjects(const ObjectQuery &query) {
-  if (!query.isValid()) {
-    return {
-      grpc::Status(
-        grpc::StatusCode::INVALID_ARGUMENT,
-        "Object argument has incorrect format"),
-      {}};
-  }
-
   return {grpc::Status::OK, searcher().getObjects(query)};
 }
 

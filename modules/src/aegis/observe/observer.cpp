@@ -13,17 +13,24 @@ namespace aegis {
 
 /* ------------------------------- ObjectObserver --------------------------- */
 
-ObjectObserver::ObjectObserver() : m_observing(false), m_root(nullptr) {}
+ObjectObserver::ObjectObserver()
+    : m_observing(false), m_root(nullptr), m_check_timer(new QTimer(this)) {
+  m_check_timer->setInterval(100);
+  connect(
+    m_check_timer, &QTimer::timeout, this, &ObjectObserver::checkForRenames);
+}
 
 ObjectObserver::~ObjectObserver() { stop(); }
 
 void ObjectObserver::start() {
   if (m_observing) return;
 
+
   QMetaObject::invokeMethod(
     qApp,
     [this]() {
       m_observing = true;
+      startRenameTracker();
       qApp->installEventFilter(this);
     },
     Qt::QueuedConnection);
@@ -32,10 +39,12 @@ void ObjectObserver::start() {
 void ObjectObserver::stop() {
   if (!m_observing) return;
 
+
   QMetaObject::invokeMethod(
     qApp,
     [this]() {
       m_observing = false;
+      stopRenameTracker();
       qApp->removeEventFilter(this);
     },
     Qt::QueuedConnection);
@@ -55,12 +64,17 @@ bool ObjectObserver::eventFilter(QObject *object, QEvent *event) {
     case QEvent::Create: {
       Q_EMIT actionReported(
         ObservedAction::ObjectAdded{object_query, parent_query});
+
+      std::lock_guard<std::mutex> lock(m_mutex);
+      m_tracked_objects.insert(object, object_query);
       break;
     }
 
     case QEvent::Destroy: {
-      Q_EMIT actionReported(
-        ObservedAction::ObjectRemoved{object_query, parent_query});
+      Q_EMIT actionReported(ObservedAction::ObjectRemoved{object_query});
+
+      std::lock_guard<std::mutex> lock(m_mutex);
+      m_tracked_objects.remove(object);
       break;
     }
 
@@ -72,6 +86,52 @@ bool ObjectObserver::eventFilter(QObject *object, QEvent *event) {
   }
 
   return QObject::eventFilter(object, event);
+}
+
+void ObjectObserver::startRenameTracker() {
+  std::lock_guard<std::mutex> lock(m_mutex);
+
+  m_check_timer->start();
+
+  const auto top_widgets = getRoots();
+  auto objects = std::queue<QObject *>{};
+  for (auto top_widget : top_widgets) {
+    if (!top_widget->parent()) objects.push(top_widget);
+  }
+
+  while (!objects.empty()) {
+    auto object = objects.front();
+    objects.pop();
+
+    auto object_query = searcher().getQuery(object);
+    m_tracked_objects.insert(object, object_query);
+
+    for (const auto child : object->children()) { objects.push(child); }
+  }
+}
+
+void ObjectObserver::stopRenameTracker() {
+  std::lock_guard<std::mutex> lock(m_mutex);
+
+  m_check_timer->stop();
+  m_tracked_objects.clear();
+}
+
+void ObjectObserver::checkForRenames() {
+  std::lock_guard<std::mutex> lock(m_mutex);
+
+  for (auto it = m_tracked_objects.begin(); it != m_tracked_objects.end();
+       ++it) {
+    const auto &object = it.key();
+    auto &query = it.value();
+
+    auto new_query = searcher().getQuery(object);
+    if (query != new_query) {
+      query = new_query;
+
+      Q_EMIT actionReported(ObservedAction::ObjectRenamed{query});
+    }
+  }
 }
 
 QObjectList ObjectObserver::getRoots() const {

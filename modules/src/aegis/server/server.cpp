@@ -35,7 +35,18 @@ void Server::listen(const QHostAddress &host, quint16 port) {
   m_queue = builder.AddCompletionQueue();
   m_server = builder.BuildAndStart();
 
-  startLoop();
+  for (auto i = 0; i < getNumberOfThreads(); ++i) {
+    auto workerThread = QThread::create([this] { startLoop(); });
+    m_threads.push_back(workerThread);
+    workerThread->start();
+  }
+}
+
+int Server::getNumberOfThreads() const {
+  auto num_workers = std::thread::hardware_concurrency();
+  if (num_workers == 0) num_workers = 4;
+
+  return num_workers;
 }
 
 void Server::startLoop() {

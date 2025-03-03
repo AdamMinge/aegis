@@ -4,6 +4,7 @@
 /* ------------------------------------ Qt ---------------------------------- */
 #include <QHash>
 #include <QObject>
+#include <QTimer>
 /* ---------------------------------- Standard ------------------------------ */
 #include <condition_variable>
 #include <mutex>
@@ -38,12 +39,19 @@ protected:
   [[nodiscard]] bool eventFilter(QObject *object, QEvent *event) override;
 
 private:
+  void startRenameTracker();
+  void stopRenameTracker();
+  void checkForRenames();
+
   [[nodiscard]] QObjectList getRoots() const;
   [[nodiscard]] bool isObserved(const QObject *object) const;
 
 private:
   bool m_observing;
   QObject *m_root;
+  QTimer *m_check_timer;
+  mutable std::mutex m_mutex;
+  QMap<QObject *, ObjectQuery> m_tracked_objects;
 };
 
 /* ----------------------------- ObjectObserverQueue ------------------------ */

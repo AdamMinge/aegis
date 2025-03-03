@@ -91,6 +91,7 @@ message ObjectChange {
         ObjectAdded added = 1;
         ObjectRemoved removed = 2;
         ObjectReparented reparented = 3;
+        ObjectRenamed renamed = 4;
     }
 }
 
@@ -101,10 +102,14 @@ message ObjectAdded {
 
 message ObjectRemoved {
     Object object = 1;
-    Object parent = 2;
 }
 
 message ObjectReparented {
     Object object = 1;
     Object parent = 2;
 }
+
+message ObjectRenamed {
+    Object object = 1;
+}
+

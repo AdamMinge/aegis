@@ -67,8 +67,6 @@ QWidget *ActionRecordStrategy::getWidget() const { return m_widget; }
 
 ObjectQuery ActionRecordStrategy::getWidgetAsQuery() const {
   const auto object = searcher().getQuery(getWidget());
-  Q_ASSERT(object.isValid());
-
   return object;
 }
 

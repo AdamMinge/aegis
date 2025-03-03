@@ -2,11 +2,12 @@ import json
 import enum
 import typing
 import threading
+import collections
+
 from PySide6.QtCore import (
     Qt,
     QAbstractItemModel,
     QModelIndex,
-    QTimer,
     QMetaObject,
     Slot,
     Q_ARG,
@@ -151,6 +152,7 @@ class ObjectsModel(QAbstractItemModel):
 
         return QModelIndex()
 
+    @Slot(str, QModelIndex)
     def createItem(self, query: str, parent_index=QModelIndex()) -> QModelIndex:
         parent_node = parent_index.internalPointer() if parent_index.isValid() else None
         node_container = parent_node.children if parent_node else self._objects
@@ -163,6 +165,7 @@ class ObjectsModel(QAbstractItemModel):
 
         return self.createIndex(new_node.row(), 0, new_node)
 
+    @Slot(str, QModelIndex)
     def takeItem(
         self, query: str, parent_index=QModelIndex()
     ) -> typing.Optional["ObjectNode"]:
@@ -179,6 +182,27 @@ class ObjectsModel(QAbstractItemModel):
 
         return node
 
+    @Slot(str, QModelIndex)
+    def updateItem(self, query: str, parent_index=QModelIndex()) -> QModelIndex:
+        find_index = self.findItem(query, parent_index)
+        if not find_index.isValid() or self.parent(find_index) != parent_index:
+            return QModelIndex()
+
+        node = find_index.internalPointer()
+        assert node
+
+        updated_node = ObjectNode.create(query)
+        node.name = updated_node.name
+        node.type = updated_node.type
+        node.path = updated_node.path
+
+        self.dataChanged.emit(
+            find_index.sibling(find_index.row(), ObjectsModel.Columns.Name),
+            find_index.sibling(find_index.row(), ObjectsModel.Columns.Path),
+            [Qt.ItemDataRole.DisplayRole],
+        )
+        return find_index
+
 
 class GRPCObjectsModel(ObjectsModel):
     def __init__(self, client: Client, parent=None):
@@ -186,14 +210,11 @@ class GRPCObjectsModel(ObjectsModel):
         self._client = client
 
         self.fetch_initial_state()
+
         self._watch_thread = threading.Thread(
             target=self.handle_tree_changes, daemon=True
         )
         self._watch_thread.start()
-
-        self._update_timer = QTimer()
-        self._update_timer.timeout.connect(self.handle_tree_update)
-        self._update_timer.start(1000)
 
     def fetch_initial_state(self):
         response = self._client.object_stub.GetTree(OptionalObject())
@@ -203,9 +224,6 @@ class GRPCObjectsModel(ObjectsModel):
         for object_node in object_nodes:
             node_index = self.createItem(object_node.object.query, parent_index)
             self.build_tree(object_node.nodes, node_index)
-
-    def handle_tree_update(self):
-        pass
 
     def handle_tree_changes(self):
         for change in self._client.object_stub.ListenObjectChanges(empty_pb2.Empty()):
@@ -232,6 +250,22 @@ class GRPCObjectsModel(ObjectsModel):
                     Q_ARG(str, change.reparented.object.query),
                     Q_ARG(str, change.reparented.parent.query),
                 )
+            elif change.HasField("renamed"):
+                QMetaObject.invokeMethod(
+                    self,
+                    "handle_object_renamed",
+                    Qt.QueuedConnection,
+                    Q_ARG(str, change.renamed.object.query),
+                )
+
+    @Slot(str)
+    def handle_object_renamed(self, object):
+        index = self.findItem(object)
+        if not index.isValid():
+            return
+
+        parent_index = self.parent(index)
+        self.updateItem(object, parent_index)
 
     @Slot(str, str)
     def handle_object_added(self, object, parent):
@@ -241,7 +275,8 @@ class GRPCObjectsModel(ObjectsModel):
     @Slot(str)
     def handle_object_removed(self, object):
         index = self.findItem(object)
-        assert index.isValid()
+        if not index.isValid():
+            return
 
         parent_index = self.parent(index)
         self.takeItem(object, parent_index)

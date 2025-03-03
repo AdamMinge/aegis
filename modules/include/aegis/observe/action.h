@@ -23,12 +23,15 @@ public:
 
   struct ObjectRemoved {
     ObjectQuery object;
-    ObjectQuery parent;
   };
 
   struct ObjectReparented {
     ObjectQuery object;
     ObjectQuery parent;
+  };
+
+  struct ObjectRenamed {
+    ObjectQuery object;
   };
 
 public:
@@ -47,7 +50,8 @@ public:
   decltype(auto) visit(TYPE &&visitor) const;
 
 private:
-  std::variant<ObjectAdded, ObjectRemoved, ObjectReparented> m_data;
+  std::variant<ObjectAdded, ObjectRemoved, ObjectReparented, ObjectRenamed>
+    m_data;
 };
 
 template<typename ACTION_SUBTYPE>

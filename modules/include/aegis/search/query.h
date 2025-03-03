@@ -24,7 +24,8 @@ public:
   ~ObjectQuery();
 
   [[nodiscard]] QString toString() const;
-  [[nodiscard]] bool isValid() const;
+
+  [[nodiscard]] bool operator==(const ObjectQuery &other) const;
 
 protected:
   explicit ObjectQuery(QVariantMap data);

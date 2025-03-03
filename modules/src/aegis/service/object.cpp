@@ -34,8 +34,6 @@ public:
     auto removed = response.mutable_removed();
     removed->mutable_object()->set_query(
       action.object.toString().toStdString());
-    removed->mutable_parent()->set_query(
-      action.parent.toString().toStdString());
     return response;
   }
 
@@ -47,6 +45,15 @@ public:
       action.object.toString().toStdString());
     reparented->mutable_parent()->set_query(
       action.parent.toString().toStdString());
+    return response;
+  }
+
+  aegis_proto::ObjectChange
+  operator()(const ObservedAction::ObjectRenamed &action) const {
+    aegis_proto::ObjectChange response;
+    auto renamed = response.mutable_renamed();
+    renamed->mutable_object()->set_query(
+      action.object.toString().toStdString());
     return response;
   }
 };

@@ -480,13 +480,18 @@ ObjectGetPropertiesCall::Response
 ObjectGetPropertiesCall::properties(const QObject *object) const {
   auto response = ObjectGetPropertiesCall::Response{};
 
+  auto unique_properties = std::set<std::string>{};
   auto meta_object = object->metaObject();
   for (auto i = 0; i < meta_object->propertyCount(); ++i) {
     const auto name = meta_object->property(i).name();
-    const auto value = object->property(name);
+    unique_properties.insert(name);
+  }
+
+  for (auto unique_property : unique_properties) {
+    const auto value = object->property(unique_property.c_str());
 
     auto new_properties = response.add_properties();
-    new_properties->set_property(name);
+    new_properties->set_property(unique_property);
     *new_properties->mutable_value() = convertIntoValue(value);
   }
 

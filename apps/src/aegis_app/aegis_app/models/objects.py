@@ -12,7 +12,7 @@ from PySide6.QtCore import (
     Q_ARG,
 )
 from google.protobuf import empty_pb2
-from aegis.aegis_pb2 import OptionalObject, Object
+from aegis.aegis_pb2 import OptionalObject
 
 from aegis_app.client import Client
 
@@ -60,6 +60,7 @@ class ObjectsModel(QAbstractItemModel):
         Name = 0
         Path = 1
         Type = 2
+        Query = 3
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -88,6 +89,10 @@ class ObjectsModel(QAbstractItemModel):
                     return node.type
                 case ObjectsModel.Columns.Path:
                     return node.path
+        elif role == Qt.ItemDataRole.UserRole:
+            match index.column():
+                case ObjectsModel.Columns.Query:
+                    return node.query
 
     def headerData(
         self, section, orientation, role=Qt.ItemDataRole.DisplayRole

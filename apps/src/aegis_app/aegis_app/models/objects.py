@@ -131,15 +131,18 @@ class ObjectsModel(QAbstractItemModel):
 
         return self.createIndex(parent_node.row(), 0, parent_node)
 
-    def findItem(self, query: str, index=QModelIndex()) -> QModelIndex:
-        node = index.internalPointer() if index.isValid() else None
-        if node == query:
-            return index
-
-        for row in range(self.rowCount(index)):
-            child_index = self.findItem(query, self.index(row, 0, index))
-            if child_index.isValid():
+    def findItem(
+        self, query: str, parent=QModelIndex(), recursive: bool = True
+    ) -> QModelIndex:
+        for row in range(self.rowCount(parent)):
+            child_index = self.index(row, 0, parent)
+            child_node = child_index.internalPointer()
+            if child_node == query:
                 return child_index
+
+            found_index = self.findItem(query, child_index, recursive)
+            if found_index.isValid():
+                return found_index
 
         return QModelIndex()
 
@@ -162,9 +165,9 @@ class ObjectsModel(QAbstractItemModel):
     ) -> typing.Optional["ObjectNode"]:
         parent_node = parent_index.internalPointer() if parent_index.isValid() else None
         node_container = parent_node.children if parent_node else self._objects
-        find_index = self.findItem(query, parent_index)
+        find_index = self.findItem(query, parent_index, recursive=False)
 
-        if not find_index.isValid() or self.parent(find_index) != parent_index:
+        if not find_index.isValid():
             return None
 
         self.beginRemoveRows(parent_index, find_index.row(), find_index.row())
@@ -177,8 +180,9 @@ class ObjectsModel(QAbstractItemModel):
     def updateItem(
         self, old_query: str, new_query: str, parent_index=QModelIndex()
     ) -> QModelIndex:
-        find_index = self.findItem(old_query, parent_index)
-        if not find_index.isValid() or self.parent(find_index) != parent_index:
+        find_index = self.findItem(old_query, parent_index, recursive=False)
+
+        if not find_index.isValid():
             return QModelIndex()
 
         node = find_index.internalPointer()

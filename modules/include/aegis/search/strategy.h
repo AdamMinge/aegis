@@ -97,25 +97,6 @@ private:
   [[nodiscard]] uint getOrderIndex(const QObject *object) const;
 };
 
-/* ---------------------------- MemoryAddressSearch ------------------------- */
-
-class LIB_AEGIS_API MemoryAddressSearch : public SearchStrategy {
-public:
-  static constexpr auto memory_address_query = "memory_address";
-
-public:
-  explicit MemoryAddressSearch();
-  ~MemoryAddressSearch() override;
-
-  [[nodiscard]] bool matchesObjectQuery(
-    const QObject *object, const QVariantMap &query) const override;
-  [[nodiscard]] QVariantMap
-  createObjectQuery(const QObject *object) const override;
-
-private:
-  [[nodiscard]] QString getMemoryAddress(const QObject *object) const;
-};
-
 }// namespace aegis
 
 #endif// AEGIS_SEARCH_STRATEGY_H

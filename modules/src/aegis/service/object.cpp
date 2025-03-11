@@ -52,8 +52,10 @@ public:
   operator()(const ObservedAction::ObjectRenamed &action) const {
     aegis_proto::ObjectChange response;
     auto renamed = response.mutable_renamed();
-    renamed->mutable_object()->set_query(
-      action.object.toString().toStdString());
+    renamed->mutable_old_object()->set_query(
+      action.old_object.toString().toStdString());
+    renamed->mutable_new_object()->set_query(
+      action.new_object.toString().toStdString());
     return response;
   }
 };

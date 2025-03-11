@@ -209,31 +209,4 @@ uint OrderIndexSearch::getOrderIndex(const QObject *object) const {
   return topObjects.indexOf(object);
 }
 
-/* ---------------------------- MemoryAddressSearch ------------------------- */
-
-MemoryAddressSearch::MemoryAddressSearch() = default;
-
-MemoryAddressSearch::~MemoryAddressSearch() = default;
-
-bool MemoryAddressSearch::matchesObjectQuery(
-  const QObject *object, const QVariantMap &query) const {
-  if (query.contains(memory_address_query)) {
-    return getMemoryAddress(object) == query[memory_address_query];
-  }
-
-  return true;
-}
-
-QVariantMap
-MemoryAddressSearch::createObjectQuery(const QObject *object) const {
-  auto query = QVariantMap{};
-  query[memory_address_query] = getMemoryAddress(object);
-
-  return query;
-}
-
-QString MemoryAddressSearch::getMemoryAddress(const QObject *object) const {
-  return std::to_string(reinterpret_cast<size_t>(object)).c_str();
-}
-
 }// namespace aegis

@@ -31,7 +31,8 @@ public:
   };
 
   struct ObjectRenamed {
-    ObjectQuery object;
+    ObjectQuery old_object;
+    ObjectQuery new_object;
   };
 
 public:

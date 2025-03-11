@@ -14,7 +14,7 @@ namespace aegis {
 /* ------------------------------- ObjectObserver --------------------------- */
 
 ObjectObserver::ObjectObserver()
-    : m_observing(false), m_root(nullptr), m_check_timer(new QTimer(this)) {
+    : m_observing(false), m_check_timer(new QTimer(this)) {
   m_check_timer->setInterval(100);
   connect(
     m_check_timer, &QTimer::timeout, this, &ObjectObserver::checkForRenames);
@@ -52,35 +52,38 @@ void ObjectObserver::stop() {
 
 bool ObjectObserver::isObserving() const { return m_observing; }
 
-void ObjectObserver::setRoot(QObject *root) { m_root = root; }
-
 bool ObjectObserver::eventFilter(QObject *object, QEvent *event) {
-  if (!isObserved(object)) return QObject::eventFilter(object, event);
-
-  auto object_query = searcher().getQuery(object);
-  auto parent_query = searcher().getQuery(object->parent());
-
   switch (event->type()) {
     case QEvent::Create: {
-      Q_EMIT actionReported(
-        ObservedAction::ObjectAdded{object_query, parent_query});
-
       std::lock_guard<std::mutex> lock(m_mutex);
-      m_tracked_objects.insert(object, object_query);
+
+      m_tracked_objects.insert(object, searcher().getQuery(object));
+
+      Q_EMIT actionReported(ObservedAction::ObjectAdded{
+        m_tracked_objects.value(object),
+        m_tracked_objects.value(object->parent())});
+
       break;
     }
 
     case QEvent::Destroy: {
-      Q_EMIT actionReported(ObservedAction::ObjectRemoved{object_query});
-
       std::lock_guard<std::mutex> lock(m_mutex);
+
+      Q_EMIT actionReported(
+        ObservedAction::ObjectRemoved{m_tracked_objects.value(object)});
+
       m_tracked_objects.remove(object);
       break;
     }
 
     case QEvent::ParentChange: {
-      Q_EMIT actionReported(
-        ObservedAction::ObjectReparented{object_query, parent_query});
+      std::lock_guard<std::mutex> lock(m_mutex);
+
+      if (!m_tracked_objects.contains(object)) break;
+
+      Q_EMIT actionReported(ObservedAction::ObjectReparented{
+        m_tracked_objects.value(object),
+        m_tracked_objects.value(object->parent())});
       break;
     }
   }
@@ -93,11 +96,9 @@ void ObjectObserver::startRenameTracker() {
 
   m_check_timer->start();
 
-  const auto top_widgets = getRoots();
+  const auto top_widgets = getTopLevelObjects();
   auto objects = std::queue<QObject *>{};
-  for (auto top_widget : top_widgets) {
-    if (!top_widget->parent()) objects.push(top_widget);
-  }
+  for (auto top_widget : top_widgets) { objects.push(top_widget); }
 
   while (!objects.empty()) {
     auto object = objects.front();
@@ -127,32 +128,13 @@ void ObjectObserver::checkForRenames() {
 
     auto new_query = searcher().getQuery(object);
     if (query != new_query) {
+      auto old_query = query;
       query = new_query;
 
-      Q_EMIT actionReported(ObservedAction::ObjectRenamed{query});
+      Q_EMIT actionReported(
+        ObservedAction::ObjectRenamed{old_query, new_query});
     }
   }
-}
-
-QObjectList ObjectObserver::getRoots() const {
-  if (m_root) {
-    auto roots = QObjectList{};
-    roots.append(const_cast<QObject *>(m_root));
-    return roots;
-  }
-
-  return getTopLevelObjects();
-}
-
-bool ObjectObserver::isObserved(const QObject *object) const {
-  if (!m_root) return true;
-
-  while (object) {
-    if (object == m_root) return true;
-    object = object->parent();
-  }
-
-  return false;
 }
 
 /* ----------------------------- ObjectObserverQueue ------------------------ */

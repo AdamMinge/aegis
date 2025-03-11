@@ -30,8 +30,6 @@ public:
 
   [[nodiscard]] bool isObserving() const;
 
-  void setRoot(QObject *root);
-
 Q_SIGNALS:
   void actionReported(const ObservedAction &action);
 
@@ -43,12 +41,8 @@ private:
   void stopRenameTracker();
   void checkForRenames();
 
-  [[nodiscard]] QObjectList getRoots() const;
-  [[nodiscard]] bool isObserved(const QObject *object) const;
-
 private:
   bool m_observing;
-  QObject *m_root;
   QTimer *m_check_timer;
   mutable std::mutex m_mutex;
   QMap<QObject *, ObjectQuery> m_tracked_objects;

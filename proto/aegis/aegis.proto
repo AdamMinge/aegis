@@ -110,6 +110,7 @@ message ObjectReparented {
 }
 
 message ObjectRenamed {
-    Object object = 1;
+    Object old_object = 1;
+    Object new_object = 2;
 }
 

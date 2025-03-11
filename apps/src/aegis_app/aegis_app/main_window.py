@@ -10,10 +10,9 @@ from PySide6.QtWidgets import (
     QTreeView,
     QHeaderView,
 )
-from PySide6.QtCore import Signal, Slot, Qt, QModelIndex
+from PySide6.QtCore import Signal, Qt, QModelIndex
 
 from pyside6_utils.widgets import DataClassTreeView
-from pyside6_utils.widgets.delegates import DataclassEditorsDelegate
 
 from aegis_app.client import Client
 from aegis_app.models import MethodsModel, GRPCObjectsModel, GRPCPropertiesModel
@@ -29,8 +28,8 @@ class ObjectsDock(QDockWidget):
         self._init_connection()
 
     def _init_ui(self):
-        self._model = GRPCObjectsModel(self._client, parent=self)
-        self._view = QTreeView(parent=self)
+        self._model = GRPCObjectsModel(self._client)
+        self._view = QTreeView()
         self._view.setModel(self._model)
         self._view.setSelectionBehavior(QTableView.SelectionBehavior.SelectRows)
         self._view.setAlternatingRowColors(True)
@@ -62,11 +61,10 @@ class PropertiesDock(QDockWidget):
         self._init_ui()
 
     def _init_ui(self):
-        self._model = GRPCPropertiesModel(self._client, parent=self)
-        self._view = DataClassTreeView(parent=self)
+        self._model = GRPCPropertiesModel(self._client)
+        self._view = DataClassTreeView()
         self._view.setModel(self._model)
         self._view.setSelectionBehavior(QTableView.SelectionBehavior.SelectRows)
-        self._view.setItemDelegate(DataclassEditorsDelegate())
         self._view.setAlternatingRowColors(True)
         self._view.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self._view.header().setSectionResizeMode(
